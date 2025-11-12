@@ -1,34 +1,31 @@
 name: "Gemini AI PR Reviewer"
 
 on:
-  # THIS IS THE KEY CHANGE:
-  # This workflow now runs when a Pull Request is opened
-  # or updated (e.g., new commits) that targets your 'main' branch.
+  # This triggers the workflow when a Pull Request
+  # is opened or updated that targets your 'main' branch.
   pull_request:
-    branches: [ main ] 
-    # You can add other main branches here, e.g., [ main, develop ]
+    branches: [ main ]
 
 jobs:
   gemini-pr-review:
     runs-on: ubuntu-latest
     
-    # This permission is REQUIRED for the action
-    # to be able to write a comment on your Pull Request.
+    # This permission is REQUIRED to allow the
+    # action to post a comment on your Pull Request.
     permissions:
       pull-requests: write
 
     steps:
-      # 1. Checks out your code from the Pull Request
+      # 1. Checks out your code
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      # 2. Runs the official Gemini CLI action
-      # This action is much smarter and is designed for PRs.
+      # 2. Runs the CORRECT Gemini CLI Action
       - name: Run Gemini AI Review
-        uses: google-github-actions/run-gemini-cli@v1
+        # This is the corrected line:
+        uses: google-gemini/gemini-cli-github-action@v1
         with:
           # This is the prompt for the AI.
-          # I've made it more specific to YOUR project.
           prompt: |
             Please act as a senior Laravel developer. Review the code changes 
             in this Pull Request for the 'digitalregistry' project.
@@ -45,5 +42,5 @@ jobs:
           # response as a comment on the PR.
           comment-on-pr: true
         env:
-          # This securely uses the API key you stored in your secrets
+          # This securely uses the API key you stored in secrets
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
