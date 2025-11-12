@@ -33,7 +33,7 @@
             </div>
 
             <div class="mt-[32px]">
-                <x-primary-button class="h-[36px] w-[100%] bg-blue-700 flex justify-center">
+                <x-primary-button class="h-[36px] w-[100%] justify-center">
                     {{ __('Log in') }}
                 </x-primary-button>
             </div>
