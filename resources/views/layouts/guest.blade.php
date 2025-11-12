@@ -29,7 +29,7 @@
                     </div>
                 </div>
             </div>
-
+                {{-- This is a Blade for testing the AI. --}}
             <div class="login-right-column">
                 {{ $slot }}
             </div>
