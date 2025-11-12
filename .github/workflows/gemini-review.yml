@@ -1,35 +1,49 @@
-name: "Gemini AI Code Review"
+name: "Gemini AI PR Reviewer"
 
 on:
-  # This tells the action to run on every push
-  # to your "main" branch.
-  push:
+  # THIS IS THE KEY CHANGE:
+  # This workflow now runs when a Pull Request is opened
+  # or updated (e.g., new commits) that targets your 'main' branch.
+  pull_request:
     branches: [ main ] 
-    # You can change "main" to any branch name,
-    # or add more branches like [ main, develop ]
+    # You can add other main branches here, e.g., [ main, develop ]
 
 jobs:
-  gemini-analysis:
+  gemini-pr-review:
     runs-on: ubuntu-latest
+    
+    # This permission is REQUIRED for the action
+    # to be able to write a comment on your Pull Request.
+    permissions:
+      pull-requests: write
+
     steps:
-      # 1. Check out your repository's code
+      # 1. Checks out your code from the Pull Request
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      # 2. Set up the Gemini CLI
-      - name: Setup Gemini CLI
-        uses: google-gemini/setup-gemini-cli@v1
-
-      # 3. Run the AI analysis
-      #    It uses the API key you stored in Secrets
-      - name: Run Gemini Analysis
-        env:
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-        run: |
+      # 2. Runs the official Gemini CLI action
+      # This action is much smarter and is designed for PRs.
+      - name: Run Gemini AI Review
+        uses: google-github-actions/run-gemini-cli@v1
+        with:
           # This is the prompt for the AI.
-          # You can change this to whatever you want!
-          gemini review "Please review these code changes for any potential bugs, 
-          security issues, or deviations from Laravel best practices."
+          # I've made it more specific to YOUR project.
+          prompt: |
+            Please act as a senior Laravel developer. Review the code changes 
+            in this Pull Request for the 'digitalregistry' project.
 
-          # You can also ask specific questions
-          # gemini review "Does the User.php model look correct?"
+            Specifically, check for:
+            - Any potential bugs or security issues.
+            - Deviations from Laravel best practices.
+            - Issues related to the 'spatie/laravel-permission' package or the User model.
+            - Any obvious errors in the routes, models, or controllers.
+
+            Provide a concise summary and a list of any potential issues.
+          
+          # This tells the action to post the AI's
+          # response as a comment on the PR.
+          comment-on-pr: true
+        env:
+          # This securely uses the API key you stored in your secrets
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
