@@ -1,0 +1,35 @@
+name: "Gemini AI Code Review"
+
+on:
+  # This tells the action to run on every push
+  # to your "main" branch.
+  push:
+    branches: [ main ] 
+    # You can change "main" to any branch name,
+    # or add more branches like [ main, develop ]
+
+jobs:
+  gemini-analysis:
+    runs-on: ubuntu-latest
+    steps:
+      # 1. Check out your repository's code
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # 2. Set up the Gemini CLI
+      - name: Setup Gemini CLI
+        uses: google-gemini/setup-gemini-cli@v1
+
+      # 3. Run the AI analysis
+      #    It uses the API key you stored in Secrets
+      - name: Run Gemini Analysis
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: |
+          # This is the prompt for the AI.
+          # You can change this to whatever you want!
+          gemini review "Please review these code changes for any potential bugs, 
+          security issues, or deviations from Laravel best practices."
+
+          # You can also ask specific questions
+          # gemini review "Does the User.php model look correct?"
