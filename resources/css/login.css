@@ -1,0 +1,120 @@
+*{
+    margin: 0;
+    padding: 0;
+}
+
+
+
+/*
+ * This file contains the custom 16/8/4 grid system
+ * for your login page.
+*/
+
+/* 1. Set the page background color */
+body {
+    /* The light gray background */
+    /* We use min-height to ensure it's always at least the full screen height */
+    box-sizing: border-box; /* Ensures padding/margin are included in height */
+}
+
+/* 2. MOBILE (Default): 4 Columns */
+.login-container {
+     background-color: #fafafa27;
+    height: 100vh; /* Full viewport height */
+    width: 100%;
+    display: grid;
+    /* 4 columns, 16px gutter (gap) */
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    /* 16px margin (padding on the body) */
+
+}
+
+.login-left-column {
+    /* On mobile, the blue box takes all 4 columns */
+    grid-column: span 4;
+    height: 100%;
+    width: 100%;
+    background-image: linear-gradient( #1d4fd8da, #241092ce), url("/public/images/bg-namayan.png");
+    /* These are your styles from before */
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 1rem;
+    color: white;
+    font-weight: bold;
+    min-height: 300px; /* Give it some height on mobile */
+}
+
+.login-right-column {
+    height: 100%;
+    width: 100%;
+    /* On mobile, the form takes all 4 columns */
+    grid-column: span 4;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* 3. TABLET (Media Query): 8 Columns */
+/* `md` is 768px. This is a standard Tailwind breakpoint. */
+@media (min-width: 768px) {
+    .login-container {
+        /* 8 columns, 16px gutter (gap), 16px margin (padding) */
+        grid-template-columns: repeat(8, 1fr);
+        gap: 16px;
+        /* Make it fill the height, minus the margins */
+        min-height: calc(100vh - 32px);
+    }
+
+    .login-left-column {
+        /* On tablet, the blue box takes 4 of 8 columns */
+        grid-column: span 4;
+        min-height: auto; /* Reset min-height */
+    }
+
+    .login-right-column {
+        /* On tablet, the form takes 4 of 8 columns */
+        grid-column: span 4;
+    }
+}
+
+/* 4. DESKTOP (Media Query): 16 Columns */
+/* `xl` is 1280px. This is a standard Tailwind breakpoint. */
+@media (min-width: 1280px) {
+    .login-container {
+        /* 16 columns, 16px gutter (gap) */
+        grid-template-columns: repeat(16, 1fr);
+        gap: 16px;
+        /* 40px margin (padding) */
+        /* Make it fill the height, minus the margins */
+        min-height: calc(100vh - 80px);
+    }
+
+    .login-left-column {
+        /* On desktop, the blue box takes 9 of 16 columns */
+        /* (9 is ~56%, close to your 60/40 split) */
+        grid-column: span 9;
+    }
+
+    .login-right-column {
+        /* On desktop, the form takes 7 of 16 columns */
+        grid-column: span 7;
+    }
+}
+
+
+/* --- Helper classes from your design --- */
+.login-header-text {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+     filter: drop-shadow(0px 4px 6px rgba(0, 0, 0, 0.438));
+}
+.login-header-text img {
+    height: 110px;
+    width: 110px;
+
+}

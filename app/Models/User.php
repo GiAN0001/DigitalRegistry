@@ -1,0 +1,93 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Spatie\Permission\Traits\HasRoles;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
+use App\Models\BarangayRole; // We need this for the function
+
+class User extends Authenticatable
+{
+    // Add the HasRoles trait from Spatie
+    use HasRoles, Notifiable;
+
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array<int, string>
+     */
+    protected $fillable = [
+        'username',
+        'password',
+        'first_name',
+        'last_name',
+        'middle_name',
+        'email',
+        'contact',
+        'status',
+        'barangay_role_id',
+        'added_by',
+        'updated_by',
+    ];
+
+    /**
+     * The attributes that should be hidden for serialization.
+     *
+     * @var array<int, string>
+     */
+    protected $hidden = [
+        'password',
+        'remember_token',
+    ];
+
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'email_verified_at' => 'datetime',
+            'password' => 'hashed',
+        ];
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | MODEL RELATIONSHIPS (Our Custom Code)
+    |--------------------------------------------------------------------------
+    */
+
+    /**
+     * Get the real-world job title for this user.
+     * (e.g., "Barangay Captain")
+     */
+    public function barangayRole(): BelongsTo
+    {
+        // This links our `barangay_role_id` column to the `id` on the `barangay_roles` table
+        return $this->belongsTo(BarangayRole::class, 'barangay_role_id', 'id');
+    }
+
+    /**
+     * Get the admin who created this user.
+     * (This is a self-referencing relationship)
+     */
+    public function addedByUser(): BelongsTo
+    {
+        // This links our `added_by` column back to the `id` on this SAME table
+        return $this->belongsTo(User::class, 'added_by', 'id');
+    }
+
+    /**
+     * Get the admin who last updated this user.
+     * (This is a self-referencing relationship)
+     */
+    public function updatedByUser(): BelongsTo
+    {
+        // This links our `updated_by` column back to the `id` on this SAME table
+        return $this->belongsTo(User::class, 'updated_by', 'id');
+    }
+}
