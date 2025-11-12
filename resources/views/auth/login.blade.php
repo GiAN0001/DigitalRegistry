@@ -21,7 +21,7 @@
                               autocomplete="username" />
                 <x-input-error :messages="$errors->get('username')" class="mt-2" />
             </div>
-
+            {{-- This is a Blade comment and will not be visible in the HTML source. --}}
             <div class="mt-[16px]">
                 <x-input-label for="password" :value="__('Password')" />
                 <x-text-input id="password" class="block mt-1 w-full"
