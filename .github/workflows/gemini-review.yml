@@ -18,7 +18,8 @@ jobs:
           fetch-depth: 0
 
       - name: Run Gemini Analysis
-        uses: google-github-actions/run-gemini-cli@v1
+        # CHANGE THIS LINE:
+        uses: google-github-actions/run-gemini-cli@v0.1.14
         id: gemini
         with:
           prompt: |
