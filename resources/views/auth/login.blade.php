@@ -33,7 +33,7 @@
             </div>
             {--thisis acommet tretset--}
             <div class="mt-[32px]">
-                <x-primary-button class="h-[36px] w-[100%] justify-center">
+                <x-primary-button class="h-[36px] w-[100%] justify-center">asdfasdf
                     {{ __('Log in') }}
                 </x-primary-button>
             </div>
