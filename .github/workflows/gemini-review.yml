@@ -3,7 +3,7 @@ name: "Gemini AI Dashboard"
 on:
   push:
     branches-ignore:
-      - 'ai-feedback' # Don't run when the AI pushes to its own branch!
+      - 'ai-feedback'
 
 jobs:
   update-review-dashboard:
@@ -18,10 +18,10 @@ jobs:
           fetch-depth: 0
 
       - name: Run Gemini Analysis
-        # CHANGE THIS LINE:
         uses: google-github-actions/run-gemini-cli@v0.1.14
         id: gemini
         with:
+          gemini_api_key: ${{ secrets.GEMINI_API_KEY }}
           prompt: |
             Review the latest changes in the '${{ github.ref_name }}' branch.
             
@@ -34,29 +34,15 @@ jobs:
             Start the report with a clear header: "# Code Review for ${{ github.ref_name }}"
             
             Format everything as clean, readable Markdown.
-        env:
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
 
       - name: Update Dashboard Branch
         run: |
-          # 1. Configure Git
           git config --global user.name "Gemini AI"
           git config --global user.email "gemini-bot@google.com"
-
-          # 2. Switch to the permanent 'ai-feedback' branch
-          # If it doesn't exist, create it as an orphan (empty) branch
           git checkout ai-feedback 2>/dev/null || git checkout --orphan ai-feedback
-          
-          # 3. Remove old files so the branch stays clean
           git rm -rf . 2>/dev/null || true
-          
-          # 4. Create the Review File
           echo "${{ steps.gemini.outputs.response }}" > REVIEW.md
-          
-          # 5. Add a timestamp to the file so you know it's fresh
           echo -e "\n\n---\n*Generated at $(date)*" >> REVIEW.md
-
-          # 6. Commit and Push
           git add REVIEW.md
-          git commit -m "Update AI Review for ${{ github.ref_name }}"
+          git commit -m "Update AI Review"
           git push -f origin ai-feedback
