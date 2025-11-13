@@ -31,9 +31,8 @@
                                 autocomplete="current-password" />
                 <x-input-error :messages="$errors->get('password')" class="mt-2" />
             </div>
-            {--thisis acommet tretset--}
             <div class="mt-[32px]">
-                <x-primary-button class="h-[36px] w-[100%] justify-center">asdfasdf
+                <x-primary-button class="h-[36px] w-[100%] justify-center">
                     {{ __('Log in') }}
                 </x-primary-button>
             </div>
