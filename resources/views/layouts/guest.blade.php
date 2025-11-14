@@ -17,15 +17,15 @@
         <div class="login-container">
 
             <div class="login-left-column">
-                <div class="login-header-text h-[200px] w-[80%] flex justify-center items-center">
+                <div class="login-header-text flex justify-center items-center">
                    <div class="flex gap-1">
                         <img src="{{ asset('images/seal-mandaluyong.png') }}" alt="Mandaluyong Seal" class="w-[100px] h-[100px]">
                         <img src="{{ asset('images/seal-barangay.png') }}" alt="Barangay Seal" class="w-[100px] h-[100px]">
                    </div>
-                    <div class=" flex flex-col items-left gap-.8">
-                        <p class="font-[Times_New_Roman]">REPUBLIC OF THE PHILIPPINES</p>
+                    <div>
+                        <p>REPUBLIC OF THE PHILIPPINES</p>
                         <div class="border border-solid border-white"></div>
-                        <p class="font-[Times_New_Roman]">BARANGAY NAMAYAN, MANDALUYONG CITY</p>
+                        <p>BARANGAY NAMAYAN, MANDALUYONG CITY</p>
                     </div>
                 </div>
             </div>
