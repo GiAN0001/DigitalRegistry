@@ -10,13 +10,13 @@
     >
         <span class="flex items-center text-left">
             <span class="
-                w-6 h-4 transition duration-150 
+                w-5 h-5 transition duration-150 
                 {{ $active ? 'text-slate-50' : 'text-slate-700 group-hover:text-slate-50' }}
             ">
                 {{ $icon ?? '' }}
             </span>
             
-            <span class="pr-2">{{ $title }}</span>
+            <span class="pl-2 pr-2">{{ $title }}</span>
         </span>
 
         <svg 

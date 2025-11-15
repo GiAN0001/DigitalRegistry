@@ -24,4 +24,5 @@ Route::middleware(['auth'])->group(function () {
 
     // You will add your other routes (residents, users) here later
 });
+
 require __DIR__.'/auth.php';
