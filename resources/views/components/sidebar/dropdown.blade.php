@@ -10,13 +10,13 @@
     >
         <span class="flex items-center text-left">
             <span class="
-                w-6 h-6 transition duration-150 
+                w-6 h-4 transition duration-150 
                 {{ $active ? 'text-slate-50' : 'text-slate-700 group-hover:text-slate-50' }}
             ">
                 {{ $icon ?? '' }}
             </span>
             
-            <span class="ml-3">{{ $title }}</span>
+            <span class="pr-2">{{ $title }}</span>
         </span>
 
         <svg 
@@ -30,7 +30,7 @@
         </svg>
     </button>
 
-    <ul x-show="open" x-transition class="py-2 space-y-1 pl-6">
+    <ul x-show="open" x-transition class="py-2 space-y-1 pl-3">
         {{ $slot }}
     </ul>
 </div>
