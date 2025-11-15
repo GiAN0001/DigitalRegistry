@@ -7,12 +7,12 @@
         <a href="{{ route('dashboard') }}" 
            class="flex items-center p-2 text-sm font-medium rounded-lg transition-colors duration-200 group
            {{ request()->routeIs('dashboard') ? 'bg-blue-700 text-white shadow-md' : 'text-gray-300 hover:bg-gray-700 hover:text-white' }}">
-            <x-lucide-layout-dashboard class="w-5 h-5 mr-3" />
+            <x-lucide-layout-dashboard class="w-5 h-5" />
             <span>Dashboard</span>
         </a>
 
         <a href="#" class="flex items-center p-2 text-sm font-medium text-slate-700 rounded-lg hover:bg-blue-700 hover:text-slate-50 transition-colors duration-200 group">
-            <x-lucide-users class="w-5 h-5 mr-3" />
+            <x-lucide-users class="w-5 h-5" />
             <span>Residents</span>
         </a>
 
@@ -36,7 +36,7 @@
         @endhasanyrole
 
         <a href="#" class="flex items-center w-full p-2 text-sm font-medium text-slate-700 transition duration-75 rounded-lg hover:text-white hover:bg-blue-700">
-            <x-lucide-ticket class="w-5 h-5 mr-3" />
+            <x-lucide-ticket class="w-5 h-5" />
             <span>Tickets</span>
         </a>
 
@@ -73,7 +73,7 @@
                 </x-sidebar.dropdown>
 
                 <a href="#" class="flex items-center w-full p-2 text-sm font-medium text-slate-700 transition duration-75 rounded-lg hover:text-white hover:bg-blue-700">
-                    <x-lucide-history class="w-5 h-5 mr-3" />
+                    <x-lucide-history class="w-5 h-5" />
                     <span>System Logs</span>
                 </a>
             </div>
