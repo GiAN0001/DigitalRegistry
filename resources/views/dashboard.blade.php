@@ -9,5 +9,4 @@
             You are logged in as a <span class="font-bold capitalize">{{ Auth::user()->roles->first()->name ?? 'User' }}</span>.
         </p>
     </div>
-
 </x-app-layout>

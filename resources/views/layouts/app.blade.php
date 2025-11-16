@@ -33,7 +33,7 @@
                 </div>
             </header>
 
-            <main class="w-full flex-grow p-6 overflow-y-auto">
+            <main class="w-full flex-grow mt-8 overflow-y-auto">
                 {{ $slot }}
             </main>
         </div>

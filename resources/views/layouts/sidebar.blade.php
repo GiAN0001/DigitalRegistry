@@ -6,12 +6,15 @@
         
         <a href="{{ route('dashboard') }}" 
            class="flex items-center p-2 text-sm font-medium rounded-lg transition-colors duration-200 group
-           {{ request()->routeIs('dashboard') ? 'bg-blue-700 text-white shadow-md' : 'text-gray-300 hover:bg-gray-700 hover:text-white' }}">
+           {{ request()->routeIs('dashboard') ? 'bg-blue-700 text-white shadow-md' : 'text-slate-700 hover:bg-blue-700 hover:text-white' }}">
             <x-lucide-layout-dashboard class="w-5 h-5 mr-2" />
             <span>Dashboard</span>
         </a>
 
-        <a href="#" class="flex items-center p-2 text-sm font-medium text-slate-700 rounded-lg hover:bg-blue-700 hover:text-slate-50 transition-colors duration-200 group">
+        <a href="{{ route('residents.index') }}" class="
+       flex items-center p-2 text-sm font-medium rounded-lg transition-colors duration-200 group
+       {{ request()->routeIs('residents.*') ? 'bg-blue-700 text-slate-50' : 'text-slate-700 hover:bg-blue-700 hover:text-slate-50' }}
+        ">
             <x-lucide-users class="w-5 h-5 mr-2" />
             <span>Residents</span>
         </a>
