@@ -1,8 +1,6 @@
 <div class="text-white h-full flex flex-col transition-all duration-300">
     
-    
-    
-    <nav class="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
+    <nav class="flex-1 space-y-2 overflow-y-auto">
         
         <a href="{{ route('dashboard') }}" 
            class="flex items-center p-2 text-sm font-medium rounded-lg transition-colors duration-200 group

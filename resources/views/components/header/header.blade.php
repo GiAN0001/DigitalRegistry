@@ -1,26 +1,98 @@
-@props(['title'])
+<header class="bg-white shadow-sm rounded-2xl p-4">
+        <div class="flex items-center justify-between">
 
-<header class="flex items-center justify-between p-4 bg-white rounded-lg shadow-md">
-    
-    <div>
-        <h2 class="text-2xl font-bold text-gray-800">
-            {{ $title }}
-        </h2>
-    </div>
+            {{-- DIRECTORY DESIGN (expl: Page // Dashboard) --}}
+            <nav class="flex" aria-label="Breadcrumb">
+                <ol class="inline-flex items-center space-x-1 md:space-x-2">
+                    <li class="inline-flex items-center">
+                        <span class="text-sm font-medium text-gray-500">
+                            {{-- Inside this span for the previous page directory (try to input word inside span, after that run the code and check the header design) --}}
+                        </span>
+                    </li>
+                    <li>
+                        <div class="flex items-center">
+                            <span class="mx-2 text-gray-400">
+                                {{-- This span is for the "//" --}}
+                            </span>
+                            <span class="text-sm font-medium text-slate-800" aria-current="page">
+                                {{-- This span is for the current Page Directory "//" --}}
+                                Dashboard
+                            </span>
+                        </div>
+                    </li>
+                </ol>
+            </nav>
 
-    <div class="flex items-center gap-4">
-        
-        <div class="text-right">
-            <div class="font-medium text-gray-800">{{ Auth::user()->first_name }} {{ Auth::user()->last_name }}</div>
-            <div class="text-sm text-gray-500 capitalize">{{ Auth::user()->roles->first()->name ?? 'User' }}</div>
+            {{-- USER PROFILE DROPDOWN --}}
+            <div x-data="{ open: false }" class="relative">
+
+
+                <button @click="open = !open" class="flex items-center space-x-3 focus:outline-none">
+
+                    {{-- Image profile --}}
+                    <img class="w-10 h-10 rounded-[10px]]"
+                        src="https://ui-avatars.com/api/?name=V+Emmanuel&color=7F9CF5&background=EBF4FF" alt="User avatar">
+
+                    {{-- User Information --}}
+                    <div class="text-left hidden md:block">
+                        <div class="font-semibold text-sm text-gray-900">{{ Auth::user()->first_name }} {{ Auth::user()->last_name }} {{ Auth::user()->extension }} </div>
+                        <div class="text-xs text-gray-500">{{ Auth::user()->barangayRole->name }}</div>
+                    </div>
+
+                    {{-- Drop down Icon --}}
+                    <svg class="w-5 h-5 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd"
+                            d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                            clip-rule="evenodd" />
+                    </svg>
+                </button>
+
+                {{-- CONTAINER FOR DROP DOWN --}}
+                <div x-show="open" @click.away="open = false" x-transition
+                    class="absolute right-0 mt-4 w-[17vh] bg-white py-1 rounded-lg shadow-sm border border-gray-200 z-50"
+                    style="display: none;">
+
+                   
+                    <div class="flex items-center px-4 p-2 border-b border-gray-100">
+                        <img class="w-5 h-5 rounded-[10px]"
+                            src="https://ui-avatars.com/api/?name=V+Emmanuel&color=7F9CF5&background=EBF4FF"
+                            alt="User avatar">
+                        <div class="ml-3">
+                            <div class=" text-xs text-gray-900">{{ Auth::user()->first_name }} {{ Auth::user()->last_name }} {{ Auth::user()->extension }}</div>
+                        </div>
+                    </div>
+
+                    {{-- profile and settings section --}}
+                    <nav class="py-2">
+                        <a href="#" class="flex items-center px-4 py-1 text-xs text-gray-700 hover:bg-gray-100">
+                            <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.096 2.573-1.066z">
+                                </path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            </svg>
+                            <span class="ml-3">Profile Settings</span>
+                        </a>
+                        <form method="POST" action="{{ route('logout') }}">
+                            @csrf
+                            <a href="{{ route('logout') }}" 
+                            class="flex items-center px-4 py-1 text-xs text-gray-700 hover:bg-gray-100"
+                            onclick="event.preventDefault(); this.closest('form').submit();">
+                                
+                                <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1">
+                                    </path>
+                                </svg>
+                                <span class="ml-3">Log Out</span>
+                            </a>
+                        </form>
+                    </nav>
+                </div>
+            </div>
+
         </div>
-        
-        <form method="POST" action="{{ route('logout') }}">
-            @csrf
-            <button type_submit" class="p-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition duration-150">
-                <x-lucide-log-out class="w-5 h-5" />
-            </button>
-        </form>
-    </div>
-
 </header>
