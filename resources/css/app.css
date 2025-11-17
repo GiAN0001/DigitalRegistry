@@ -1,3 +1,16 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+
+.main-grid{
+    display: grid;
+    grid-template-columns: repeat(16, 1fr);
+    gap: 16px;
+}
+.side-bar{
+    grid-column: 1 / span 3;
+}
+.content{
+    grid-column: span 13;
+}
