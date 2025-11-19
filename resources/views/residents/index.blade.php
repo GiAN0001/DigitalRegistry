@@ -1,7 +1,4 @@
 <x-app-layout>
-    <x-slot name="header">
-        Residents
-    </x-slot>
 
     <div class="sub-content">
 
