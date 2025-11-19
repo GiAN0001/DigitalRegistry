@@ -1,103 +1,142 @@
 <x-app-layout>
 
-        <x-search-bar placeholder="Search residents..." class="mb-4"/>
-        
-        <x-dynamic-filter 
-            model="App\Models\AreaStreet" 
-            column="purok_name" 
-            title="Filter by Purok" 
-        />
+    <div class="sub-content">
 
-    <div class="p-6 bg-white shadow-md rounded-lg">
-        
-        <div class="flex justify-between items-center mb-4">
-            <h2 class="text-xl font-semibold text-gray-800">List of Residents</h2>
-           
-            <a href="#" class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700">
-                <x-lucide-plus class="w-4 h-4 inline-block mr-1" />
-                Register Resident
-            </a>
-           
-        </div>
 
-        <div class="overflow-x-auto mt-6">
-            <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-blue-200">
-                    <tr>
-                        <th class="px-2 py-2 text-left text-xs font-medium text-slate-700 uppercase tracking-wider rounded-l-lg">Household No</th>
-                        <th class="px-2 py-2 text-left text-xs font-medium text-slate-700 uppercase tracking-wider">Name</th>
-                        <th class="px-2 py-2 text-left text-xs font-medium text-slate-700 uppercase tracking-wider">Address</th>
-                        <th class="px-2 py-2 text-left text-xs font-medium text-slate-700 uppercase tracking-wider">House Structure</th>
-                        <th class="px-2 py-2 text-left text-xs font-medium text-slate-700 uppercase tracking-wider">Ownership Status</th>
-                        <th class="px-2 py-2 text-left text-xs font-medium text-slate-700 uppercase tracking-wider">Birthplace</th>
-                        <th class="px-2 py-2 text-left text-xs font-medium text-slate-700 uppercase tracking-wider">Birthdate</th>
-                        <th class="px-2 py-2 text-left text-xs font-medium text-slate-700 uppercase tracking-wider">Age</th>
-                        <th class="px-2 py-2 text-left text-xs font-medium text-slate-700 uppercase tracking-wider">Sex</th>
-                        <th class="px-2 py-2 text-left text-xs font-medium text-slate-700 uppercase tracking-wider">Civil Status</th>
-                        <th class="px-2 py-2 text-left text-xs font-medium text-slate-700 uppercase tracking-wider">Citizenship</th>
-                        <th class="px-2 py-2 text-left text-xs font-medium text-slate-700 uppercase tracking-wider">Occupation</th>
-                        <th class="px-2 py-2 text-left text-xs font-medium text-slate-700 uppercase tracking-wider">Sector</th>
-                        <th class="px-2 py-2 text-left text-xs font-medium text-slate-700 uppercase tracking-wider">Vaccination</th>
-                        <th class="px-2 py-2 text-left text-xs font-medium text-slate-700 uppercase tracking-wider">Comorbidity</th>
-                        <th class="px-2 py-2 text-left text-xs font-medium text-slate-700 uppercase tracking-wider">Maintenance</th>
-                        <th class="px-2 py-2 text-left text-xs font-medium text-slate-700 uppercase tracking-wider">Pet Type</th>
-                        <th class="px-2 py-2 text-left text-xs font-medium text-slate-700 uppercase tracking-wider">Quantity</th>
-                        
-                        @role('admin')
-                        <th class="px-2 py-2 text-left text-xs font-medium text-slate-700 uppercase tracking-wider rounded-r-lg">Action</th>
-                        @endrole
-                    </tr>
-                </thead>
-                <tbody class="bg-white divide-y divide-gray-200">
-                    @forelse ($residents as $resident)
-                        <tr class="hover:bg-gray-50">
-                            <td class="px-2 py-4 whitespace-nowrap text-sm text-gray-500">{{ $resident->household->household_number ?? 'N/A' }}</td>
-                            <td class="px-2 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ $resident->first_name }} {{ $resident->last_name }} {{ $resident->middle_name }} {{ $resident->extension }}</td>
-                            <td class="px-2 py-4 whitespace-nowrap text-sm text-gray-500">
-                                {{ $resident->household->house_number ?? '' }} {{ $resident->household->areaStreet->street_name ?? '' }}, {{ $resident->household->areaStreet->purok_name ?? '' }}
-                            </td>
-                            <td class="px-2 py-4 whitespace-nowrap text-sm text-gray-500">{{ $resident->household->houseStructure->house_structure_type ?? 'N/A' }}</td>
-                            <td class="px-2 py-4 whitespace-nowrap text-sm text-gray-500">{{ $resident->residencyType->name ?? 'N/A' }}</td>
-                            <td class="px-2 py-4 whitespace-nowrap text-sm text-gray-500">{{ $resident->demographic->birthplace ?? 'N/A' }}</td>
-                            <td class="px-2 py-4 whitespace-nowrap text-sm text-gray-500">{{ $resident->demographic->birthdate ?? 'N/A' }}</td>
-                            <td class="px-2 py-4 whitespace-nowrap text-sm text-gray-500">{{ $resident->demographic->age ?? 'N/A' }}</td>
-                            <td class="px-2 py-4 whitespace-nowrap text-sm text-gray-500">{{ $resident->demographic->sex ?? 'N/A' }}</td>
-                            <td class="px-2 py-4 whitespace-nowrap text-sm text-gray-500">{{ $resident->demographic->civil_status ?? 'N/A' }}</td>
-                            <td class="px-2 py-4 whitespace-nowrap text-sm text-gray-500">{{ $resident->demographic->nationality ?? 'N/A' }}</td>
-                            <td class="px-2 py-4 whitespace-nowrap text-sm text-gray-500">{{ $resident->demographic->occupation ?? 'N/A' }}</td>
-                            <td class="px-2 py-4 whitespace-nowrap text-sm text-gray-500">{{ $resident->healthInformation->sector ?? 'N/A' }}</td>
-                            <td class="px-2 py-4 whitespace-nowrap text-sm text-gray-500">{{ $resident->healthInformation->vaccination ?? 'N/A' }}</td>
-                            <td class="px-2 py-4 whitespace-nowrap text-sm text-gray-500">{{ $resident->healthInformation->comorbidity ?? 'None' }}</td>
-                            <td class="px-2 py-4 whitespace-nowrap text-sm text-gray-500">{{ $resident->healthInformation->maintenance ?? 'None' }}</td>
-                            <td class="px-2 py-4 whitespace-nowrap text-sm text-gray-500">
-                                {{ $resident->household->householdPets->map(fn($pet) => $pet->petType->name)->join(', ') }}
-                            </td>
-                            <td class="px-2 py-4 whitespace-nowrap text-sm text-gray-500">
-                                {{ $resident->household->householdPets->sum('quantity') }}
-                            </td>
+        <x-search-bar placeholder="Search residents..." class="mb-4" />
+
+        <div class="p-6 bg-white shadow-md rounded-lg grid grid-cols-16 overflow-auto">
+
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-semibold text-gray-800">List of Residents</h2>
+
+                <a href="#"
+                    class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700">
+                    <x-lucide-plus class="w-4 h-4 inline-block mr-1" />
+                    Register Resident
+                </a>
+
+            </div>
+
+            <div class="overflow-x-auto mt-6">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-blue-200">
+                        <tr>
+                            <th
+                                class="px-2 py-2 text-left text-xs font-medium text-slate-700 uppercase tracking-wider rounded-l-lg">
+                                Household No</th>
+                            <th class="px-2 py-2 text-left text-xs font-medium text-slate-700 uppercase tracking-wider">
+                                Name</th>
+                            <th class="px-2 py-2 text-left text-xs font-medium text-slate-700 uppercase tracking-wider">
+                                Address</th>
+                            <th class="px-2 py-2 text-left text-xs font-medium text-slate-700 uppercase tracking-wider">
+                                House Structure</th>
+                            <th class="px-2 py-2 text-left text-xs font-medium text-slate-700 uppercase tracking-wider">
+                                Ownership Status</th>
+                            <th class="px-2 py-2 text-left text-xs font-medium text-slate-700 uppercase tracking-wider">
+                                Birthplace</th>
+                            <th class="px-2 py-2 text-left text-xs font-medium text-slate-700 uppercase tracking-wider">
+                                Birthdate</th>
+                            <th class="px-2 py-2 text-left text-xs font-medium text-slate-700 uppercase tracking-wider">
+                                Age</th>
+                            <th class="px-2 py-2 text-left text-xs font-medium text-slate-700 uppercase tracking-wider">
+                                Sex</th>
+                            <th class="px-2 py-2 text-left text-xs font-medium text-slate-700 uppercase tracking-wider">
+                                Civil Status</th>
+                            <th class="px-2 py-2 text-left text-xs font-medium text-slate-700 uppercase tracking-wider">
+                                Citizenship</th>
+                            <th class="px-2 py-2 text-left text-xs font-medium text-slate-700 uppercase tracking-wider">
+                                Occupation</th>
+                            <th class="px-2 py-2 text-left text-xs font-medium text-slate-700 uppercase tracking-wider">
+                                Sector</th>
+                            <th class="px-2 py-2 text-left text-xs font-medium text-slate-700 uppercase tracking-wider">
+                                Vaccination</th>
+                            <th class="px-2 py-2 text-left text-xs font-medium text-slate-700 uppercase tracking-wider">
+                                Comorbidity</th>
+                            <th class="px-2 py-2 text-left text-xs font-medium text-slate-700 uppercase tracking-wider">
+                                Maintenance</th>
+                            <th class="px-2 py-2 text-left text-xs font-medium text-slate-700 uppercase tracking-wider">
+                                Pet Type</th>
+                            <th class="px-2 py-2 text-left text-xs font-medium text-slate-700 uppercase tracking-wider">
+                                Quantity</th>
 
                             @role('admin')
-                            <td class="px-2 py-4 whitespace-nowrap text-sm font-medium">
-                                <a href="#" class="text-blue-600 hover:text-blue-900">View</a>
-                                <a href="#" class="text-indigo-600 hover:text-indigo-900 ml-4">Edit</a>
-                                <a href="#" class="text-red-600 hover:text-red-900 ml-4">Delete</a>
-                            </td>
+                                <th
+                                    class="px-2 py-2 text-left text-xs font-medium text-slate-700 uppercase tracking-wider rounded-r-lg">
+                                    Action</th>
                             @endrole
                         </tr>
-                    @empty
-                        <tr>
-                            <td colspan="19" class="px-6 py-4 text-center text-gray-500">
-                                No residents found.
-                            </td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        @forelse ($residents as $resident)
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-2 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    {{ $resident->household->household_number ?? 'N/A' }}</td>
+                                <td class="px-2 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                    {{ $resident->first_name }} {{ $resident->last_name }} {{ $resident->middle_name }}
+                                    {{ $resident->extension }}</td>
+                                <td class="px-2 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    {{ $resident->household->house_number ?? '' }}
+                                    {{ $resident->household->areaStreet->street_name ?? '' }},
+                                    {{ $resident->household->areaStreet->purok_name ?? '' }}
+                                </td>
+                                <td class="px-2 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    {{ $resident->household->houseStructure->house_structure_type ?? 'N/A' }}</td>
+                                <td class="px-2 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    {{ $resident->residencyType->name ?? 'N/A' }}</td>
+                                <td class="px-2 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    {{ $resident->demographic->birthplace ?? 'N/A' }}</td>
+                                <td class="px-2 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    {{ $resident->demographic->birthdate ?? 'N/A' }}</td>
+                                <td class="px-2 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    {{ $resident->demographic->age ?? 'N/A' }}</td>
+                                <td class="px-2 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    {{ $resident->demographic->sex ?? 'N/A' }}</td>
+                                <td class="px-2 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    {{ $resident->demographic->civil_status ?? 'N/A' }}</td>
+                                <td class="px-2 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    {{ $resident->demographic->nationality ?? 'N/A' }}</td>
+                                <td class="px-2 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    {{ $resident->demographic->occupation ?? 'N/A' }}</td>
+                                <td class="px-2 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    {{ $resident->healthInformation->sector ?? 'N/A' }}</td>
+                                <td class="px-2 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    {{ $resident->healthInformation->vaccination ?? 'N/A' }}</td>
+                                <td class="px-2 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    {{ $resident->healthInformation->comorbidity ?? 'None' }}</td>
+                                <td class="px-2 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    {{ $resident->healthInformation->maintenance ?? 'None' }}</td>
+                                <td class="px-2 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    {{ $resident->household->householdPets->map(fn($pet) => $pet->petType->name)->join(', ') }}
+                                </td>
+                                <td class="px-2 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    {{ $resident->household->householdPets->sum('quantity') }}
+                                </td>
 
-        <div class="mt-4">
-            {{ $residents->links() }}
-        </div>
+                                @role('admin')
+                                    <td class="px-2 py-4 whitespace-nowrap text-sm font-medium">
+                                        <a href="#" class="text-blue-600 hover:text-blue-900">View</a>
+                                        <a href="#" class="text-indigo-600 hover:text-indigo-900 ml-4">Edit</a>
+                                        <a href="#" class="text-red-600 hover:text-red-900 ml-4">Delete</a>
+                                    </td>
+                                @endrole
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="19" class="px-6 py-4 text-center text-gray-500">
+                                    No residents found.
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
 
+            <div class="mt-4">
+                {{ $residents->links() }}
+            </div>
+
+        </div>
     </div>
+
 </x-app-layout>
