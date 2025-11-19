@@ -13,4 +13,7 @@
 }
 .content{
     grid-column: span 13;
+    overflow: hidden;
+    padding: 0 16px;
 }
+

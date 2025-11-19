@@ -15,7 +15,7 @@
     </div>
 
     <div class="content">
-        <div class="flex-grow mr-10">
+        <div class="flex-grow">
            @include('components.header.header')
         </div>
         <div class="table mt-4">

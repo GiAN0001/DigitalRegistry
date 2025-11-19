@@ -1,4 +1,5 @@
-<header class="bg-white shadow-sm rounded-2xl p-4">
+<div class="sub-content">
+    <header class="bg-white shadow-sm rounded-2xl p-4">
         <div class="flex items-center justify-between">
 
             {{-- DIRECTORY DESIGN (expl: Page // Dashboard) --}}
@@ -31,7 +32,7 @@
 
                     {{-- Image profile --}}
                     <img class="w-10 h-10 rounded-[10px]]"
-                        src="https://ui-avatars.com/api/?name=V+Emmanuel&color=7F9CF5&background=EBF4FF" alt="User avatar">
+                        src="https://ui-avatars.com/api/?name={{ Auth::user()->first_name }}+{{ Auth::user()->last_name }}&color=7F9CF5&background=EBF4FF" alt="User avatar">
 
                     {{-- User Information --}}
                     <div class="text-left hidden md:block">
@@ -49,13 +50,13 @@
 
                 {{-- CONTAINER FOR DROP DOWN --}}
                 <div x-show="open" @click.away="open = false" x-transition
-                    class="absolute right-0 mt-4 w-[17vh] bg-white py-1 rounded-lg shadow-sm border border-gray-200 z-50"
+                    class="absolute right-0 mt-3 w-[18vh] bg-white py-1 rounded-lg shadow-sm border border-gray-200 z-50"
                     style="display: none;">
 
-                   
+
                     <div class="flex items-center px-4 p-2 border-b border-gray-100">
-                        <img class="w-5 h-5 rounded-[10px]"
-                            src="https://ui-avatars.com/api/?name=V+Emmanuel&color=7F9CF5&background=EBF4FF"
+                        <img class="w-6 h-6 rounded-[10px]"
+                            src="https://ui-avatars.com/api/?name={{ Auth::user()->first_name }}+{{ Auth::user()->last_name }}&color=7F9CF5&background=EBF4FF"
                             alt="User avatar">
                         <div class="ml-3">
                             <div class=" text-xs text-gray-900">{{ Auth::user()->first_name }} {{ Auth::user()->last_name }} {{ Auth::user()->extension }}</div>
@@ -77,10 +78,10 @@
                         </a>
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
-                            <a href="{{ route('logout') }}" 
+                            <a href="{{ route('logout') }}"
                             class="flex items-center px-4 py-1 text-xs text-gray-700 hover:bg-gray-100"
                             onclick="event.preventDefault(); this.closest('form').submit();">
-                                
+
                                 <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"
                                     xmlns="http://www.w3.org/2000/svg">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -96,3 +97,5 @@
 
         </div>
 </header>
+
+</div>
