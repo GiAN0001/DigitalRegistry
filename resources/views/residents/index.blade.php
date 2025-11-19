@@ -1,9 +1,12 @@
 <x-app-layout>
-    <x-slot name="header">
-        Residents
-    </x-slot>
 
         <x-search-bar placeholder="Search residents..." class="mb-4"/>
+        
+        <x-dynamic-filter 
+            model="App\Models\AreaStreet" 
+            column="purok_name" 
+            title="Filter by Purok" 
+        />
 
     <div class="p-6 bg-white shadow-md rounded-lg">
         
