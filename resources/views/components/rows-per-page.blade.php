@@ -1,18 +1,18 @@
-@props(['title'])
+@props(['options' => [10, 25, 50, 100]])
 
-<div x-data="{ open: false }" @click.away="open = false" class="relative w-full inline-block text-left">
+<div x-data="{ open: false }" @click.away="open = false" class="relative inline-block text-left min-w-[70px]">
     
     <button @click="open = !open" type="button" class="
         flex w-full items-center justify-between
         rounded-lg bg-slate-50 
         text-slate-700 text-sm font-medium
-        h-10 p-2 border border-slate-50 border-1
+        h-10 p-2
         shadow-sm
+        focus:outline-none focus:ring-0 border-none
         hover:bg-slate-100 transition-colors duration-150
-        hover:border-slate-200
     ">
-        <span class="truncate">
-            {{ request($column) ? request($column) : $title }}
+        <span>
+            {{ request('per_page', 10) }}
         </span>
         
         <x-lucide-chevron-down 
@@ -32,25 +32,18 @@
         class="absolute z-10 mt-1 w-full origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
         style="display: none;"
     >
-        <div class="py-1 max-h-60 overflow-y-auto custom-scrollbar">
+        <div class="py-1">
             
-            <a href="{{ request()->fullUrlWithQuery([$column => null]) }}" 
-               class="block px-4 py-2 text-sm font-bold text-gray-700 hover:bg-gray-50 border-b border-gray-100">
-                Clear Filter
-            </a>
-
-            @forelse($options as $option)
-                <a href="{{ request()->fullUrlWithQuery([$column => $option, 'page' => 1]) }}" 
-                   class="block px-4 py-2 text-sm transition-colors duration-150
-                          {{ request($column) == $option 
-                             ? 'bg-gray-300 text-slate-700 font-medium' 
+            @foreach($options as $option)
+                <a href="{{ request()->fullUrlWithQuery(['per_page' => $option, 'page' => 1]) }}" 
+                   class="block px-4 py-2 text-sm transition-colors duration-150 text-center
+                          {{ request('per_page', 10) == $option 
+                             ? 'bg-blue-50 text-blue-700 font-medium' 
                              : 'text-slate-700 hover:bg-gray-300 hover:text-slate-700' 
                           }}">
                     {{ $option }}
                 </a>
-            @empty
-                <span class="block px-4 py-2 text-sm text-gray-400 italic">No data found</span>
-            @endforelse
+            @endforeach
             
         </div>
     </div>

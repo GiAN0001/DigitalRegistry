@@ -1,23 +1,44 @@
 <x-app-layout>
 
     <div class="sub-content">
+        <div class="filters mt-[42px]">
+            <x-search-bar placeholder="Search residents..."/>
 
+            <x-dynamic-filter 
+                model="App\Models\AreaStreet" 
+                column="purok_name" 
+                title="Filter by Purok" 
+            />
+            <x-dynamic-filter 
+                model="App\Models\resident" 
+                column="created_at" 
+                title="Filter by year" 
+            />
+        </div>
 
-        <x-search-bar placeholder="Search residents..." class="mb-4" />
+        <div class="filters2">
+            <div class="flex items-center gap-2">
 
-        <div class="p-6 bg-white shadow-md rounded-lg grid grid-cols-16 overflow-auto">
-
-            <div class="flex justify-between items-center mb-4">
-                <h2 class="text-xl font-semibold text-gray-800">List of Residents</h2>
-
-                <a href="#"
-                    class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700">
-                    <x-lucide-plus class="w-4 h-4 inline-block mr-1" />
-                    Register Resident
-                </a>
-
+                <div> 
+                    <x-rows-per-page />
+                </div>
             </div>
 
+            <x-dynamic-filter 
+                model="App\Models\residencyType" 
+                column="name" 
+                title="Filter by Ownership Status" 
+            />
+
+            <x-dynamic-filter 
+                model="App\Models\houseStructure" 
+                column="house_structure_type" 
+                title="Filter by House Structure" 
+            />
+
+            
+        </div>
+        <div class="p-4 bg-white shadow-md rounded-lg grid overflow-auto">
             <div class="overflow-x-auto mt-6">
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-blue-200">

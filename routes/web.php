@@ -21,9 +21,10 @@ Route::get('/', function () {
 });
 
 Route::middleware(['auth'])->group(function () {
+    
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-   Route::get('/residents', [ResidentController::class, 'index'])->name('residents.index');
+    Route::get('/residents', [ResidentController::class, 'index'])->name('residents.index');
 });
 
 require __DIR__.'/auth.php';
