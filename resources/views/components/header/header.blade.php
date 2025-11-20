@@ -1,5 +1,5 @@
 <div class="sub-content">
-    <header class="bg-white shadow-sm rounded-2xl p-4">
+    <header class="bg-slate-50 shadow-sm rounded-2xl p-4">
         <div class="flex items-center justify-between">
 
             {{-- DIRECTORY DESIGN (expl: Page // Dashboard) --}}
@@ -31,7 +31,7 @@
                 <button @click="open = !open" class="flex items-center space-x-3 focus:outline-none">
 
                     {{-- Image profile --}}
-                    <img class="w-10 h-10 rounded-[10px]]"
+                    <img class="w-10 h-10 rounded-full"
                         src="https://ui-avatars.com/api/?name={{ Auth::user()->first_name }}+{{ Auth::user()->last_name }}&color=7F9CF5&background=EBF4FF" alt="User avatar">
 
                     {{-- User Information --}}
@@ -48,14 +48,13 @@
                     </svg>
                 </button>
 
-                {{-- CONTAINER FOR DROP DOWN --}}
                 <div x-show="open" @click.away="open = false" x-transition
                     class="absolute right-0 mt-3 w-[18vh] bg-white py-1 rounded-lg shadow-sm border border-gray-200 z-50"
                     style="display: none;">
 
 
                     <div class="flex items-center px-4 p-2 border-b border-gray-100">
-                        <img class="w-6 h-6 rounded-[10px]"
+                        <img class="w-6 h-6 rounded-full"
                             src="https://ui-avatars.com/api/?name={{ Auth::user()->first_name }}+{{ Auth::user()->last_name }}&color=7F9CF5&background=EBF4FF"
                             alt="User avatar">
                         <div class="ml-3">

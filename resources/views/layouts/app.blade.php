@@ -8,9 +8,9 @@
     @vite(['resources/css/app.css', 'resources/css/login.css', 'resources/js/app.js'])
 </head>
 
-<body class="main-grid font-sans antialiased bg-slate-100 mt-4">
+<body class="main-grid font-sans antialiased bg-slate-100">
 
-    <div class="side-bar ml-10">
+    <div class="side-bar">
         @include('layouts.sidebar')
     </div>
 

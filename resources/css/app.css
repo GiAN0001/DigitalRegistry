@@ -2,11 +2,13 @@
 @tailwind components;
 @tailwind utilities;
 
-
+/*Resident tab desktop design*/
 .main-grid{
     display: grid;
     grid-template-columns: repeat(16, 1fr);
     gap: 16px;
+    height: 100%;
+    margin: 32px 40px 0 40px; ;
 }
 .side-bar{
     grid-column: 1 / span 3;
@@ -14,6 +16,30 @@
 .content{
     grid-column: span 13;
     overflow: hidden;
-    padding: 0 16px;
 }
+.filters, .filters2{
+    display: flex;
+    gap: 16px;
+    margin-bottom: 16px;
+} 
+
+/* Responsive Design resident mobile sample - gian
+@media (max-width: 320px) {
+    .main-grid{
+        grid-template-columns: repeat(4, 1fr);
+        margin: 16px 16px;
+    }
+    .side-bar{
+        grid-column: 1 / span 1;
+        height: auto;
+        display: none;
+    }
+    .content{
+        grid-column: span 4;
+    }
+    .filters{
+        flex-direction: column;
+    }
+    
+} */
 

@@ -4,54 +4,65 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Models\Resident; 
-use Illuminate\Support\Facades\Auth; 
+use App\Models\Resident;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
-use App\Models\AreaStreet;
+use Illuminate\Database\Eloquent\Builder;
 
 class ResidentController extends Controller
 {
-    public function index(Request $request) // Inject Request
+    public function index(Request $request): View
     {
         $user = Auth::user();
+
         $query = Resident::forUser($user)
             ->with([
-                'demographic', 
-                'residencyType', 
-                'healthInformation', 
-                'household.areaStreet', 
-                'household.houseStructure', 
+                'demographic',
+                'residencyType',
+                'healthInformation',
+                'household.areaStreet',
+                'household.houseStructure',
                 'household.householdPets.petType'
-                // ... other relationships
             ]);
 
-        // --- FILTER LOGIC ---
-
-        // 1. Filter by Purok
-        if ($request->has('purok_name') && $request->purok_name != null) {
-            // Use whereHas to query the relationship
+        // 1. Filter by Purok (via Household -> AreaStreet)
+        if ($request->filled('purok_name')) {
             $query->whereHas('household.areaStreet', function ($q) use ($request) {
                 $q->where('purok_name', $request->purok_name);
             });
         }
-        /*
-        // 2. Filter by House Structure
-        if ($request->has('house_structure_type') && $request->house_structure_type != null) {
+
+      
+        // 2. Filter by House Structure (via Household -> HouseStructure)
+        if ($request->filled('house_structure_type')) {
             $query->whereHas('household.houseStructure', function ($q) use ($request) {
                 $q->where('house_structure_type', $request->house_structure_type);
             });
         }
-
-        // 3. Filter by Sex
-        if ($request->has('sex') && $request->sex != null) {
+ 
+        // 3. Filter by Residency Status (Owner, Tenant, etc.)
+        if ($request->filled('name')) {
+            $query->whereHas('residencyType', function ($q) use ($request) {
+                $q->where('name', $request->name);
+            });
+        }
+        /*
+        // 4. Filter by Sex (via Demographic)
+        if ($request->filled('sex')) {
             $query->whereHas('demographic', function ($q) use ($request) {
                 $q->where('sex', $request->sex);
             });
-        } */
+        }
+            */
 
-        // --- END FILTER LOGIC ---
+        // --- PAGINATION LOGIC ---
+        // Get 'per_page' from URL, default to 10 if missing
+        $perPage = $request->input('per_page', 10);
 
-        $residents = $query->latest()->paginate(10)->withQueryString(); // Persist filters in pagination links
+        // Fetch results
+        $residents = $query->latest()
+            ->paginate($perPage)
+            ->withQueryString(); // Important: keeps your filters active when clicking page 2
 
         return view('residents.index', [
             'residents' => $residents,
