@@ -5,13 +5,17 @@
 ])
 
 @php
-$maxWidth = [
+$allClasses = [
     'sm' => 'sm:max-w-sm',
     'md' => 'sm:max-w-md',
     'lg' => 'sm:max-w-lg',
     'xl' => 'sm:max-w-xl',
     '2xl' => 'sm:max-w-2xl',
-][$maxWidth];
+    '3xl' => 'sm:max-w-[1120px]',
+];
+
+// The Fix: If the key exists, use it. If not, use the raw string passed in.
+$maxWidth = $allClasses[$maxWidth] ?? $maxWidth;
 @endphp
 
 <div

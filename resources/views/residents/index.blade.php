@@ -36,7 +36,13 @@
                 title="Filter by House Structure" 
             />
 
-            
+            <x-button x-data="" x-on:click.prevent="$dispatch('open-modal', 'register-resident')">
+                <x-slot name="icon">
+                    <x-lucide-plus class="w-4 h-4" />
+                </x-slot>
+                Register Resident
+            </x-button>
+
         </div>
         <div class="p-4 bg-white shadow-md rounded-lg grid overflow-auto">
             <div class="overflow-x-auto mt-6">
@@ -156,8 +162,9 @@
             <div class="mt-4">
                 {{ $residents->links() }}
             </div>
-
         </div>
     </div>
 
+<div @include('residents.modal.register-resident')/>
+    
 </x-app-layout>
