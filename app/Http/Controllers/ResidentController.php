@@ -8,12 +8,15 @@ use App\Models\Resident;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
 use Illuminate\Database\Eloquent\Builder;
+use App\Models\AreaStreet;
 
 class ResidentController extends Controller
 {
     public function index(Request $request): View
     {
         $user = Auth::user();
+        $streets = AreaStreet::all();
+        $purok = AreaStreet::all();
 
         $query = Resident::forUser($user)
             ->with([
@@ -32,7 +35,6 @@ class ResidentController extends Controller
             });
         }
 
-      
         // 2. Filter by House Structure (via Household -> HouseStructure)
         if ($request->filled('house_structure_type')) {
             $query->whereHas('household.houseStructure', function ($q) use ($request) {
@@ -55,6 +57,13 @@ class ResidentController extends Controller
         }
             */
 
+        // 5. Filter by Street
+        if ($request->filled('street_name')) {
+            $query->whereHas('household.areaStreet', function ($q) use ($request) {
+                $q->where('street_name', $request->street_name);
+            });
+        }
+
         // --- PAGINATION LOGIC ---
         // Get 'per_page' from URL, default to 10 if missing
         $perPage = $request->input('per_page', 10);
@@ -66,6 +75,8 @@ class ResidentController extends Controller
 
         return view('residents.index', [
             'residents' => $residents,
+            'streets' => $streets,
+            'purok' => $purok,
         ]);
     }
 }

@@ -1,49 +1,53 @@
 <x-app-layout>
 
     <div class="sub-content">
-        <div class="filters mt-[42px]">
-            <x-search-bar placeholder="Search residents..."/>
+        <div class="flex flex-wrap items-center gap-3 mt-[42px]">
+
+            <x-search-bar placeholder="Search residents..." />      
 
             <x-dynamic-filter 
                 model="App\Models\AreaStreet" 
                 column="purok_name" 
                 title="Filter by Purok" 
             />
+
             <x-dynamic-filter 
-                model="App\Models\resident" 
+                model="App\Models\Resident" 
                 column="created_at" 
                 title="Filter by year" 
             />
         </div>
 
-        <div class="filters2">
-            <div class="flex items-center gap-2">
+        <div class="flex flex-wrap items-center gap-3 mt-4">
 
-                <div> 
-                    <x-rows-per-page />
-                </div>
-            </div>
+            <x-rows-per-page />
 
             <x-dynamic-filter 
-                model="App\Models\residencyType" 
+                model="App\Models\ResidencyType" 
                 column="name" 
                 title="Filter by Ownership Status" 
             />
 
             <x-dynamic-filter 
-                model="App\Models\houseStructure" 
+                model="App\Models\HouseStructure" 
                 column="house_structure_type" 
                 title="Filter by House Structure" 
             />
 
-            <x-button x-data="" x-on:click.prevent="$dispatch('open-modal', 'register-resident')">
-                <x-slot name="icon">
-                    <x-lucide-plus class="w-4 h-4" />
-                </x-slot>
-                Register Resident
-            </x-button>
-
+            <div class="ml-auto">
+                <x-button 
+                    x-data 
+                    x-on:click.prevent="$dispatch('open-modal', 'register-resident')"
+                >
+                    <x-slot name="icon">
+                        <x-lucide-plus class="w-4 h-4" />
+                    </x-slot>
+                    Register Resident
+                </x-button>
+            </div>
         </div>
+        <div class="mt-4"></div>
+
         <div class="p-4 bg-white shadow-md rounded-lg grid overflow-auto">
             <div class="overflow-x-auto mt-6">
                 <table class="min-w-full divide-y divide-gray-200">
@@ -165,6 +169,8 @@
         </div>
     </div>
 
-<div @include('residents.modal.register-resident')/>
+<div>
+    @include('residents.modal.register-resident')
+</div>
     
 </x-app-layout>
