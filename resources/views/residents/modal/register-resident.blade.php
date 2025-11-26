@@ -55,21 +55,21 @@
                         <x-input-label>
                             Last Name <span class="text-red-500">*</span>
                         </x-input-label>
-                        <x-text-input class="w-full mt-1 border-blue-700" placeholder="Dela Cruz" required />
+                        <x-text-input class="w-full mt-1 !border-blue-700" placeholder="Dela Cruz" required />
                     </div>
                     <div>
                         <x-input-label>
                             First Name <span class="text-red-500">*</span>
                         </x-input-label>
-                        <x-text-input class="w-full mt-1 border-blue-700" placeholder="Juan" required />
+                        <x-text-input class="w-full mt-1 !border-blue-700" placeholder="Juan" required />
                     </div>
                     <div>
                         <x-input-label value="Middle Name" />
-                        <x-text-input class="w-full mt-1 border-blue-700" placeholder="Santos" />
+                        <x-text-input class="w-full mt-1 !border-blue-700" placeholder="Santos" />
                     </div>
                     <div>
                         <x-input-label value="Extension" />
-                        <x-text-input class="w-full mt-1 border-blue-700" placeholder="Jr, Sr, III" />
+                        <x-text-input class="w-full mt-1 !border-blue-700" placeholder="Jr, Sr, III" />
                     </div>
 
                     <div>
@@ -82,13 +82,13 @@
                         <x-input-label>
                             Date of Birth <span class="text-red-500">*</span>
                         </x-input-label>
-                        <x-text-input type="date" class="w-full mt-1 border-blue-700" required />
+                        <x-text-input type="date" class="w-full mt-1 !border-blue-700" required />
                     </div>
                     <div>
                         <x-input-label>
                             Age <span class="text-red-500">*</span>
                         </x-input-label>
-                        <x-text-input class="w-full mt-1 border-blue-700" placeholder="18" required />
+                        <x-text-input class="w-full mt-1 !border-blue-700" placeholder="18" required />
                     </div>
                      <div>
                         <x-input-label>
@@ -129,11 +129,11 @@
                         <x-input-label>
                             Citizenship <span class="text-red-500">*</span>
                         </x-input-label>
-                        <x-text-input class="w-full mt-1 border-blue-700" value="Filipino" required />
+                        <x-text-input class="w-full mt-1 !border-blue-700" value="Filipino" required />
                     </div>
                     <div class="md:col-span-2">
                         <x-input-label value="Occupation" />
-                        <x-text-input class="w-full mt-1 border-blue-700" placeholder="Driver, Teacher, etc." />
+                        <x-text-input class="w-full mt-1 !border-blue-700" placeholder="Driver, Teacher, etc." />
                     </div>
 
                     <div>
@@ -172,7 +172,7 @@
                         <x-input-label>
                             House Number <span class="text-red-500">*</span>
                         </x-input-label>
-                        <x-text-input class="w-full mt-1 border-blue-700" placeholder="123-A" required />
+                        <x-text-input class="w-full mt-1 !border-blue-700" placeholder="123-A" required />
                     </div>
                     <div>
                         <x-input-label>
@@ -224,13 +224,13 @@
                         <x-input-label>
                             Household Email <span class="text-red-500">*</span>
                         </x-input-label>
-                        <x-text-input type="email" class="w-full mt-1 border-blue-700" placeholder="family@example.com" />
+                        <x-text-input type="email" class="w-full mt-1 !border-blue-700" placeholder="family@example.com" />
                     </div>
                     <div>
                         <x-input-label>
                             Household Contact No <span class="text-red-500">*</span>
                         </x-input-label>
-                        <x-text-input class="w-full mt-1 border-blue-700" placeholder="0917..." />
+                        <x-text-input class="w-full mt-1 !border-blue-700" placeholder="0917..." />
                     </div>
 
                     <div x-show="ownershipStatus != '0' && ownershipStatus != ''" class="md:col-span-3 bg-gray-50 p-4 rounded-lg border border-gray-200 mt-2">
