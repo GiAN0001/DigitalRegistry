@@ -2,6 +2,41 @@
 @tailwind components;
 @tailwind utilities;
 
+/* GLOBAL DEFAULTS */
+
+@layer base {
+    body {
+        /* Applies Slate 700 text and Figtree font automatically */
+        @apply text-secondary font-sans antialiased bg-slate-50;
+    }
+
+    /* Standardize headings */
+    h1, h2, h3, h4, h5, h6 {
+        @apply font-bold text-slate-900;
+    }
+}
+
+/* 2. COMPONENT CLASSES (Shortcuts) */
+@layer components {
+    /* Usage: <div class="card">...</div> */
+    .card {
+        @apply bg-white rounded-16 shadow-sm p-16px border border-slate-200;
+    }
+
+    /* Usage: <button class="btn-primary">...</button> */
+    .btn-primary {
+        @apply bg-primary text-white rounded-8 px-4 py-2 text-sm-medium
+               hover:bg-primary-hover transition-colors;
+    }
+
+    /* Usage: <input class="input-field"> */
+    .input-field {
+        @apply w-full border border-slate-300 rounded-8 px-16px py-2 text-sm-medium
+               focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary;
+    }
+}
+
+
 /*Resident tab desktop design*/
 .main-grid{
     display: grid;
@@ -23,7 +58,7 @@
     gap: 16px;
     align-items: center;
     width: full;
-} 
+}
 
 /* Responsive Design resident mobile sample - gian
 @media (max-width: 320px) {
@@ -42,6 +77,6 @@
     .filters{
         flex-direction: column;
     }
-    
+
 } */
 
