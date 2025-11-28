@@ -3,18 +3,18 @@
     <div class="sub-content">
         <div class="flex flex-wrap items-center gap-3 mt-[42px]">
 
-            <x-search-bar placeholder="Search residents..." />
+            <x-search-bar placeholder="Search residents..." />      
 
-            <x-dynamic-filter
-                model="App\Models\AreaStreet"
-                column="purok_name"
-                title="Filter by Purok"
+            <x-dynamic-filter 
+                model="App\Models\AreaStreet" 
+                column="purok_name" 
+                title="Filter by Purok" 
             />
 
-            <x-dynamic-filter
-                model="App\Models\Resident"
-                column="created_at"
-                title="Filter by year"
+            <x-dynamic-filter 
+                model="App\Models\Resident" 
+                column="created_at" 
+                title="Filter by year" 
             />
         </div>
 
@@ -22,21 +22,21 @@
 
             <x-rows-per-page />
 
-            <x-dynamic-filter
-                model="App\Models\ResidencyType"
-                column="name"
-                title="Filter by Ownership Status"
+            <x-dynamic-filter 
+                model="App\Models\ResidencyType" 
+                column="name" 
+                title="Filter by Ownership Status" 
             />
 
-            <x-dynamic-filter
-                model="App\Models\HouseStructure"
-                column="house_structure_type"
-                title="Filter by House Structure"
+            <x-dynamic-filter 
+                model="App\Models\HouseStructure" 
+                column="house_structure_type" 
+                title="Filter by House Structure" 
             />
 
             <div class="ml-auto">
-                <x-button
-                    x-data
+                <x-button 
+                    x-data 
                     x-on:click.prevent="$dispatch('open-modal', 'register-resident')"
                 >
                     <x-slot name="icon">
@@ -172,5 +172,5 @@
 <div>
     @include('residents.modal.register-resident')
 </div>
-
+    
 </x-app-layout>
