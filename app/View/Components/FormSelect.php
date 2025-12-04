@@ -30,8 +30,8 @@ class FormSelect extends Component
             // 2. Fetch data: Get 'id' and 'name' (or whatever column you chose)
             // We use pluck to get a key-value pair: [id => name]
             $this->options = $model::distinct()
-                                    ->orderBy($column)
-                                    ->pluck($column);
+                                    ->pluck($column, $valueColumn)
+                                        ->all();
                                     
         } catch (\Exception $e) {
             Log::error("FormSelect Error for {$model}: " . $e->getMessage());
