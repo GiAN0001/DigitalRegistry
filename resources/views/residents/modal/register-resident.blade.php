@@ -55,46 +55,46 @@
                         <x-input-label>
                             Last Name <span class="text-red-500">*</span>
                         </x-input-label>
-                        <x-text-input class="w-full mt-1 !border-blue-700" placeholder="Dela Cruz" required />
+                        <x-text-input class="w-full mt-1 text-sm" placeholder="Dela Cruz" required />
                     </div>
                     <div>
                         <x-input-label>
                             First Name <span class="text-red-500">*</span>
                         </x-input-label>
-                        <x-text-input class="w-full mt-1 !border-blue-700" placeholder="Juan" required />
+                        <x-text-input class="w-full mt-1 text-sm" placeholder="Juan" required />
                     </div>
                     <div>
                         <x-input-label value="Middle Name" />
-                        <x-text-input class="w-full mt-1 !border-blue-700" placeholder="Santos" />
+                        <x-text-input class="w-full mt-1 text-sm" placeholder="Santos" />
                     </div>
                     <div>
                         <x-input-label value="Extension" />
-                        <x-text-input class="w-full mt-1 !border-blue-700" placeholder="Jr, Sr, III" />
+                        <x-text-input class="w-full mt-1 text-sm" placeholder="Jr, Sr, III" />
                     </div>
 
                     <div>
                         <x-input-label>
                             Place of Birth <span class="text-red-500">*</span>
                         </x-input-label>
-                        <x-text-input class="w-full mt-1 border-blue-700" placeholder="City, Province" required />
+                        <x-text-input class="w-full mt-1 text-sm" placeholder="City, Province" required />
                     </div>
                     <div>
                         <x-input-label>
                             Date of Birth <span class="text-red-500">*</span>
                         </x-input-label>
-                        <x-text-input type="date" class="w-full mt-1 !border-blue-700" required />
+                        <x-text-input type="date" class="w-full mt-1 text-sm" required />
                     </div>
                     <div>
                         <x-input-label>
                             Age <span class="text-red-500">*</span>
                         </x-input-label>
-                        <x-text-input class="w-full mt-1 !border-blue-700" placeholder="18" required />
+                        <x-text-input class="w-full mt-1 text-sm" placeholder="18" required />
                     </div>
                      <div>
                         <x-input-label>
                             Household role <span class="text-red-500">*</span>
                         </x-input-label>
-                        <x-form-select 
+                        <x-form-select class="w-full h-10 mt-1 text-slate-500"
                             model="App\Models\houseHoldRole" 
                             column="name" 
                             value-column="id"
@@ -106,7 +106,7 @@
                         <x-input-label>
                             Sex <span class="text-red-500">*</span>
                         </x-input-label>
-                        <select class="w-full h-10 text-sm text-slate-700 border border-gray-300 rounded-md shadow-sm focus:border-blue-700 focus:ring-blue-700 focus:ring-1 placeholder:text-gray-400" required>
+                        <select class="w-full h-10 mt-1 text-sm text-slate-500 border border-gray-300 rounded-md shadow-sm focus:border-blue-700 focus:ring-blue-700 focus:ring-1 placeholder:text-gray-400" required>
                             <option value="" selected disabled>Select</option>
                             <option>Male</option>
                             <option>Female</option>
@@ -117,7 +117,7 @@
                         <x-input-label>
                             Civil Status <span class="text-red-500">*</span>
                         </x-input-label>
-                        <select class="w-full h-10 text-sm text-slate-700 border border-gray-300 rounded-md shadow-sm focus:border-blue-700 focus:ring-blue-700 focus:ring-1 placeholder:text-gray-400" required>
+                        <select class="w-full h-10 mt-1 text-sm text-slate-500 border border-gray-300 rounded-md shadow-sm focus:border-blue-700 focus:ring-blue-700 focus:ring-1 placeholder:text-gray-400" required>
                             <option value="" selected disabled>Select</option>
                             <option>Single</option>
                             <option>Married</option>
@@ -129,37 +129,38 @@
                         <x-input-label>
                             Citizenship <span class="text-red-500">*</span>
                         </x-input-label>
-                        <x-text-input class="w-full mt-1 !border-blue-700" value="Filipino" required />
+                        <x-text-input class="w-full h-10 mt-1 text-sm" value="Filipino" required />
                     </div>
-                    <div class="md:col-span-2">
+                    <div>
                         <x-input-label value="Occupation" />
-                        <x-text-input class="w-full mt-1 !border-blue-700" placeholder="Driver, Teacher, etc." />
+                        <x-text-input class="w-full mt-1 text-sm" placeholder="Driver, Teacher, etc." />
                     </div>
 
                     <div>
                         <x-input-label value="Sector" />
-                        <select class="w-full h-10 text-sm text-slate-700 border border-gray-300 rounded-md shadow-sm focus:border-blue-700 focus:ring-blue-700 focus:ring-1 placeholder:text-gray-400">
+                        <select class="w-full h-10 mt-1 text-sm text-slate-500 border border-gray-300 rounded-md shadow-sm focus:border-blue-700 focus:ring-blue-700 focus:ring-1 placeholder:text-gray-400">
                             <option>None</option>
                             <option>Senior Citizen</option>
+                            <option>Pregnant</option>
                             <option>PWD</option>
                             <option>Solo Parent</option>
                         </select>
                     </div>
                     <div>
                         <x-input-label value="Vaccinations" />
-                        <select class="w-full h-10 text-sm text-slate-700 border border-gray-300 rounded-md shadow-sm focus:border-blue-700 focus:ring-blue-700 focus:ring-1 placeholder:text-gray-400">
+                        <select class="w-full h-10 mt-1 text-sm text-slate-500 border border-gray-300 rounded-md shadow-sm focus:border-blue-700 focus:ring-blue-700 focus:ring-1 placeholder:text-gray-400">
                             <option>None</option>
                             <option>Private Citizen</option>
                             <option>Health Center</option>
                         </select>
                     </div>
-                    <div class="md:col-span-3">
-                        <x-input-label value="Comorbidity)" />
-                        <x-text-input class="w-full mt-1 border-blue-700" placeholder="Hypertension, Diabetes / Metformin, Losartan" />
+                    <div class="md:col-span-2">
+                        <x-input-label value="Comorbidity" />
+                        <x-text-input class="w-full mt-1 text-sm border-blue-700" placeholder="Hypertension, Diabetes" />
                     </div>
-                    <div class="md:col-span-3">
-                        <x-input-label value="Maintenance)" />
-                        <x-text-input class="w-full mt-1 border-blue-700" placeholder="Hypertension, Diabetes / Metformin, Losartan" />
+                    <div class="md:col-span-2">
+                        <x-input-label value="Maintenance" />
+                        <x-text-input class="w-full mt-1 text-sm border-blue-700" placeholder="Metformin, Losartan" />
                     </div>
                 </div>
             </div>
@@ -167,18 +168,18 @@
             <div x-show="step === 2" style="display: none;" x-transition:enter="transition ease-out duration-300">
                 <h3 class="text-lg font-semibold text-slate-700 mb-4">Household Information</h3>
                 
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                     <div>
                         <x-input-label>
                             House Number <span class="text-red-500">*</span>
                         </x-input-label>
-                        <x-text-input class="w-full mt-1 !border-blue-700" placeholder="123-A" required />
+                        <x-text-input class="w-full mt-1 text-sm" placeholder="123-A" required />
                     </div>
                     <div>
                         <x-input-label>
                             Purok <span class="text-red-500">*</span>
                         </x-input-label>
-                        <x-form-select 
+                        <x-form-select class="w-full h-10 mt-1 text-slate-500"
                             model="App\Models\AreaStreet" 
                             column="Purok_name" 
                             value-column="id"
@@ -189,7 +190,7 @@
                         <x-input-label>
                             Street <span class="text-red-500">*</span>
                         </x-input-label>
-                        <x-form-select 
+                        <x-form-select class="w-full h-10 mt-1 text-slate-500"
                             model="App\Models\AreaStreet" 
                             column="street_name" 
                             value-column="id"
@@ -200,7 +201,7 @@
                         <x-input-label>
                             House Structure <span class="text-red-500">*</span>
                         </x-input-label>
-                        <x-form-select 
+                        <x-form-select class="w-full h-10 mt-1 text-slate-500"
                             model="App\Models\houseStructure" 
                             column="house_structure_type" 
                             value-column="id"
@@ -212,7 +213,7 @@
                         <x-input-label>
                             Ownership Status <span class="text-red-500">*</span>
                         </x-input-label>
-                        <x-form-select x-model="ownershipStatus"
+                        <x-form-select x-model="ownershipStatus" class="w-full h-10 mt-1 text-slate-500"
                             model="App\Models\ResidencyType" 
                             column="name" 
                             value-column="id"
@@ -224,13 +225,13 @@
                         <x-input-label>
                             Household Email <span class="text-red-500">*</span>
                         </x-input-label>
-                        <x-text-input type="email" class="w-full mt-1 !border-blue-700" placeholder="family@example.com" />
+                        <x-text-input type="email" class="w-full mt-1 text-sm" placeholder="family@example.com" />
                     </div>
                     <div>
                         <x-input-label>
                             Household Contact No <span class="text-red-500">*</span>
                         </x-input-label>
-                        <x-text-input class="w-full mt-1 !border-blue-700" placeholder="0917..." />
+                        <x-text-input class="w-full mt-1 text-sm" placeholder="0917..." />
                     </div>
 
                     <div x-show="ownershipStatus != '0' && ownershipStatus != ''" class="md:col-span-3 bg-gray-50 p-4 rounded-lg border border-gray-200 mt-2">
@@ -267,52 +268,53 @@
 
                 <div class="space-y-3">
                     <template x-for="(member, index) in familyMembers" :key="member.id">
-                        <div class="flex gap-3 items-start bg-gray-50 p-3 rounded-lg border border-gray-200">
-                            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div class="bg-gray-50 p-3 rounded-lg border border-gray-200">
+                            <div class="flex gap-3 items-start">
+                                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 flex-1">
                                 <div>
                                     <x-input-label>
                                         Last Name <span class="text-red-500">*</span>
                                     </x-input-label>
-                                    <x-text-input class="w-full mt-1 border-blue-700" placeholder="Dela Cruz" required />
+                                    <x-text-input class="w-full mt-1 text-sm" placeholder="Dela Cruz" required />
                                 </div>
                                 <div>
                                     <x-input-label>
                                         First Name <span class="text-red-500">*</span>
                                     </x-input-label>
-                                    <x-text-input class="w-full mt-1 border-blue-700" placeholder="Juan" required />
+                                    <x-text-input class="w-full mt-1 text-sm" placeholder="Juan" required />
                                 </div>
                                 <div>
                                     <x-input-label value="Middle Name" />
-                                    <x-text-input class="w-full mt-1 border-blue-700" placeholder="Santos" />
+                                    <x-text-input class="w-full mt-1 text-sm" placeholder="Santos" />
                                 </div>
                                 <div>
                                     <x-input-label value="Extension" />
-                                    <x-text-input class="w-full mt-1 border-blue-700" placeholder="Jr, Sr, III" />
+                                    <x-text-input class="w-full mt-1 text-sm" placeholder="Jr, Sr, III" />
                                 </div>
 
                                 <div>
                                     <x-input-label>
                                         Place of Birth <span class="text-red-500">*</span>
                                     </x-input-label>
-                                    <x-text-input class="w-full mt-1 border-blue-700" placeholder="City, Province" required />
+                                    <x-text-input class="w-full mt-1 text-sm" placeholder="City, Province" required />
                                 </div>
                                 <div>
                                     <x-input-label>
                                         Date of Birth <span class="text-red-500">*</span>
                                     </x-input-label>
-                                    <x-text-input type="date" class="w-full mt-1 border-blue-700" required />
+                                    <x-text-input type="date" class="w-full mt-1 text-sm" required />
                                 </div>
                                 <div>
                                     <x-input-label>
                                         Age <span class="text-red-500">*</span>
                                     </x-input-label>
-                                    <x-text-input class="w-full mt-1 border-blue-700" placeholder="18" required />
+                                    <x-text-input class="w-full mt-1 text-sm" placeholder="18" required />
                                 </div>
                                 <div>
                                     <x-input-label>
                                         Household role <span class="text-red-500">*</span>
                                     </x-input-label>
-                                    <x-form-select 
+                                    <x-form-select class="w-full h-10 mt-1 text-slate-500"
                                         model="App\Models\houseHoldRole" 
                                         column="name" 
                                         value-column="id"
@@ -324,7 +326,7 @@
                                     <x-input-label>
                                         Sex <span class="text-red-500">*</span>
                                     </x-input-label>
-                                    <select class="w-full h-10 text-sm text-slate-700 border border-gray-300 rounded-md shadow-sm focus:border-blue-700 focus:ring-blue-700 focus:ring-1 placeholder:text-gray-400" required>
+                                    <select class="w-full h-10 mt-1 text-sm text-slate-500 border border-gray-300 rounded-md shadow-sm focus:border-blue-700 focus:ring-blue-700 focus:ring-1 placeholder:text-gray-400" required>
                                         <option value="" selected disabled>Select</option>
                                         <option>Male</option>
                                         <option>Female</option>
@@ -335,7 +337,7 @@
                                     <x-input-label>
                                         Civil Status <span class="text-red-500">*</span>
                                     </x-input-label>
-                                    <select class="w-full h-10 text-sm text-slate-700 border border-gray-300 rounded-md shadow-sm focus:border-blue-700 focus:ring-blue-700 focus:ring-1 placeholder:text-gray-400" required>
+                                    <select class="w-full h-10 mt-1 text-sm text-slate-500 border border-gray-300 rounded-md shadow-sm focus:border-blue-700 focus:ring-blue-700 focus:ring-1 placeholder:text-gray-400" required>
                                         <option value="" selected disabled>Select</option>
                                         <option>Single</option>
                                         <option>Married</option>
@@ -347,16 +349,16 @@
                                     <x-input-label>
                                         Citizenship <span class="text-red-500">*</span>
                                     </x-input-label>
-                                    <x-text-input class="w-full mt-1 border-blue-700" value="Filipino" required />
+                                    <x-text-input class="w-full mt-1 text-sm" value="Filipino" required />
                                 </div>
-                                <div class="md:col-span-2">
+                                <div class="md:col-span-1">
                                     <x-input-label value="Occupation" />
-                                    <x-text-input class="w-full mt-1 border-blue-700" placeholder="Driver, Teacher, etc." />
+                                    <x-text-input class="w-full mt-1 text-sm" placeholder="Driver, Teacher, etc." />
                                 </div>
 
                                 <div>
                                     <x-input-label value="Sector" />
-                                    <select class="w-full h-10 text-sm text-slate-700 border border-gray-300 rounded-md shadow-sm focus:border-blue-700 focus:ring-blue-700 focus:ring-1 placeholder:text-gray-400">
+                                    <select class="w-full h-10 mt-1 text-sm text-slate-500 border border-gray-300 rounded-md shadow-sm focus:border-blue-700 focus:ring-blue-700 focus:ring-1 placeholder:text-gray-400">
                                         <option>None</option>
                                         <option>Senior Citizen</option>
                                         <option>PWD</option>
@@ -365,19 +367,19 @@
                                 </div>
                                 <div>
                                     <x-input-label value="Vaccinations" />
-                                    <select class="w-full h-10 text-sm text-slate-700 border border-gray-300 rounded-md shadow-sm focus:border-blue-700 focus:ring-blue-700 focus:ring-1 placeholder:text-gray-400">
+                                    <select class="w-full h-10 mt-1 text-sm text-slate-500 border border-gray-300 rounded-md shadow-sm focus:border-blue-700 focus:ring-blue-700 focus:ring-1 placeholder:text-gray-400">
                                         <option>None</option>
                                         <option>Private Citizen</option>
                                         <option>Health Center</option>
                                     </select>
                                 </div>
-                                <div class="md:col-span-3">
-                                    <x-input-label value="Comorbidity)" />
-                                    <x-text-input class="w-full mt-1 border-blue-700" placeholder="Hypertension, Diabetes / Metformin, Losartan" />
+                                <div class="md:col-span-2">
+                                    <x-input-label value="Comorbidity" />
+                                    <x-text-input class="w-full mt-1 text-sm" placeholder="Hypertension, Diabetes" />
                                 </div>
-                                <div class="md:col-span-3">
-                                    <x-input-label value="Maintenance)" />
-                                    <x-text-input class="w-full mt-1 border-blue-700" placeholder="Hypertension, Diabetes / Metformin, Losartan" />
+                                <div class="md:col-span-2">
+                                    <x-input-label value="Maintenance" />
+                                    <x-text-input class="w-full mt-1 text-sm" placeholder="Metformin, Losartan" />
                                 </div>
                             </div>
                             <button type="button" @click="removeMember(index)" class="mt-6 text-red-500 hover:text-red-700">
@@ -405,8 +407,8 @@
                         <div class="flex gap-3 items-start bg-gray-50 p-3 rounded-lg border border-gray-200">
                             <div class="flex-1 grid grid-cols-2 gap-3">
                                 <div>
-                                    <x-input-label value="Pet Type" class="text-xs" />
-                                    <x-form-select 
+                                    <x-input-label value="Pet Type"/>
+                                    <x-form-select class="w-full h-10 mt-1 text-sm text-slate-500"
                                         model="App\Models\petType" 
                                         column="name" 
                                         value-column="id"
@@ -414,8 +416,8 @@
                                     />
                                 </div>
                                 <div>
-                                    <x-input-label value="Quantity" class="text-xs" />
-                                    <x-text-input type="number" class="w-full mt-1 text-sm" x-model="pet.quantity" />
+                                    <x-input-label value="Quantity" />
+                                    <x-text-input type="number" class="w-full h-10 mt-1 text-sm text-slate-500" x-model="pet.quantity" />
                                 </div>
                             </div>
                             <button type="button" @click="removePet(index)" class="mt-6 text-red-500 hover:text-red-700">

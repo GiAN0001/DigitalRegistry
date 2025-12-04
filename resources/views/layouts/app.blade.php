@@ -18,7 +18,7 @@
         <div class="flex-grow">
            @include('components.header.header')
         </div>
-        <div class="table mt-4">
+        <div class="mt-4">
             {{ $slot}}
         </div>
     </div>

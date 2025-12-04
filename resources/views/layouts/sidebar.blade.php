@@ -62,7 +62,7 @@
                     </x-slot>
                     
                     <li>
-                        <a href="#" class="flex items-center w-full p-2 text-sm font-medium text-slate-700 transition duration-75 rounded-lg hover:text-white hover:bg-blue-700">
+                        <a href="{{ route('admin.users.index') }}" class="flex items-center w-full p-2 text-sm font-medium text-slate-700 transition duration-75 rounded-lg hover:text-white hover:bg-blue-700">
                             Account Management
                         </a>
                     </li>
