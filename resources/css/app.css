@@ -23,7 +23,8 @@
     gap: 16px;
     align-items: center;
     width: full;
-} 
+}
+
 
 /* Responsive Design resident mobile sample - gian
 @media (max-width: 320px) {
@@ -42,6 +43,6 @@
     .filters{
         flex-direction: column;
     }
-    
+
 } */
 

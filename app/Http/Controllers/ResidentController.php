@@ -41,7 +41,7 @@ class ResidentController extends Controller
                 $q->where('house_structure_type', $request->house_structure_type);
             });
         }
- 
+
         // 3. Filter by Residency Status (Owner, Tenant, etc.)
         if ($request->filled('name')) {
             $query->whereHas('residencyType', function ($q) use ($request) {
