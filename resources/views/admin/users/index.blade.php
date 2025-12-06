@@ -59,7 +59,6 @@
                         <th class="px-3 py-3 text-left text-xs font-medium text-slate-700 uppercase tracking-wider rounded-l-lg">Name</th>
                         <th class="px-3 py-3 text-left text-xs font-medium text-slate-700 uppercase tracking-wider">Username</th>
                         <th class="px-3 py-3 text-left text-xs font-medium text-slate-700 uppercase tracking-wider">Email</th>
-                        <th class="px-3 py-3 text-left text-xs font-medium text-slate-700 uppercase tracking-wider">Contact</th>                       
                         <th class="px-3 py-3 text-left text-xs font-medium text-slate-700 uppercase tracking-wider">System Role</th>
                         <th class="px-3 py-3 text-left text-xs font-medium text-slate-700 uppercase tracking-wider">Barangay Role (Job)</th>
                         <th class="px-3 py-3 text-left text-xs font-medium text-slate-700 uppercase tracking-wider">Status</th>
@@ -70,17 +69,13 @@
                     @forelse ($users as $user)
                         <tr class="hover:bg-gray-50">
                             <td class="px-3 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                {{ $user->first_name }} {{ $user->middle_name }} {{ $user->last_name }}
+                                {{ $user->first_name }} {{ $user->last_name }}
                             </td>
                             <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-700">
                                 {{ $user->username }}
                             </td>
                             <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-500">
                                 {{ $user->email }}
-                            </td>
-
-                            <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-500">
-                                {{ $user->contact }}
                             </td>
                             <td class="px-3 py-4 whitespace-nowrap text-sm font-semibold capitalize">
                                 {{ $user->roles->first()->name ?? 'N/A' }}
@@ -96,29 +91,20 @@
                                 @endif
                             </td>
                             <td class="px-3 py-4 whitespace-nowrap text-sm font-medium">
+                                <a href="{{ route('admin.users.edit', $user->id) }}" class="text-indigo-600 hover:text-indigo-900">Edit</a>
 
-                                <a href="#" 
-                                    x-data 
-                                    x-on:click.prevent="
-                                        // 1. Open the modal
-                                        $dispatch('open-modal', 'edit-user-modal'); 
-                                        // 2. Dispatch the user data as JSON
-                                        $dispatch('edit-user-data', {{ $user->toJson() }}) 
-                                    " 
-                                    class="text-indigo-600 hover:text-blue-700 ml-4">
-                                        Edit
-                                </a>
-                                
                                 @if($user->id != Auth::id())
-                                    <a href="#" 
-                                        x-data 
-                                        x-on:click.prevent="
-                                            $dispatch('open-modal', 'delete-confirmation-modal');
-                                            $dispatch('set-delete-target', {{ $user->id }})
-                                        " 
-                                        class="text-red-600 hover:text-red-900 ml-4">
-                                            Delete
+
+                                    <a href="#"
+                                    onclick="event.preventDefault(); if(confirm('Are you sure you want to delete this user?')) { document.getElementById('delete-form-{{ $user->id }}').submit(); }"
+                                    class="text-red-600 hover:text-red-900 ml-4">
+                                    Delete
                                     </a>
+
+                                    <form id="delete-form-{{ $user->id }}" action="{{ route('admin.users.destroy', $user->id) }}" method="POST" style="display: none;">
+                                        @csrf
+                                        @method('DELETE')
+                                    </form>
 
                                 @else
                                     <span class="text-gray-400 ml-4">Admin Self</span>
@@ -140,8 +126,7 @@
             {{ $users->links() }}
         </div>
 
-        @include('admin.users.partials.edit-modal')
-        @include('admin.users.partials._delete-confirmation-modal')
+        @include('admin.users.partials._create-modal')
 
         @if ($errors->any())
             <div x-data x-init="$dispatch('open-modal', 'create-user-modal')"></div>

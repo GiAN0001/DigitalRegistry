@@ -10,8 +10,10 @@
             <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
 
                 <div>
-                    <x-input-label for="first_name" value="First Name" />
-                    <x-text-input id="first_name" name="first_name" type="text" class="mt-1 w-full h-10"/>
+                    <x-input-label for="first_name">
+                        <span class="text-red-600">*</span> First Name
+                    </x-input-label>
+                    <x-text-input id="first_name" name="first_name" type="text" class="mt-1 w-full h-10" :value="old('first_name')" />
                     <x-input-error :messages="$errors->get('first_name')" class="mt-2" />
                 </div>
 
