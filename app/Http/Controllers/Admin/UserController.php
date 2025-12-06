@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\DB;
 
 class UserController extends Controller
 {
-   
+
     public function index(): View
     {
 
@@ -24,14 +24,14 @@ class UserController extends Controller
         $totalAdmins = User::role('Admin')->count();
         $totalStaff = User::role('Staff')->count();
         $totalHelpDesk = User::role('help desk')->count();
-        
+
         // Fetch ALL users, eagerly loading roles and job titles.
-        $users = User::with('barangayRole') 
+        $users = User::with('barangayRole')
             ->latest()
             ->paginate(10);
-            
+
         // We handle the "cannot delete self" logic in the view (Step 3).
-        
+
         return view('admin.users.index', [
             'users' => $users,
             'totalUsers' => $totalUsers,
@@ -40,9 +40,9 @@ class UserController extends Controller
             'totalStaff' => $totalStaff,
             'totalHelpDesk' => $totalHelpDesk,
         ]);
-        
+
     }
-    
+
     /**
      * Store a newly created user in storage.
      */
@@ -60,7 +60,7 @@ class UserController extends Controller
             'status' => ['required', 'in:0,1'],
             'password' => 'required|string|min:8|confirmed',
         ]);
-        
+
         $user = User::create([
             'first_name' => $request->first_name,
             'last_name' => $request->last_name,
@@ -73,15 +73,15 @@ class UserController extends Controller
             'password' => Hash::make($request->password),
         ]);
 
-            $roleId = $request->role; 
-            
-         
-            $role = Role::findById($roleId); 
-            
+            $roleId = $request->role;
+
+
+            $role = Role::findById($roleId);
+
             // Assign the Role Model object
             $user->assignRole($role);
 
-           
+
         return redirect()->route('admin.users.index')->with('success', 'User created successfully.');
     }
 }

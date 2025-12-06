@@ -1,44 +1,44 @@
 <x-app-layout>
-    
-    <div class="analytics">
-        <x-analytics-widget 
-            title="Total Active Users" 
-            :value="$totalUsers" 
-            icon-name="users" 
-            bg-color="bg-blue-500" 
+
+    <div class="analytics grid grid-cols-4 grid-rows-2 gap-6 mb-8">
+        <x-analytics-widget
+            title="Total Active Users"
+            :value="$totalUsers"
+            icon-name="users"
+            bg-color="bg-blue-500"
         />
-        <x-analytics-widget 
-            title="Total Inactive Users" 
-            :value="$totalInactiveUsers" 
-            icon-name="users" 
-            bg-color="bg-blue-500" 
+        <x-analytics-widget
+            title="Total Inactive Users"
+            :value="$totalInactiveUsers"
+            icon-name="users"
+            bg-color="bg-blue-500"
         />
-        <x-analytics-widget 
-            title="Number of Admins" 
-            :value="$totalAdmins" 
-            icon-name="users" 
-            bg-color="bg-blue-500" 
+        <x-analytics-widget
+            title="Number of Admins"
+            :value="$totalAdmins"
+            icon-name="users"
+            bg-color="bg-blue-500"
         />
-        <x-analytics-widget 
-            title="Number of Help desk" 
-            :value="$totalHelpDesk" 
-            icon-name="users" 
-            bg-color="bg-blue-500" 
+        <x-analytics-widget
+            title="Number of Help desk"
+            :value="$totalHelpDesk"
+            icon-name="users"
+            bg-color="bg-blue-500"
         />
-        <x-analytics-widget 
-            title="Number of staff" 
-            :value="$totalStaff" 
-            icon-name="users" 
-            bg-color="bg-blue-500" 
+        <x-analytics-widget
+            title="Number of staff"
+            :value="$totalStaff"
+            icon-name="users"
+            bg-color="bg-blue-500"
         />
-   
+
     </div>
 
     <div class="p-6 bg-white shadow-md rounded-lg">
-        
+
         <div class="flex justify-between items-center mb-6">
             <h2 class="text-xl font-semibold text-gray-800">System User Accounts</h2>
-            <a href="#" 
+            <a href="#"
                 x-data
                 x-on:click.prevent="$dispatch('open-modal', 'create-user-modal')"
                 class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 flex items-center"
@@ -92,14 +92,20 @@
                             </td>
                             <td class="px-3 py-4 whitespace-nowrap text-sm font-medium">
                                 <a href="{{ route('admin.users.edit', $user->id) }}" class="text-indigo-600 hover:text-indigo-900">Edit</a>
-                                
+
                                 @if($user->id != Auth::id())
-                                    <a href="#" onclick="event.preventDefault(); document.getElementById('delete-form-{{ $user->id }}').submit();" class="text-red-600 hover:text-red-900 ml-4">Delete</a>
-                                    
+
+                                    <a href="#"
+                                    onclick="event.preventDefault(); if(confirm('Are you sure you want to delete this user?')) { document.getElementById('delete-form-{{ $user->id }}').submit(); }"
+                                    class="text-red-600 hover:text-red-900 ml-4">
+                                    Delete
+                                    </a>
+
                                     <form id="delete-form-{{ $user->id }}" action="{{ route('admin.users.destroy', $user->id) }}" method="POST" style="display: none;">
                                         @csrf
                                         @method('DELETE')
                                     </form>
+
                                 @else
                                     <span class="text-gray-400 ml-4">Admin Self</span>
                                 @endif
@@ -121,6 +127,10 @@
         </div>
 
         @include('admin.users.partials._create-modal')
-        
+
+        @if ($errors->any())
+            <div x-data x-init="$dispatch('open-modal', 'create-user-modal')"></div>
+        @endif
+
     </div>
 </x-app-layout>
