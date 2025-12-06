@@ -1,44 +1,44 @@
 <x-app-layout>
-    
-    <div class="analytics">
-        <x-analytics-widget 
-            title="Total Active Users" 
-            :value="$totalUsers" 
-            icon-name="users" 
-            bg-color="bg-blue-500" 
+
+    <div class="analytics grid grid-cols-4 grid-rows-2 gap-6 mb-8">
+        <x-analytics-widget
+            title="Total Active Users"
+            :value="$totalUsers"
+            icon-name="users"
+            bg-color="bg-blue-500"
         />
-        <x-analytics-widget 
-            title="Total Inactive Users" 
-            :value="$totalInactiveUsers" 
-            icon-name="users" 
-            bg-color="bg-blue-500" 
+        <x-analytics-widget
+            title="Total Inactive Users"
+            :value="$totalInactiveUsers"
+            icon-name="users"
+            bg-color="bg-blue-500"
         />
-        <x-analytics-widget 
-            title="Number of Admins" 
-            :value="$totalAdmins" 
-            icon-name="users" 
-            bg-color="bg-blue-500" 
+        <x-analytics-widget
+            title="Number of Admins"
+            :value="$totalAdmins"
+            icon-name="users"
+            bg-color="bg-blue-500"
         />
-        <x-analytics-widget 
-            title="Number of Help desk" 
-            :value="$totalHelpDesk" 
-            icon-name="users" 
-            bg-color="bg-blue-500" 
+        <x-analytics-widget
+            title="Number of Help desk"
+            :value="$totalHelpDesk"
+            icon-name="users"
+            bg-color="bg-blue-500"
         />
-        <x-analytics-widget 
-            title="Number of staff" 
-            :value="$totalStaff" 
-            icon-name="users" 
-            bg-color="bg-blue-500" 
+        <x-analytics-widget
+            title="Number of staff"
+            :value="$totalStaff"
+            icon-name="users"
+            bg-color="bg-blue-500"
         />
-   
+
     </div>
 
     <div class="p-6 bg-white shadow-md rounded-lg">
-        
+
         <div class="flex justify-between items-center mb-6">
             <h2 class="text-xl font-semibold text-gray-800">System User Accounts</h2>
-            <a href="#" 
+            <a href="#"
                 x-data
                 x-on:click.prevent="$dispatch('open-modal', 'create-user-modal')"
                 class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 flex items-center"
@@ -140,8 +140,12 @@
             {{ $users->links() }}
         </div>
 
-        @include('admin.users.partials._create-modal')
         @include('admin.users.partials.edit-modal')
         @include('admin.users.partials._delete-confirmation-modal')
+
+        @if ($errors->any())
+            <div x-data x-init="$dispatch('open-modal', 'create-user-modal')"></div>
+        @endif
+
     </div>
 </x-app-layout>
