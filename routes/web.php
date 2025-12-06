@@ -3,6 +3,7 @@
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ResidentController;
+use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\Admin\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -27,6 +28,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     Route::get('/residents', [ResidentController::class, 'index'])->name('residents.index');
+
+    Route::get('/transaction', [DocumentController::class, 'document'])->name('transaction.document');
 
     Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
     
