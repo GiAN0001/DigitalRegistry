@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\DB;
 
 class DocumentRequest extends Model
 {
@@ -25,6 +26,9 @@ class DocumentRequest extends Model
         'date_of_release' => 'datetime',
         'fee' => 'decimal:2',
     ];
+
+    // Add this line to automatically append accessors
+    protected $appends = ['resident_name', 'staff_name', 'releaser_name', 'date_color', 'text_color', 'border_color'];
 
     // Relationships
     public function resident(): BelongsTo
@@ -47,7 +51,28 @@ class DocumentRequest extends Model
         return $this->belongsTo(User::class, 'released_by_user_id');
     }
 
-    // Helper method to get resident name (from join or relationship)
+    // Scopes
+    /**
+     * Scope to fetch with joined resident and user names (for better performance)
+     */
+    public function scopeWithNames($query)
+    {
+        return $query
+            ->leftJoin('residents', 'document_requests.resident_id', '=', 'residents.id')
+            ->leftJoin('users as creators', 'document_requests.created_by_user_id', '=', 'creators.id')
+            ->leftJoin('users as releasers', 'document_requests.released_by_user_id', '=', 'releasers.id')
+            ->select(
+                'document_requests.*',
+                DB::raw("CONCAT(residents.first_name, ' ', residents.last_name) as resident_name"),
+                DB::raw("CONCAT(creators.first_name, ' ', creators.last_name) as staff_name"),
+                DB::raw("CONCAT(releasers.first_name, ' ', releasers.last_name) as releaser_name")
+            );
+    }
+
+    // Accessors
+    /**
+     * Get resident name (from join or relationship)
+     */
     public function getResidentNameAttribute()
     {
         // If fetched via join, use that
@@ -61,7 +86,9 @@ class DocumentRequest extends Model
             : 'N/A';
     }
 
-    // Helper method to get staff name (from join or relationship)
+    /**
+     * Get staff name (from join or relationship)
+     */
     public function getStaffNameAttribute()
     {
         // If fetched via join, use that
@@ -70,10 +97,34 @@ class DocumentRequest extends Model
         }
         
         // Otherwise use relationship
-        return $this->createdByUser?->name ?? 'N/A';
+        if ($this->createdByUser) {
+            return $this->createdByUser->first_name . ' ' . $this->createdByUser->last_name;
+        }
+        
+        return 'N/A';
     }
 
-    // Helper methods for status colors (background)
+    /**
+     * Get releaser name (from join or relationship)
+     */
+    public function getReleaserNameAttribute()
+    {
+        // If fetched via join, use that
+        if (isset($this->attributes['releaser_name'])) {
+            return $this->attributes['releaser_name'];
+        }
+        
+        // Otherwise use relationship
+        if ($this->releasedByUser) {
+            return $this->releasedByUser->first_name . ' ' . $this->releasedByUser->last_name;
+        }
+        
+        return null;
+    }
+
+    /**
+     * Get date color based on status
+     */
     public function getDateColorAttribute()
     {
         return match($this->status) {
@@ -85,7 +136,9 @@ class DocumentRequest extends Model
         };
     }
 
-    // Helper method for text color
+    /**
+     * Get text color based on status
+     */
     public function getTextColorAttribute()
     {
         return match($this->status) {
@@ -97,7 +150,9 @@ class DocumentRequest extends Model
         };
     }
 
-    // Helper method for border color
+    /**
+     * Get border color based on status
+     */
     public function getBorderColorAttribute()
     {
         return match($this->status) {
