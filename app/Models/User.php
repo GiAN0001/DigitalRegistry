@@ -57,6 +57,31 @@ class User extends Authenticatable
         ];
     }
 
+    /*
+    |--------------------------------------------------------------------------
+    | ACCESSORS (Computed Attributes)
+    |--------------------------------------------------------------------------
+    */
+
+    /**
+     * Get the user's full name.
+     * This combines first_name and last_name into a single 'name' attribute.
+     */
+    public function getNameAttribute(): string
+    {
+        return trim($this->first_name . ' ' . $this->last_name);
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | MODEL RELATIONSHIPS (Our Custom Code)
+    |--------------------------------------------------------------------------
+    */
+
+    /**
+     * Get the real-world job title for this user.
+     * (e.g., "Barangay Captain")
+     */
     public function barangayRole(): BelongsTo
     {
        

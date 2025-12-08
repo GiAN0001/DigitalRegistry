@@ -1,6 +1,8 @@
 <div class="text-white h-full flex flex-col transition-all duration-300">
 
     <nav class="flex-1 space-y-2 overflow-y-auto">
+        
+        <a href="{{ route('dashboard') }}"  
 
         <a href="{{ route('dashboard') }}"
            class="flex items-center p-2 text-sm font-medium rounded-lg transition-colors duration-200 group
@@ -24,6 +26,7 @@
                 </x-slot>
 
                 <li>
+                    <a href="{{ route('transaction.document') }}" class="flex items-center w-full p-2 text-sm font-medium text-slate-700 transition duration-75 rounded-lg hover:text-white hover:bg-blue-700">
                     <a href="#"
                        class="flex items-center w-full p-2 text-sm font-medium transition duration-75 rounded-lg
                        {{ request()->routeIs('documents.*') ? 'bg-blue-700 text-white' : 'text-slate-700 hover:text-white hover:bg-blue-700' }}">
