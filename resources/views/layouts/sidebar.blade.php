@@ -99,13 +99,5 @@
                 </a>
             </div>
         @endrole
-        <li>
-                        <a href="#"
-                           class="flex items-center w-full p-2 text-sm font-medium transition duration-75 rounded-lg
-                           {{ request()->routeIs('manageStaff.activity') ? 'bg-blue-700 text-white' : 'text-slate-700 hover:text-white hover:bg-blue-700' }}">
-                            User Activity
-                        </a>
-                    </li>
-
     </nav>
 </div>

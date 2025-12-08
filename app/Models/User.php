@@ -7,6 +7,8 @@ use Spatie\Permission\Traits\HasRoles;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use App\Models\BarangayRole; // We need this for the function
+use App\Models\Resident;
+use App\Models\Household;
 
 class User extends Authenticatable
 {
@@ -55,39 +57,27 @@ class User extends Authenticatable
         ];
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | MODEL RELATIONSHIPS (Our Custom Code)
-    |--------------------------------------------------------------------------
-    */
-
-    /**
-     * Get the real-world job title for this user.
-     * (e.g., "Barangay Captain")
-     */
     public function barangayRole(): BelongsTo
     {
-        // This links our `barangay_role_id` column to the `id` on the `barangay_roles` table
+       
         return $this->belongsTo(BarangayRole::class, 'barangay_role_id', 'id');
     }
 
-    /**
-     * Get the admin who created this user.
-     * (This is a self-referencing relationship)
-     */
+
     public function addedByUser(): BelongsTo
     {
-        // This links our `added_by` column back to the `id` on this SAME table
+        
         return $this->belongsTo(User::class, 'added_by', 'id');
     }
 
-    /**
-     * Get the admin who last updated this user.
-     * (This is a self-referencing relationship)
-     */
     public function updatedByUser(): BelongsTo
     {
-        // This links our `updated_by` column back to the `id` on this SAME table
+       
         return $this->belongsTo(User::class, 'updated_by', 'id');
     }
+
+    
+
+    
+        
 }
