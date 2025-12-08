@@ -87,9 +87,9 @@ class UserController extends Controller
 
     public function destroy(Request $request, $id)
     {
-        // 1. Validate the current admin's password
+
         $request->validate([
-            // The password field name must match the input in the modal
+
             'current_password' => ['required', 'string'],
         ]);
 
