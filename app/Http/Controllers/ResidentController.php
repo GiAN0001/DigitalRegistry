@@ -79,4 +79,65 @@ class ResidentController extends Controller
             'purok' => $purok,
         ]);
     }
+
+    public function search(Request $request)
+    {
+        $query = $request->get('q');
+
+        if (!$query || strlen($query) < 2) {
+            return response()->json([]);
+        }
+
+        $user = Auth::user();
+
+        $residents = Resident::forUser($user)
+            ->where(function($q) use ($query) {
+                $q->where('first_name','like',"%{$query}%")
+                ->orWhere('last_name','like',"%{$query}%")
+                ->orWhereHas('household', function($h) use ($query) {
+                    $h->where('email','like',"%{$query}%")
+                        ->orWhere('contact_number','like',"%{$query}%")
+                        ->orWhere('house_number','like',"%{$query}%")
+                        ->orWhereHas('areaStreet', function($a) use ($query) {
+                            $a->where('purok_name','like',"%{$query}%")
+                            ->orWhere('street_name','like',"%{$query}%");
+                        });
+                });
+            })
+            ->with([
+                'household:id,area_id,house_number,contact_number,email',
+                'household.areaStreet:id,purok_name,street_name'
+            ])
+            ->limit(10)
+            ->get(['id', 'first_name', 'middle_name', 'last_name', 'extension', 'household_id']);
+
+        return response()->json($residents->map(function ($resident) {
+
+            $house = $resident->household;
+            $area  = $house?->areaStreet;
+
+            // Build clean full name
+            $fullName = trim("{$resident->first_name} {$resident->middle_name} {$resident->last_name} {$resident->extension}");
+
+            // Build clean address
+            $fullAddress = trim(
+                ($house?->house_number ? "{$house->house_number}, " : "") .
+                ($area?->street_name ? "{$area->street_name}, " : "") .
+                ($area?->purok_name ? "Purok {$area->purok_name}" : ""),
+                ", "
+            );
+
+            return [
+                'id' => $resident->id,
+                'full_name' => $fullName,
+
+                // From households table
+                'email' => $house?->email,
+                'contact_number' => $house?->contact_number,
+
+                'address' => $fullAddress,
+                'area_id' => $house?->area_id,
+            ];
+        }));
+    }
 }
