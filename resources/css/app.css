@@ -23,8 +23,13 @@
     gap: 16px;
     align-items: center;
     width: full;
-} 
-
+}
+.analytics{
+    display: flex;
+    width: 100%;
+    grid-column: 4 / span 16;
+    gap: 16px;
+}
 
 /* Responsive Design resident mobile sample - gian
 @media (max-width: 320px) {
