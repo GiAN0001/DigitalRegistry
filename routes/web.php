@@ -28,8 +28,13 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     Route::get('/residents', [ResidentController::class, 'index'])->name('residents.index');
+    Route::get('/residents/search', [ResidentController::class, 'search'])->name('residents.search');
 
     Route::get('/transaction', [DocumentController::class, 'document'])->name('transaction.document');
+    Route::post('/document-request/store', [DocumentController::class, 'store'])->name('document-request.store');
+    Route::post('/document/sign', [DocumentController::class, 'sign'])->name('document.sign');
+    Route::post('/document/release', [DocumentController::class, 'release'])->name('document.release');
+    Route::post('/document/cancel', [DocumentController::class, 'cancel'])->name('document.cancel');
 
     Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
     

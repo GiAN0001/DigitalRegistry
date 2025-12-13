@@ -16,28 +16,28 @@
 <div class="hidden bg-gray-200 bg-yellow-200 bg-green-200 bg-red-200 text-gray-700 text-amber-800 text-green-800 text-red-700"></div>
 
 <div class="bg-slate-50 rounded-xl p-8 shadow-md">
-    <div class="flex justify-between items-start mb-8">
+    <div class="flex justify-between items-start mb-8 relative z-10">
         <div>
             <p class="text-xs font-semibold text-slate-500">Request ID: {{ $requestId }}</p>
             <p class="font-bold text-base">{{ $name }}</p>
         </div>
         
         @if(!in_array(strtolower($status), ['released', 'cancelled']))
-            <div class="relative">
-                <button onclick="toggleMenu(event, this)" class="text-gray-800 text-2xl font-bold mt-1">⋮</button>
+            <div class="relative" x-data="{ open: false }">
+                <button @click="open = !open" class="text-gray-800 text-2xl font-bold mt-1 hover:text-gray-600 relative z-20">⋮</button>
 
                 <!-- Dropdown Menu -->
-                <div class="dropdown-menu hidden w-36 bg-white rounded-xl shadow-xl border border-gray-200 z-[9999] overflow-hidden">
+                <div class="fixed bg-white rounded-xl shadow-xl border border-gray-200 w-36 py-1 z-[99999]" x-show="open" @click.outside="open = false" x-transition>
                     
                     @if(strtolower($status) === 'pending')
-                        <button class="w-full text-left px-4 py-3 hover:bg-gray-300 text-xs font-medium">Edit</button>
-                        <button class="w-full text-left px-4 py-3 hover:bg-gray-300 text-xs font-medium">Sign</button>
-                        <button class="w-full text-left px-4 py-3 hover:bg-gray-300 text-xs font-medium">Cancel</button>
+                        <button type="button" class="w-full text-left px-4 py-3 hover:bg-gray-100 text-xs font-medium" @click="open = false">Edit</button>
+                        <button type="button" class="w-full text-left px-4 py-3 hover:bg-gray-100 text-xs font-medium" @click="open = false; document.dispatchEvent(new CustomEvent('open-signed-modal', { detail: { requestId: parseInt('{{ $requestId }}', 10) } }))">Sign</button>
+                        <button type="button" class="w-full text-left px-4 py-3 hover:bg-gray-100 text-xs font-medium" @click="open = false; document.dispatchEvent(new CustomEvent('open-cancelled-modal', { detail: { requestId: parseInt('{{ $requestId }}', 10) } }))">Cancel</button>
                     @endif
 
                     @if(strtolower($status) === 'signed')
-                        <button class="w-full text-left px-4 py-3 hover:bg-gray-300 text-xs font-medium">Release</button>
-                        <button class="w-full text-left px-4 py-3 hover:bg-gray-300 text-xs font-medium">Cancel</button>
+                        <button type="button" class="w-full text-left px-4 py-3 hover:bg-gray-100 text-xs font-medium" @click="open = false; document.dispatchEvent(new CustomEvent('open-released-modal', { detail: { requestId: parseInt('{{ $requestId }}', 10) } }))">Release</button>
+                        <button type="button" class="w-full text-left px-4 py-3 hover:bg-gray-100 text-xs font-medium" @click="open = false; document.dispatchEvent(new CustomEvent('open-cancelled-modal', { detail: { requestId: parseInt('{{ $requestId }}', 10) } }))">Cancel</button>
                     @endif
                 </div>
             </div>

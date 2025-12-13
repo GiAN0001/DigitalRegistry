@@ -14,12 +14,18 @@ class DocumentRequest extends Model
     protected $fillable = [
         'resident_id',
         'document_type_id',
+        'purpose_id',
+        'other_purpose',
+        'years_of_stay',
+        'months_of_stay',
         'created_by_user_id',
-        'released_by_user_id',
         'status',
-        'date_of_release',
         'remarks',
         'fee',
+        'date_of_release',
+        'date_signed',
+        'date_of_cancel',
+        'released_by_user_id',
     ];
 
     protected $casts = [
@@ -44,6 +50,11 @@ class DocumentRequest extends Model
     public function createdByUser(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by_user_id');
+    }
+
+    public function purpose()
+    {
+        return $this->belongsTo(DocumentPurpose::class, 'purpose_id');
     }
 
     public function releasedByUser(): BelongsTo

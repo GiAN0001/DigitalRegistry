@@ -26,8 +26,7 @@
                 </x-slot>
 
                 <li>
-                    <a href="{{ route('transaction.document') }}" class="flex items-center w-full p-2 text-sm font-medium text-slate-700 transition duration-75 rounded-lg hover:text-white hover:bg-blue-700">
-                    <a href="#"
+                    <a href="{{ route('transaction.document') }}"
                        class="flex items-center w-full p-2 text-sm font-medium transition duration-75 rounded-lg
                        {{ request()->routeIs('documents.*') ? 'bg-blue-700 text-white' : 'text-slate-700 hover:text-white hover:bg-blue-700' }}">
                         Document Requests
