@@ -49,6 +49,10 @@ class Resident extends Model
         return $this->belongsTo(User::class, 'added_by_user_id');
     }
 
+    public function getFullNameAttribute()
+    {
+        return $this->first_name . ' ' . $this->last_name;
+    }
     
     // --- RBAC LOGIC (SCOPE) ---
     public function scopeForUser(Builder $query, User $user): Builder

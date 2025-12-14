@@ -4,6 +4,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ResidentController;
 use App\Http\Controllers\DocumentController;
+use App\Http\Controllers\FacilityController;
 use App\Http\Controllers\Admin\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -35,6 +36,9 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/document/sign', [DocumentController::class, 'sign'])->name('document.sign');
     Route::post('/document/release', [DocumentController::class, 'release'])->name('document.release');
     Route::post('/document/cancel', [DocumentController::class, 'cancel'])->name('document.cancel');
+    Route::get('/transaction/facility', [FacilityController::class, 'index'])->name('transaction.facility');
+    Route::post('/transaction/facility/reservation', [FacilityController::class, 'storeReservation'])->name('facility.storeReservation');
+    Route::post('/facility/reservation/store', [FacilityController::class, 'storeReservation'])->name('facility.reservation.store');
 
     Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
     
