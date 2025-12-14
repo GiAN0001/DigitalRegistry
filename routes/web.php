@@ -24,7 +24,7 @@ Route::get('/', function () {
 });
 
 Route::middleware(['auth'])->group(function () {
-    
+
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     Route::get('/residents', [ResidentController::class, 'index'])->name('residents.index');
@@ -36,15 +36,21 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/document/release', [DocumentController::class, 'release'])->name('document.release');
     Route::post('/document/cancel', [DocumentController::class, 'cancel'])->name('document.cancel');
 
+    // --- ADDED: Profile Settings Routes ---
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    // --------------------------------------
+
     Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
-    
+
     // Creates index, create, store, edit, update, destroy routes automatically.
-        Route::resource('users', UserController::class); 
+        Route::resource('users', UserController::class);
 
     // Other Admin routes (Logs, Events, etc.) would go here later
     });
-      
 
-}); 
+
+});
 
 require __DIR__.'/auth.php';

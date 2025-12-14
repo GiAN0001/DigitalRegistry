@@ -92,25 +92,25 @@
                             </td>
                             <td class="px-3 py-4 whitespace-nowrap text-sm font-medium">
 
-                                <a href="#" 
-                                    x-data 
+                                <a href="#"
+                                    x-data
                                     x-on:click.prevent="
                                         // 1. Open the modal
-                                        $dispatch('open-modal', 'edit-user-modal'); 
+                                        $dispatch('open-modal', 'edit-user-modal');
                                         // 2. Dispatch the user data as JSON
-                                        $dispatch('edit-user-data', {{ $user->toJson() }}) 
-                                    " 
+                                        $dispatch('edit-user-data', {{ $user->toJson() }})
+                                    "
                                     class="text-indigo-600 hover:text-blue-700 ml-4">
                                         Edit
                                 </a>
-                                
+
                                 @if($user->id != Auth::id())
-                                    <a href="#" 
-                                        x-data 
+                                    <a href="#"
+                                        x-data
                                         x-on:click.prevent="
                                             $dispatch('open-modal', 'delete-confirmation-modal');
                                             $dispatch('set-delete-target', {{ $user->id }})
-                                        " 
+                                        "
                                         class="text-red-600 hover:text-red-900 ml-4">
                                             Delete
                                     </a>
@@ -134,7 +134,7 @@
         <div class="mt-4">
             {{ $users->links() }}
         </div>
-        
+
         @include('admin.users.partials._create-modal')
         @include('admin.users.partials.edit-modal')
         @include('admin.users.partials._delete-confirmation-modal')

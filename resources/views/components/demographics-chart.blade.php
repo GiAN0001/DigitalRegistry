@@ -10,7 +10,6 @@
 
     <script>
         (function() {
-            // Data and Options passed from PHP
             const chartData = JSON.parse('{!! $dataJson !!}');
             const chartOptions = JSON.parse('{!! $optionsJson !!}');
             const chartType = '{{ $type }}';
@@ -20,13 +19,11 @@
             let checkChartInterval = setInterval(function() {
                 const ctx = document.getElementById(chartId);
 
-                // Check 1: Is the Chart library loaded? Check 2: Is the canvas element ready?
                 if (typeof Chart !== 'undefined' && ctx) {
 
-                    // Library is ready: Stop the checking loop
+
                     clearInterval(checkChartInterval);
 
-                    // Initialize the Chart.js instance
                     new Chart(ctx, {
                         type: chartType,
                         data: chartData,

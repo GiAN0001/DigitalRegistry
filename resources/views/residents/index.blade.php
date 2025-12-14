@@ -49,7 +49,7 @@
         </div>
         <div class="mt-4"></div>
 
-        <div class="p-4 bg-white shadow-md rounded-lg grid overflow-auto">
+        <div class="p-4 bg-white shadow-md rounded-lg grid overflow-x-auto">
             <div class="overflow-x-auto mt-6">
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-blue-200">
