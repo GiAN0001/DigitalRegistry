@@ -1,8 +1,8 @@
 <x-app-layout>
 
-    <div class="sub-content">
+    
 
-        <div class="flex flex-wrap items-center gap-3 mt-[42px]">
+        <div class="filters">
 
             <x-search-bar placeholder="Search residents..." />
 
@@ -19,7 +19,7 @@
             />
         </div>
 
-        <div class="flex flex-wrap items-center gap-3 mt-4">
+        <div class="filters">
 
             <x-rows-per-page />
 
@@ -35,10 +35,11 @@
                 title="Filter by House Structure"
             />
 
-            <div class="ml-auto">
+            <div class="w-full">
                 <x-button
                     x-data
                     x-on:click.prevent="$dispatch('open-modal', 'register-resident')"
+                    class="w-full"
                 >
                     <x-slot name="icon">
                         <x-lucide-plus class="w-4 h-4" />
@@ -168,7 +169,7 @@
                 {{ $residents->links() }}
             </div>
         </div>
-    </div>
+
 
 <div>
     @include('residents.modal.register-resident')
