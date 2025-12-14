@@ -39,9 +39,9 @@
                     </a>
                 </li>
                 <li>
-                    <a href="#"
+                    <a href="{{ route('transaction.facility') }}"
                         class="flex items-center w-full p-2 text-sm font-medium transition duration-75 rounded-lg
-                {{ request()->routeIs('reservations.*') ? 'bg-blue-700 text-white' : 'text-slate-700 hover:text-white hover:bg-blue-700' }}">
+                    {{ request()->routeIs('transaction.facility*') ? 'bg-blue-700 text-white' : 'text-slate-700 hover:text-white hover:bg-blue-700' }}">
                         Facility Reservations
                     </a>
                 </li>
