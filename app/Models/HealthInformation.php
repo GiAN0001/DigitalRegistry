@@ -10,6 +10,12 @@ class HealthInformation extends Model
 {
     use HasFactory;
 
+    //GIAN ADDED THIS
+
+
+    protected $guarded = []; // Critical
+
+
     /**
      * The table associated with the model.
      *

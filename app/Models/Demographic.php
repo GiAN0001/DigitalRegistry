@@ -5,6 +5,11 @@ use Illuminate\Support\Carbon;
 
 class Demographic extends Model
 {
+
+    //GIAN ADDED THIS
+    protected $guarded = []; // Critical
+    public $timestamps = false; // Usually demographic tables don't have created_at/updated_at
+    
     public function getAgeAttribute(): ?int
     {
         if ($this->birthdate) {

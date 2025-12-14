@@ -10,8 +10,13 @@ use App\Models\HouseholdPet;
 
 class Household extends Model
 {
+    protected $guarded = []; 
+   
     use HasFactory; 
+
+    //GIAN ADDED THIS
     
+
     public function areaStreet(): BelongsTo
     {
         return $this->belongsTo(AreaStreet::class, 'area_id'); 

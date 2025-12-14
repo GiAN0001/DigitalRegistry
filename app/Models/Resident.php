@@ -17,6 +17,9 @@ use App\Models\ResidencyType;
 class Resident extends Model
 {
     use HasFactory;
+
+    //GIAN ADDED THIS
+    protected $guarded = [];
     
     // --- RELATIONSHIPS ---
     public function household(): BelongsTo

@@ -9,6 +9,14 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use App\Models\AreaStreet;
+//GIAN ADDED THESE
+use Illuminate\Support\Facades\Log;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\DB;
+use App\Models\Demographic; 
+use App\Models\Household;
+use App\Models\HealthInformation;
+use App\Http\Requests\ResidentRegistrationRequest;
 
 class ResidentController extends Controller
 {
@@ -140,4 +148,93 @@ class ResidentController extends Controller
             ];
         }));
     }
+    public function store(ResidentRegistrationRequest $request): RedirectResponse
+    {
+
+        // 1. Get validated data for the head only
+        $validated = $request->validated();
+        
+        $headData = $validated['head'];
+        $householdData = $validated['household']; // Get household data
+
+        DB::beginTransaction();
+        try {
+            // --- A. Create Household Record ---
+            // 1. Generate unique Household Number
+            $householdData['household_number'] = $this->generateHouseholdNumber();
+            
+            // 2. Create the Household
+            // Note: owner_resident_id is initially NULL because the resident doesn't exist yet.
+            $household = Household::create([
+                'household_number' => $householdData['household_number'],
+                'house_number' => $householdData['house_number'],
+                'area_id' => $householdData['area_id'],
+                'house_structure_id' => $householdData['house_structure_id'],
+                'contact_number' => $householdData['contact_number'],
+                'email' => $householdData['email'] ?? null,
+                'landlord_name' => $householdData['landlord_name'] ?? null,
+                'landlord_contact' => $householdData['landlord_contact'] ?? null,
+            ]);
+
+            // --- B. Create Resident (Head) Record ---
+            $resident = Resident::create([
+                'first_name' => $headData['first_name'],
+                'last_name' => $headData['last_name'],
+                'middle_name' => $headData['middle_name'] ?? null,
+                'extension' => $headData['extension'] ?? null,
+                'household_role_id' => $headData['household_role_id'], // Should be 1 (Head)
+                
+                // LINKING: Use the ID of the household we just created
+                'household_id' => $household->id, 
+                
+                // Inherit residency status from the household form
+                'residency_type_id' => $householdData['residency_type_id'],
+                'added_by_user_id' => Auth::id(),
+            ]);
+
+            // --- C. Create Related Info ---
+            Demographic::create([
+                'resident_id' => $resident->id,
+                'birthplace' => $headData['birthplace'],
+                'birthdate' => $headData['birthdate'],
+                'sex' => $headData['sex'],
+                'civil_status' => $headData['civil_status'],
+                'nationality' => $headData['nationality'],
+                'occupation' => $headData['occupation'] ?? null,
+            ]);
+
+            HealthInformation::create([
+                'resident_id' => $resident->id,
+                'sector' => $headData['sector'] ?? 'None',
+                'vaccination' => $headData['vaccination'] ?? null,
+                'comorbidity' => $headData['comorbidity'] ?? null,
+                'maintenance' => $headData['maintenance'] ?? null,
+            ]);
+
+    
+            // If this resident is the Owner (Residency Type ID 1), update the household record.
+            if ($householdData['residency_type_id'] == 1) {
+                $household->update(['owner_resident_id' => $resident->id]);
+            }
+
+            DB::commit();
+
+            return redirect()->route('residents.index')->with('success', 'Household and Head of Family registered successfully!');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error("Registration Failed: " . $e->getMessage());
+            return back()->withInput()->with('error', 'Save Failed: ' . $e->getMessage());
+        }
+    }
+
+    // --- Helper Function ---
+    private function generateHouseholdNumber(): string
+    {
+
+        $latest = Household::latest('id')->first();
+        $nextId = $latest ? $latest->id + 1 : 1;
+        return 'NAM-' . date('Y') . '-' . str_pad($nextId, 5, '0', STR_PAD_LEFT);
+    }
+    
 }
