@@ -1,9 +1,5 @@
 <x-app-layout>
-    {{--
-        CORRECTED GRID CONTAINER
-        - Changed 'grid-cols-13' to 'grid-cols-12' (Standard Tailwind).
-        - This ensures the layout works without custom configuration.
-    --}}
+
     <div class="grid grid-cols-1 md:grid-cols-12 gap-6 pb-10 mt-6">
 
         {{-- PAGE HEADER (Spans all 12 columns) --}}
@@ -12,11 +8,8 @@
             <p class="text-sm text-slate-500">Manage your profile information and account security.</p>
         </div>
 
-        {{-- RIGHT COLUMN: FORMS (Spans 8 of 12 columns) --}}
-        {{-- Changed from col-span-9 to col-span-8 to fit the 12-column grid --}}
-        <div class="col-span-1 md:col-span-8 space-y-6">
+        <div class="col-span-1 md:col-span-9 space-y-6">
 
-            {{-- Personal Information Form --}}
             <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
                 <div class="mb-6">
                     <h3 class="text-lg font-bold text-slate-800">Personal Information</h3>
@@ -110,7 +103,7 @@
 
         </div>
         {{-- LEFT COLUMN: IDENTITY CARD (Spans 4 of 12 columns) --}}
-        <div class="col-span-1 md:col-span-4 space-y-6">
+        <div class="col-span-1 md:col-span-3 space-y-6">
 
             {{-- Profile Card --}}
             <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden relative">

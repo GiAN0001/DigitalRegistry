@@ -1,5 +1,5 @@
 <div>
-    <div class="flex justify-between items-center mb-4">
+    <div class="flex justify-between items-center mb-2">
         <h3 class="text-md font-bold text-slate-700">{{ $title }}</h3>
     </div>
 
@@ -11,17 +11,19 @@
 
         <script>
             (function() {
-                // ... (data parsing logic kept exactly the same) ...
                 const chartData = JSON.parse('{!! $dataJson !!}');
-                const chartType = '{{ $type }}';
+                const chartType = '{{ $type }}'; // Ensure this is 'pie' or 'doughnut'
                 const chartId = '{{ $chartId }}';
 
-                window.addEventListener('DOMContentLoaded', function() {
-                    const ctx = document.getElementById(chartId);
 
-                    if (typeof Chart === 'undefined' || !ctx) {
-                        console.error('Chart Initialization Failed.');
-                        return;
+                const initChart = () => {
+                    const ctx = document.getElementById(chartId);
+                    if (typeof Chart === 'undefined' || !ctx) return;
+
+
+                    const existingChart = Chart.getChart(ctx);
+                    if (existingChart) {
+                        existingChart.destroy();
                     }
 
                     new Chart(ctx, {
@@ -30,43 +32,46 @@
                         options: {
                             responsive: true,
                             maintainAspectRatio: false,
-                            // Added layout padding to prevent the chart from touching edges
+
+
+                            animation: {
+                                duration: 2000,
+                                easing: 'easeOutQuart',
+                                animateRotate: true,
+                                animateScale: true
+                            },
+
+
                             layout: {
                                 padding: 20
                             },
                             scales: {
                                 y: {
-                                    beginAtZero: true,
-                                    display: false // Kept hidden as per your code/reference
+                                    display: false
                                 },
                                 x: {
-                                    display: false // Kept hidden as per your code/reference
+                                    display: false
                                 }
                             },
                             plugins: {
                                 legend: {
-                                    // VISUAL CHANGE: Moves data to the right side
                                     position: 'right',
-                                    align: 'center', // Vertically centers the legend
                                     labels: {
-                                        usePointStyle: true, // Makes the legend icons square/circle instead of rectangles
-                                        boxWidth: 12,
-                                        padding: 20, // Adds space between legend items
+                                        usePointStyle: true,
+                                        boxWidth: 10,
+                                        padding: 20,
                                         font: {
-                                            size: 10,
+                                            size: 11,
                                             weight: '600'
                                         },
-                                        color: '#334155' // Slate-700 color for text
+                                        color: '#334155'
                                     }
                                 },
                                 tooltip: {
-                                    // ... (Your existing tooltip logic kept exactly the same) ...
                                     callbacks: {
                                         label: function(context) {
                                             let label = context.dataset.label || '';
-                                            if (label) {
-                                                label += ': ';
-                                            }
+                                            if (label) label += ': ';
                                             if (context.parsed.y !== null) {
                                                 label += new Intl.NumberFormat().format(context.parsed.y);
                                             }
@@ -77,7 +82,10 @@
                             }
                         }
                     });
-                });
+                };
+
+                setTimeout(initChart, 100);
+
             })();
         </script>
     </div>
