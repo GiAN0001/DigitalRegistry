@@ -20,7 +20,7 @@
 
                 <div class="col-span-1 lg:col-span-9 flex flex-col h-full">
                     <div>
-                        <div class="flex justify-between items-center mb-4">
+                        <div class="flex justify-between items-center mb-2">
                             <h3 class="text-md font-bold text-slate-700">
                                 Barangay Staff Activity
                             </h3>
@@ -81,7 +81,7 @@
                 <!-- Date & Clock Widget -->
                 <div class="col-span-1 lg:col-span-4 flex flex-col">
                     <div>
-                        <div class="flex justify-between items-center mb-4">
+                        <div class="flex justify-between items-center mb-2">
                             <h3 class="text-sm font-semibold text-slate-700"></h3>
                             <h3 class="text-sm font-semibold text-slate-500">Date</h3>
                         </div>
