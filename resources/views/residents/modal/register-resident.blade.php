@@ -1,262 +1,271 @@
 <x-modal name="register-resident" maxWidth="max-w-[1188px]" focusable>
     
-    <div class="p-8" 
+    <div class="p-8 max-h-[85vh] overflow-y-auto" 
          x-data="{ 
-            step: 1, 
+            ownershipStatus: '{{ old('household.residency_type_id') }}', 
+            familyMembers: @js(old('members', [])), 
+            pets: @js(old('pets', [])), 
             
-            // We use this to show/hide the Landlord field in Step 2
-            ownershipStatus: '', 
+            // CRITICAL FIX: Pass Laravel validation errors to Alpine
+            serverErrors: @js($errors->toArray()),
 
-            // Arrays to hold dynamic rows
-            familyMembers: [],
-            pets: [],
-
-            // Functions to add/remove rows
             addMember() {
                 this.familyMembers.push({ 
-                    id: Date.now(), // Temporary ID for key
-                    first_name: '', 
-                    last_name: '', 
-                    relationship: '' 
+                    id: Date.now(), 
+                    last_name: '', first_name: '', middle_name: '', extension: '', 
+                    birthplace: '', birthdate: '', household_role_id: '',
+                    sex: '', civil_status: '', nationality: 'Filipino', occupation: '',
+                    sector: 'None', vaccination: 'None', comorbidity: '', maintenance: ''
                 });
             },
             removeMember(index) {
                 this.familyMembers.splice(index, 1);
             },
             addPet() {
-                this.pets.push({ 
-                    id: Date.now(), 
-                    type: '', 
-                    quantity: 1 
-                });
+                this.pets.push({ id: Date.now(), quantity: 1, pet_type_id: '' });
             },
             removePet(index) {
                 this.pets.splice(index, 1);
+            },
+            // Helper to safely get error messages for dynamic fields
+            getErr(field) {
+                return this.serverErrors[field] ? this.serverErrors[field][0] : null;
             }
-         }">
+         }"
+         @if($errors->any()) x-init="$dispatch('open-modal', 'register-resident')" @endif
+    >
 
-        <div class="flex justify-between items-center">
+        <div class="flex justify-between items-center bg-white z-10 pb-4">
             <h2 class="text-2xl font-bold text-gray-800">Household Registration</h2>
         </div>
 
-        <div>
-            <template x-if="step === 1"><x-step-progression :current-step="1" /></template>
-            <template x-if="step === 2"><x-step-progression :current-step="2" /></template>
-            <template x-if="step === 3"><x-step-progression :current-step="3" /></template>
-            <template x-if="step === 4"><x-step-progression :current-step="4" /></template>
-        </div>
+        <form method="POST" action="{{ route('residents.store') }}" class="mt-4"> 
+            @csrf
 
-        <form> 
-            <div x-show="step === 1" x-transition:enter="transition ease-out duration-300">
-                <h3 class="text-lg font-semibold text-slate-700 mb-4">Your Information (Head of Family)</h3>
+            {{-- ---------------------------------------------------- --}}
+            {{-- SECTION 1: Head of Family Information --}}
+            {{-- ---------------------------------------------------- --}}
+            <div class="mb-8 border-b pb-4">
+                <h3 class="text-xl font-bold text-blue-700 mb-4">1. Head of Family Information</h3>
                 
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    {{-- Static fields can still use standard Blade x-input-error --}}
                     <div>
-                        <x-input-label>
-                            Last Name <span class="text-red-500">*</span>
-                        </x-input-label>
-                        <x-text-input class="w-full mt-1 text-sm" placeholder="Dela Cruz" required />
+                        <x-input-label>Last Name <span class="text-red-500">*</span></x-input-label>
+                        <x-text-input name="head[last_name]" class="w-full mt-1 text-sm" placeholder="Dela Cruz" :value="old('head.last_name')" />
+                        <x-input-error :messages="$errors->get('head.last_name')" class="mt-2" />
                     </div>
                     <div>
-                        <x-input-label>
-                            First Name <span class="text-red-500">*</span>
-                        </x-input-label>
-                        <x-text-input class="w-full mt-1 text-sm" placeholder="Juan" required />
+                        <x-input-label>First Name <span class="text-red-500">*</span></x-input-label>
+                        <x-text-input name="head[first_name]" class="w-full mt-1 text-sm" placeholder="Juan" :value="old('head.first_name')" />
+                        <x-input-error :messages="$errors->get('head.first_name')" class="mt-2" />
                     </div>
                     <div>
                         <x-input-label value="Middle Name" />
-                        <x-text-input class="w-full mt-1 text-sm" placeholder="Santos" />
+                        <x-text-input name="head[middle_name]" class="w-full mt-1 text-sm" placeholder="Santos" :value="old('head.middle_name')" />
+                        <x-input-error :messages="$errors->get('head.middle_name')" class="mt-2" />
                     </div>
                     <div>
                         <x-input-label value="Extension" />
-                        <x-text-input class="w-full mt-1 text-sm" placeholder="Jr, Sr, III" />
+                        <x-text-input name="head[extension]" class="w-full mt-1 text-sm" placeholder="Jr, Sr, III" :value="old('head.extension')" />
+                        <x-input-error :messages="$errors->get('head.extension')" class="mt-2" />
                     </div>
 
                     <div>
-                        <x-input-label>
-                            Place of Birth <span class="text-red-500">*</span>
-                        </x-input-label>
-                        <x-text-input class="w-full mt-1 text-sm" placeholder="City, Province" required />
+                        <x-input-label>Place of Birth <span class="text-red-500">*</span></x-input-label>
+                        <x-text-input name="head[birthplace]" class="w-full mt-1 text-sm" placeholder="City, Province" :value="old('head.birthplace')" />
+                        <x-input-error :messages="$errors->get('head.birthplace')" class="mt-2" />
                     </div>
                     <div>
-                        <x-input-label>
-                            Date of Birth <span class="text-red-500">*</span>
-                        </x-input-label>
-                        <x-text-input type="date" class="w-full mt-1 text-sm" required />
+                        <x-input-label>Date of Birth <span class="text-red-500">*</span></x-input-label>
+                        <x-text-input name="head[birthdate]" type="date" class="w-full mt-1 text-sm" :value="old('head.birthdate')" />
+                        <x-input-error :messages="$errors->get('head.birthdate')" class="mt-2" />
                     </div>
+                    
                     <div>
-                        <x-input-label>
-                            Age <span class="text-red-500">*</span>
-                        </x-input-label>
-                        <x-text-input class="w-full mt-1 text-sm" placeholder="18" required />
-                    </div>
-                     <div>
-                        <x-input-label>
-                            Household role <span class="text-red-500">*</span>
-                        </x-input-label>
-                        <x-form-select class="w-full h-10 mt-1 text-slate-500"
-                            model="App\Models\houseHoldRole" 
+                        <x-input-label>Household role <span class="text-red-500">*</span></x-input-label>
+                        <x-form-select name="head[household_role_id]" class="w-full h-10 mt-1 text-slate-500"
+                            model="App\Models\householdRole" 
                             column="name" 
                             value-column="id"
                             placeholder="Select role"
-                            name="area_id"
+                            :selected="old('head.household_role_id')"
                         />
+                        <x-input-error :messages="$errors->get('head.household_role_id')" class="mt-2" />
                     </div>
+                    
                     <div>
-                        <x-input-label>
-                            Sex <span class="text-red-500">*</span>
-                        </x-input-label>
-                        <select class="w-full h-10 mt-1 text-sm text-slate-500 border border-gray-300 rounded-md shadow-sm focus:border-blue-700 focus:ring-blue-700 focus:ring-1 placeholder:text-gray-400" required>
+                        <x-input-label>Sex <span class="text-red-500">*</span></x-input-label>
+                        <select name="head[sex]" class="w-full h-10 mt-1 text-sm text-slate-500 border border-gray-300 rounded-md shadow-sm focus:border-blue-700 focus:ring-blue-700 focus:ring-1 placeholder:text-gray-400">
                             <option value="" selected disabled>Select</option>
-                            <option>Male</option>
-                            <option>Female</option>
+                            <option value="Male" @selected(old('head.sex') == 'Male')>Male</option>
+                            <option value="Female" @selected(old('head.sex') == 'Female')>Female</option>
                         </select>
+                        <x-input-error :messages="$errors->get('head.sex')" class="mt-2" />
                     </div>
 
                     <div>
-                        <x-input-label>
-                            Civil Status <span class="text-red-500">*</span>
-                        </x-input-label>
-                        <select class="w-full h-10 mt-1 text-sm text-slate-500 border border-gray-300 rounded-md shadow-sm focus:border-blue-700 focus:ring-blue-700 focus:ring-1 placeholder:text-gray-400" required>
+                        <x-input-label>Civil Status <span class="text-red-500">*</span></x-input-label>
+                        <select name="head[civil_status]" class="w-full h-10 mt-1 text-sm text-slate-500 border border-gray-300 rounded-md shadow-sm focus:border-blue-700 focus:ring-blue-700 focus:ring-1 placeholder:text-gray-400">
                             <option value="" selected disabled>Select</option>
-                            <option>Single</option>
-                            <option>Married</option>
-                            <option>Widowed</option>
-                            <option>Separated</option>
+                            <option value="Single" @selected(old('head.civil_status') == 'Single')>Single</option>
+                            <option value="Married" @selected(old('head.civil_status') == 'Married')>Married</option>
+                            <option value="Widowed" @selected(old('head.civil_status') == 'Widowed')>Widowed</option>
+                            <option value="Separated" @selected(old('head.civil_status') == 'Separated')>Separated</option>
                         </select>
+                        <x-input-error :messages="$errors->get('head.civil_status')" class="mt-2" />
                     </div>
-                    <div>
-                        <x-input-label>
-                            Citizenship <span class="text-red-500">*</span>
-                        </x-input-label>
-                        <x-text-input class="w-full h-10 mt-1 text-sm" value="Filipino" required />
-                    </div>
-                    <div>
-                        <x-input-label value="Occupation" />
-                        <x-text-input class="w-full mt-1 text-sm" placeholder="Driver, Teacher, etc." />
-                    </div>
+                    
+                    <div><x-input-label>Citizenship <span class="text-red-500">*</span></x-input-label><x-text-input name="head[nationality]" class="w-full h-10 mt-1 text-sm" value="Filipino" :value="old('head.nationality')" /><x-input-error :messages="$errors->get('head.nationality')" class="mt-2" /></div>
+                    <div><x-input-label value="Occupation" /><x-text-input name="head[occupation]" class="w-full mt-1 text-sm" placeholder="Driver, Teacher, etc." :value="old('head.occupation')" /><x-input-error :messages="$errors->get('head.occupation')" class="mt-2" /></div>
 
                     <div>
                         <x-input-label value="Sector" />
-                        <select class="w-full h-10 mt-1 text-sm text-slate-500 border border-gray-300 rounded-md shadow-sm focus:border-blue-700 focus:ring-blue-700 focus:ring-1 placeholder:text-gray-400">
-                            <option>None</option>
-                            <option>Senior Citizen</option>
-                            <option>Pregnant</option>
-                            <option>PWD</option>
-                            <option>Solo Parent</option>
+                        <select name="head[sector]" class="w-full h-10 mt-1 text-sm text-slate-500 border border-gray-300 rounded-md shadow-sm focus:border-blue-700 focus:ring-blue-700 focus:ring-1 placeholder:text-gray-400">
+                            <option value="None" @selected(old('head.sector') == 'None')>None</option>
+                            <option value="Senior Citizen" @selected(old('head.sector') == 'Senior Citizen')>Senior Citizen</option>
+                            <option value="PWD" @selected(old('head.sector') == 'PWD')>PWD</option>
+                            <option value="Solo Parent" @selected(old('head.sector') == 'Solo Parent')>Solo Parent</option>
                         </select>
+                        <x-input-error :messages="$errors->get('head.sector')" class="mt-2" />
                     </div>
                     <div>
                         <x-input-label value="Vaccinations" />
-                        <select class="w-full h-10 mt-1 text-sm text-slate-500 border border-gray-300 rounded-md shadow-sm focus:border-blue-700 focus:ring-blue-700 focus:ring-1 placeholder:text-gray-400">
-                            <option>None</option>
-                            <option>Private Citizen</option>
-                            <option>Health Center</option>
+                        <select name="head[vaccination]" class="w-full h-10 mt-1 text-sm text-slate-500 border border-gray-300 rounded-md shadow-sm focus:border-blue-700 focus:ring-blue-700 focus:ring-1 placeholder:text-gray-400">
+                            <option value="None" @selected(old('head.vaccination') == 'None')>None</option>
+                            <option value="Private" @selected(old('head.vaccination') == 'Private')>Private</option>
+                            <option value="Health Center" @selected(old('head.vaccination') == 'Health Center')>Health Center</option>
                         </select>
+                        <x-input-error :messages="$errors->get('head.vaccination')" class="mt-2" />
                     </div>
                     <div class="md:col-span-2">
                         <x-input-label value="Comorbidity" />
-                        <x-text-input class="w-full mt-1 text-sm border-blue-700" placeholder="Hypertension, Diabetes" />
+                        <x-text-input name="head[comorbidity]" class="w-full mt-1 text-sm" placeholder="Hypertension, Diabetes" :value="old('head.comorbidity')" />
+                        <x-input-error :messages="$errors->get('head.comorbidity')" class="mt-2" />
                     </div>
                     <div class="md:col-span-2">
                         <x-input-label value="Maintenance" />
-                        <x-text-input class="w-full mt-1 text-sm border-blue-700" placeholder="Metformin, Losartan" />
+                        <x-text-input name="head[maintenance]" class="w-full mt-1 text-sm" placeholder="Metformin, Losartan" :value="old('head.maintenance')" />
+                        <x-input-error :messages="$errors->get('head.maintenance')" class="mt-2" />
                     </div>
+                    
                 </div>
             </div>
 
-            <div x-show="step === 2" style="display: none;" x-transition:enter="transition ease-out duration-300">
-                <h3 class="text-lg font-semibold text-slate-700 mb-4">Household Information</h3>
+
+            {{-- --------------------------------------------- --}}
+            {{-- SECTION 2: Household Information --}}
+            {{-- --------------------------------------------- --}}
+            <div class="mb-8 border-b pb-4">
+                <h3 class="text-xl font-bold text-blue-700 mb-4">2. Household Information</h3>
                 
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    {{-- 17. House Number --}}
                     <div>
-                        <x-input-label>
-                            House Number <span class="text-red-500">*</span>
-                        </x-input-label>
-                        <x-text-input class="w-full mt-1 text-sm" placeholder="123-A" required />
+                        <x-input-label>House Number <span class="text-red-500">*</span></x-input-label>
+                        <x-text-input name="household[house_number]" class="w-full mt-1 text-sm" placeholder="123-A" :value="old('household.house_number')" />
+                        <x-input-error :messages="$errors->get('household.house_number')" class="mt-2" />
                     </div>
+                    
+                    {{-- 18. Purok (Area ID) --}}
                     <div>
-                        <x-input-label>
-                            Purok <span class="text-red-500">*</span>
-                        </x-input-label>
-                        <x-form-select class="w-full h-10 mt-1 text-slate-500"
+                        <x-input-label>Purok <span class="text-red-500">*</span></x-input-label>
+                        <x-form-select name="household[area_id]" class="w-full h-10 mt-1 text-slate-500"
                             model="App\Models\AreaStreet" 
-                            column="Purok_name" 
+                            column="purok_name" 
                             value-column="id"
                             placeholder="Select purok"
+                            :selected="old('household.area_id')"
                         />
+                        <x-input-error :messages="$errors->get('household.area_id')" class="mt-2" />
                     </div>
+
+                    {{-- 19. Street (Area ID) --}}
                     <div>
-                        <x-input-label>
-                            Street <span class="text-red-500">*</span>
-                        </x-input-label>
-                        <x-form-select class="w-full h-10 mt-1 text-slate-500"
+                        <x-input-label>Street <span class="text-red-500">*</span></x-input-label>
+                        <x-form-select name="household[area_id]" class="w-full h-10 mt-1 text-slate-500"
                             model="App\Models\AreaStreet" 
                             column="street_name" 
                             value-column="id"
                             placeholder="Select street"
+                            :selected="old('household.area_id')"
                         />
+                        <x-input-error :messages="$errors->get('household.area_id')" class="mt-2" />
                     </div>
+                    
+                    {{-- 20. House Structure ID --}}
                     <div>
-                        <x-input-label>
-                            House Structure <span class="text-red-500">*</span>
-                        </x-input-label>
-                        <x-form-select class="w-full h-10 mt-1 text-slate-500"
-                            model="App\Models\houseStructure" 
+                        <x-input-label>House Structure <span class="text-red-500">*</span></x-input-label>
+                        <x-form-select name="household[house_structure_id]" class="w-full h-10 mt-1 text-slate-500"
+                            model="App\Models\HouseStructure" 
                             column="house_structure_type" 
                             value-column="id"
                             placeholder="Select house structure"
+                            :selected="old('household.house_structure_id')"
                         />
+                        <x-input-error :messages="$errors->get('household.house_structure_id')" class="mt-2" />
                     </div>
 
+                    {{-- 21. Ownership Status (Residency Type ID) --}}
                     <div>
-                        <x-input-label>
-                            Ownership Status <span class="text-red-500">*</span>
-                        </x-input-label>
-                        <x-form-select x-model="ownershipStatus" class="w-full h-10 mt-1 text-slate-500"
+                        <x-input-label>Ownership Status <span class="text-red-500">*</span></x-input-label>
+                        <x-form-select x-model="ownershipStatus" name="household[residency_type_id]" class="w-full h-10 mt-1 text-slate-500"
                             model="App\Models\ResidencyType" 
                             column="name" 
                             value-column="id"
                             placeholder="Select Ownership Status"
+                            :selected="old('household.residency_type_id')"
                         />
+                        <x-input-error :messages="$errors->get('household.residency_type_id')" class="mt-2" />
                     </div>
 
+                    {{-- 22. Household Email --}}
                     <div>
-                        <x-input-label>
-                            Household Email <span class="text-red-500">*</span>
-                        </x-input-label>
-                        <x-text-input type="email" class="w-full mt-1 text-sm" placeholder="family@example.com" />
-                    </div>
-                    <div>
-                        <x-input-label>
-                            Household Contact No <span class="text-red-500">*</span>
-                        </x-input-label>
-                        <x-text-input class="w-full mt-1 text-sm" placeholder="0917..." />
+                        <x-input-label>Household Email</x-input-label>
+                        <x-text-input name="household[email]" type="email" class="w-full mt-1 text-sm" placeholder="family@example.com" :value="old('household.email')" />
+                        <x-input-error :messages="$errors->get('household.email')" class="mt-2" />
                     </div>
 
-                    <div x-show="ownershipStatus != '0' && ownershipStatus != ''" class="md:col-span-3 bg-gray-50 p-4 rounded-lg border border-gray-200 mt-2">
-                        <h4 class="text-sm font-bold text-gray-600 mb-2">Landlord Details</h4>
+                    {{-- 23. Household Contact No --}}
+                    <div>
+                        <x-input-label>Household Contact No <span class="text-red-500">*</span></x-input-label>
+                        <x-text-input name="household[contact_number]" class="w-full mt-1 text-sm" placeholder="0917..." :value="old('household.contact_number')" />
+                        <x-input-error :messages="$errors->get('household.contact_number')" class="mt-2" />
+                    </div>
+
+                    <div x-show="ownershipStatus != '1' && ownershipStatus != ''" class="md:col-span-3 bg-gray-50 p-4 rounded-lg border border-gray-200 mt-2">
+                        <h4 class="text-sm font-bold text-gray-600 mb-2">Landlord Details (Required if not Owner)</h4>
                         <div class="grid grid-cols-2 gap-4">
+                            {{-- 24. Landlord Name --}}
                             <div>
-                                <x-input-label>
-                                    Landlord Name <span class="text-red-500">*</span>
-                                </x-input-label>
-                                <x-text-input class="w-full mt-1" />
+                                <x-input-label>Landlord Name <span class="text-red-500">*</span></x-input-label>
+                                <x-text-input name="household[landlord_name]" class="w-full mt-1" 
+                                    x-bind:required="ownershipStatus != '1' && ownershipStatus != ''" 
+                                    :value="old('household.landlord_name')"
+                                />
+                                <x-input-error :messages="$errors->get('household.landlord_name')" class="mt-2" />
                             </div>
+                            {{-- 25. Landlord Contact --}}
                             <div>
-                                <x-input-label>
-                                    Landlord Contact <span class="text-red-500">*</span>
-                                </x-input-label>
-                                <x-text-input class="w-full mt-1" />
+                                <x-input-label>Landlord Contact <span class="text-red-500">*</span></x-input-label>
+                                <x-text-input name="household[landlord_contact]" class="w-full mt-1" 
+                                    x-bind:required="ownershipStatus != '1' && ownershipStatus != ''" 
+                                    :value="old('household.landlord_contact')"
+                                />
+                                <x-input-error :messages="$errors->get('household.landlord_contact')" class="mt-2" />
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div x-show="step === 3" style="display: none;" x-transition:enter="transition ease-out duration-300">
+
+            {{-- --------------------------------------------- --}}
+            {{-- SECTION 3: Family Members --}}
+            {{-- --------------------------------------------- --}}
+            <div class="mb-8 border-b pb-4">
                 <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-lg font-semibold text-slate-700">Family Members</h3>
+                    <h3 class="text-xl font-bold text-blue-700">3. Family Members (If Applicable)</h3>
                     <button type="button" @click="addMember()" class="text-sm text-blue-600 font-bold hover:underline">
                         + Add Member
                     </button>
@@ -271,128 +280,100 @@
                         <div class="bg-gray-50 p-3 rounded-lg border border-gray-200">
                             <div class="flex gap-3 items-start">
                                 <div class="grid grid-cols-1 md:grid-cols-4 gap-4 flex-1">
-                                <div>
-                                    <x-input-label>
-                                        Last Name <span class="text-red-500">*</span>
-                                    </x-input-label>
-                                    <x-text-input class="w-full mt-1 text-sm" placeholder="Dela Cruz" required />
-                                </div>
-                                <div>
-                                    <x-input-label>
-                                        First Name <span class="text-red-500">*</span>
-                                    </x-input-label>
-                                    <x-text-input class="w-full mt-1 text-sm" placeholder="Juan" required />
-                                </div>
-                                <div>
-                                    <x-input-label value="Middle Name" />
-                                    <x-text-input class="w-full mt-1 text-sm" placeholder="Santos" />
-                                </div>
-                                <div>
-                                    <x-input-label value="Extension" />
-                                    <x-text-input class="w-full mt-1 text-sm" placeholder="Jr, Sr, III" />
-                                </div>
+                                    {{-- FIX: Use Alpine 'getErr' for error messages in dynamic loop --}}
+                                    
+                                    <div><x-input-label>Last Name <span class="text-red-500">*</span></x-input-label><x-text-input x-bind:name="`members[${index}][last_name]`" class="w-full mt-1 text-sm" placeholder="Dela Cruz" x-bind:value="member.last_name ?? ''" /><p x-show="getErr(`members.${index}.last_name`)" x-text="getErr(`members.${index}.last_name`)" class="text-sm text-red-600 space-y-1 mt-2"></p></div>
+                                    <div><x-input-label>First Name <span class="text-red-500">*</span></x-input-label><x-text-input x-bind:name="`members[${index}][first_name]`" class="w-full mt-1 text-sm" placeholder="Juan" x-bind:value="member.first_name ?? ''" /><p x-show="getErr(`members.${index}.first_name`)" x-text="getErr(`members.${index}.first_name`)" class="text-sm text-red-600 space-y-1 mt-2"></p></div>
+                                    <div><x-input-label value="Middle Name" /><x-text-input x-bind:name="`members[${index}][middle_name]`" class="w-full mt-1 text-sm" placeholder="Santos" x-bind:value="member.middle_name ?? ''" /><p x-show="getErr(`members.${index}.middle_name`)" x-text="getErr(`members.${index}.middle_name`)" class="text-sm text-red-600 space-y-1 mt-2"></p></div>
+                                    <div><x-input-label value="Extension" /><x-text-input x-bind:name="`members[${index}][extension]`" class="w-full mt-1 text-sm" placeholder="Jr, Sr, III" x-bind:value="member.extension ?? ''" /><p x-show="getErr(`members.${index}.extension`)" x-text="getErr(`members.${index}.extension`)" class="text-sm text-red-600 space-y-1 mt-2"></p></div>
 
-                                <div>
-                                    <x-input-label>
-                                        Place of Birth <span class="text-red-500">*</span>
-                                    </x-input-label>
-                                    <x-text-input class="w-full mt-1 text-sm" placeholder="City, Province" required />
-                                </div>
-                                <div>
-                                    <x-input-label>
-                                        Date of Birth <span class="text-red-500">*</span>
-                                    </x-input-label>
-                                    <x-text-input type="date" class="w-full mt-1 text-sm" required />
-                                </div>
-                                <div>
-                                    <x-input-label>
-                                        Age <span class="text-red-500">*</span>
-                                    </x-input-label>
-                                    <x-text-input class="w-full mt-1 text-sm" placeholder="18" required />
-                                </div>
-                                <div>
-                                    <x-input-label>
-                                        Household role <span class="text-red-500">*</span>
-                                    </x-input-label>
-                                    <x-form-select class="w-full h-10 mt-1 text-slate-500"
-                                        model="App\Models\houseHoldRole" 
-                                        column="name" 
-                                        value-column="id"
-                                        placeholder="Select role"
-                                        name="area_id"
-                                    />
-                                </div>
-                                <div>
-                                    <x-input-label>
-                                        Sex <span class="text-red-500">*</span>
-                                    </x-input-label>
-                                    <select class="w-full h-10 mt-1 text-sm text-slate-500 border border-gray-300 rounded-md shadow-sm focus:border-blue-700 focus:ring-blue-700 focus:ring-1 placeholder:text-gray-400" required>
-                                        <option value="" selected disabled>Select</option>
-                                        <option>Male</option>
-                                        <option>Female</option>
-                                    </select>
-                                </div>
+                                    <div><x-input-label>Place of Birth <span class="text-red-500">*</span></x-input-label><x-text-input x-bind:name="`members[${index}][birthplace]`" class="w-full mt-1 text-sm" placeholder="City, Province" x-bind:value="member.birthplace ?? ''" /><p x-show="getErr(`members.${index}.birthplace`)" x-text="getErr(`members.${index}.birthplace`)" class="text-sm text-red-600 space-y-1 mt-2"></p></div>
+                                    <div><x-input-label>Date of Birth <span class="text-red-500">*</span></x-input-label><x-text-input x-bind:name="`members[${index}][birthdate]`" type="date" class="w-full mt-1 text-sm" x-bind:value="member.birthdate ?? ''" /><p x-show="getErr(`members.${index}.birthdate`)" x-text="getErr(`members.${index}.birthdate`)" class="text-sm text-red-600 space-y-1 mt-2"></p></div>
+                                    
+                                    
+                                    <div>
+                                        <x-input-label>Household role <span class="text-red-500">*</span></x-input-label>
+                                        <x-form-select x-bind:name="`members[${index}][household_role_id]`" class="w-full h-10 mt-1 text-slate-500"
+                                            model="App\Models\householdRole" 
+                                            column="name" 
+                                            value-column="id"
+                                            placeholder="Select role"
+                                            x-bind:selected="member.household_role_id"
+                                        />
+                                        <p x-show="getErr(`members.${index}.household_role_id`)" x-text="getErr(`members.${index}.household_role_id`)" class="text-sm text-red-600 space-y-1 mt-2"></p>
+                                    </div>
+                                    
+                                    <div>
+                                        <x-input-label>Sex <span class="text-red-500">*</span></x-input-label>
+                                        <select x-bind:name="`members[${index}][sex]`" class="w-full h-10 mt-1 text-sm text-slate-500 border border-gray-300 rounded-md shadow-sm focus:border-blue-700 focus:ring-blue-700 focus:ring-1 placeholder:text-gray-400">
+                                            <option value="" selected disabled>Select</option>
+                                            <option value="Male" x-bind:selected="member.sex == 'Male'">Male</option>
+                                            <option value="Female" x-bind:selected="member.sex == 'Female'">Female</option>
+                                        </select>
+                                        <p x-show="getErr(`members.${index}.sex`)" x-text="getErr(`members.${index}.sex`)" class="text-sm text-red-600 space-y-1 mt-2"></p>
+                                    </div>
 
-                                <div>
-                                    <x-input-label>
-                                        Civil Status <span class="text-red-500">*</span>
-                                    </x-input-label>
-                                    <select class="w-full h-10 mt-1 text-sm text-slate-500 border border-gray-300 rounded-md shadow-sm focus:border-blue-700 focus:ring-blue-700 focus:ring-1 placeholder:text-gray-400" required>
-                                        <option value="" selected disabled>Select</option>
-                                        <option>Single</option>
-                                        <option>Married</option>
-                                        <option>Widowed</option>
-                                        <option>Separated</option>
-                                    </select>
+                                    <div>
+                                        <x-input-label>Civil Status <span class="text-red-500">*</span></x-input-label>
+                                        <select x-bind:name="`members[${index}][civil_status]`" class="w-full h-10 mt-1 text-sm text-slate-500 border border-gray-300 rounded-md shadow-sm focus:border-blue-700 focus:ring-blue-700 focus:ring-1 placeholder:text-gray-400">
+                                            <option value="" selected disabled>Select</option>
+                                            <option value="Single" x-bind:selected="member.civil_status == 'Single'">Single</option>
+                                            <option value="Married" x-bind:selected="member.civil_status == 'Married'">Married</option>
+                                            <option value="Widowed" x-bind:selected="member.civil_status == 'Widowed'">Widowed</option>
+                                            <option value="Separated" x-bind:selected="member.civil_status == 'Separated'">Separated</option>
+                                        </select>
+                                        <p x-show="getErr(`members.${index}.civil_status`)" x-text="getErr(`members.${index}.civil_status`)" class="text-sm text-red-600 space-y-1 mt-2"></p>
+                                    </div>
+                                    <div><x-input-label>Citizenship <span class="text-red-500">*</span></x-input-label><x-text-input x-bind:name="`members[${index}][nationality]`" class="w-full mt-1 text-sm" value="Filipino" x-bind:value="member.nationality ?? 'Filipino'" /><p x-show="getErr(`members.${index}.nationality`)" x-text="getErr(`members.${index}.nationality`)" class="text-sm text-red-600 space-y-1 mt-2"></p></div>
+                                    <div class="md:col-span-1"><x-input-label value="Occupation" /><x-text-input x-bind:name="`members[${index}][occupation]`" class="w-full mt-1 text-sm" placeholder="Driver, Teacher, etc." x-bind:value="member.occupation ?? ''" /><p x-show="getErr(`members.${index}.occupation`)" x-text="getErr(`members.${index}.occupation`)" class="text-sm text-red-600 space-y-1 mt-2"></p></div>
+                                    
+                                    <div>
+                                        <x-input-label value="Sector" />
+                                        <select x-bind:name="`members[${index}][sector]`" class="w-full h-10 mt-1 text-sm text-slate-500 border border-gray-300 rounded-md shadow-sm focus:border-blue-700 focus:ring-blue-700 focus:ring-1 placeholder:text-gray-400">
+                                            <option value="None" x-bind:selected="member.sector == 'None'">None</option>
+                                            <option value="Senior Citizen" x-bind:selected="member.sector == 'Senior Citizen'">Senior Citizen</option>
+                                            <option value="PWD" x-bind:selected="member.sector == 'PWD'">PWD</option>
+                                            <option value="Solo Parent" x-bind:selected="member.sector == 'Solo Parent'">Solo Parent</option>
+                                        </select>
+                                        <p x-show="getErr(`members.${index}.sector`)" x-text="getErr(`members.${index}.sector`)" class="text-sm text-red-600 space-y-1 mt-2"></p>
+                                    </div>
+                                    <div>
+                                        <x-input-label value="Vaccinations" />
+                                        <select x-bind:name="`members[${index}][vaccination]`" class="w-full h-10 mt-1 text-sm text-slate-500 border border-gray-300 rounded-md shadow-sm focus:border-blue-700 focus:ring-blue-700 focus:ring-1 placeholder:text-gray-400">
+                                            <option value="None" x-bind:selected="member.vaccination == 'None'">None</option>
+                                            <option value="Private" x-bind:selected="member.vaccination == 'Private'">Private</option>
+                                            <option value="Health Center" x-bind:selected="member.vaccination == 'Health Center'">Health Center</option>
+                                        </select>
+                                        <p x-show="getErr(`members.${index}.vaccination`)" x-text="getErr(`members.${index}.vaccination`)" class="text-sm text-red-600 space-y-1 mt-2"></p>
+                                    </div>
+                                    <div class="md:col-span-2">
+                                        <x-input-label value="Comorbidity" />
+                                        <x-text-input x-bind:name="`members[${index}][comorbidity]`" class="w-full mt-1 text-sm" placeholder="Hypertension, Diabetes" x-bind:value="member.comorbidity ?? ''" />
+                                        <p x-show="getErr(`members.${index}.comorbidity`)" x-text="getErr(`members.${index}.comorbidity`)" class="text-sm text-red-600 space-y-1 mt-2"></p>
+                                    </div>
+                                    <div class="md:col-span-2">
+                                        <x-input-label value="Maintenance" />
+                                        <x-text-input x-bind:name="`members[${index}][maintenance]`" class="w-full mt-1 text-sm" placeholder="Metformin, Losartan" x-bind:value="member.maintenance ?? ''" />
+                                        <p x-show="getErr(`members.${index}.maintenance`)" x-text="getErr(`members.${index}.maintenance`)" class="text-sm text-red-600 space-y-1 mt-2"></p>
+                                    </div>
+                                    
                                 </div>
-                                <div>
-                                    <x-input-label>
-                                        Citizenship <span class="text-red-500">*</span>
-                                    </x-input-label>
-                                    <x-text-input class="w-full mt-1 text-sm" value="Filipino" required />
-                                </div>
-                                <div class="md:col-span-1">
-                                    <x-input-label value="Occupation" />
-                                    <x-text-input class="w-full mt-1 text-sm" placeholder="Driver, Teacher, etc." />
-                                </div>
-
-                                <div>
-                                    <x-input-label value="Sector" />
-                                    <select class="w-full h-10 mt-1 text-sm text-slate-500 border border-gray-300 rounded-md shadow-sm focus:border-blue-700 focus:ring-blue-700 focus:ring-1 placeholder:text-gray-400">
-                                        <option>None</option>
-                                        <option>Senior Citizen</option>
-                                        <option>PWD</option>
-                                        <option>Solo Parent</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <x-input-label value="Vaccinations" />
-                                    <select class="w-full h-10 mt-1 text-sm text-slate-500 border border-gray-300 rounded-md shadow-sm focus:border-blue-700 focus:ring-blue-700 focus:ring-1 placeholder:text-gray-400">
-                                        <option>None</option>
-                                        <option>Private Citizen</option>
-                                        <option>Health Center</option>
-                                    </select>
-                                </div>
-                                <div class="md:col-span-2">
-                                    <x-input-label value="Comorbidity" />
-                                    <x-text-input class="w-full mt-1 text-sm" placeholder="Hypertension, Diabetes" />
-                                </div>
-                                <div class="md:col-span-2">
-                                    <x-input-label value="Maintenance" />
-                                    <x-text-input class="w-full mt-1 text-sm" placeholder="Metformin, Losartan" />
-                                </div>
+                                <button type="button" @click="removeMember(index)" class="mt-6 text-red-500 hover:text-red-700">
+                                    <x-lucide-trash-2 class="w-5 h-5" />
+                                </button>
                             </div>
-                            <button type="button" @click="removeMember(index)" class="mt-6 text-red-500 hover:text-red-700">
-                                <x-lucide-trash-2 class="w-5 h-5" />
-                            </button>
                         </div>
                     </template>
                 </div>
             </div>
 
-            <div x-show="step === 4" style="display: none;" x-transition:enter="transition ease-out duration-300">
+
+            {{-- --------------------------------------------- --}}
+            {{-- SECTION 4: Household Pets --}}
+            {{-- --------------------------------------------- --}}
+            <div class="mb-8 border-b pb-4">
                 <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-lg font-semibold text-slate-700">Household Pets</h3>
+                    <h3 class="text-xl font-bold text-blue-700">4. Household Pets (If Applicable)</h3>
                     <button type="button" @click="addPet()" class="text-sm text-blue-600 font-bold hover:underline">
                         + Add Pet
                     </button>
@@ -408,16 +389,19 @@
                             <div class="flex-1 grid grid-cols-2 gap-3">
                                 <div>
                                     <x-input-label value="Pet Type"/>
-                                    <x-form-select class="w-full h-10 mt-1 text-sm text-slate-500"
-                                        model="App\Models\petType" 
+                                    <x-form-select x-bind:name="`pets[${index}][pet_type_id]`" class="w-full h-10 mt-1 text-sm text-slate-500"
+                                        model="App\Models\PetType" 
                                         column="name" 
                                         value-column="id"
                                         placeholder="Select pet type"
+                                        x-bind:selected="pet.pet_type_id"
                                     />
+                                    <p x-show="getErr(`pets.${index}.pet_type_id`)" x-text="getErr(`pets.${index}.pet_type_id`)" class="text-sm text-red-600 space-y-1 mt-2"></p>
                                 </div>
                                 <div>
                                     <x-input-label value="Quantity" />
-                                    <x-text-input type="number" class="w-full h-10 mt-1 text-sm text-slate-500" x-model="pet.quantity" />
+                                    <x-text-input x-bind:name="`pets[${index}][quantity]`" type="number" class="w-full h-10 mt-1 text-sm text-slate-500" x-model="pet.quantity" x-bind:value="pet.quantity" />
+                                    <p x-show="getErr(`pets.${index}.quantity`)" x-text="getErr(`pets.${index}.quantity`)" class="text-sm text-red-600 space-y-1 mt-2"></p>
                                 </div>
                             </div>
                             <button type="button" @click="removePet(index)" class="mt-6 text-red-500 hover:text-red-700">
@@ -428,33 +412,16 @@
                 </div>
             </div>
 
-            <div class="mt-8 pt-4 border-t border-gray-200 flex justify-between items-center">
-                <button type="button" 
-                        x-on:click="step > 1 ? step-- : $dispatch('close')" 
-                        class="text-gray-600 hover:text-gray-900 font-medium text-sm">
-                    <span x-text="step > 1 ? '← Back' : 'Cancel'"></span>
-                </button>
-
-                <div class="flex space-x-2">
-                    <template x-for="i in 4">
-                        <div class="w-2 h-2 rounded-full" 
-                             :class="step === i ? 'bg-blue-600' : 'bg-gray-300'"></div>
-                    </template>
-                </div>
-
-                <div>
-                    <button type="button" x-show="step < 4" x-on:click="step++"
-                            class="px-6 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition">
-                        Next Step →
-                    </button>
-                    
-                    <button type="submit" x-show="step === 4" style="display: none;"
-                            class="px-6 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition shadow-md">
-                        Finish & Save
-                    </button>
-                </div>
+            {{-- --------------------------------------------- --}}
+            {{-- FINAL SUBMISSION BUTTON (Sticky Footer) --}}
+            {{-- --------------------------------------------- --}}
+            <div class="sticky bottom-0 bg-white pt-4 border-t border-gray-200 flex justify-end">
+                <x-secondary-button x-on:click.prevent="$dispatch('close')">Cancel</x-secondary-button>
+                
+                <x-primary-button class="ms-3" type="submit">
+                    {{ __('Finish & Save') }}
+                </x-primary-button>
             </div>
-
         </form>
     </div>
 </x-modal>

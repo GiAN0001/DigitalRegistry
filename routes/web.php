@@ -28,6 +28,10 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     Route::get('/residents', [ResidentController::class, 'index'])->name('residents.index');
+
+    //GIAN ADDED THIS
+    Route::post('/residents', [ResidentController::class, 'store'])->name('residents.store');
+
     Route::get('/residents/search', [ResidentController::class, 'search'])->name('residents.search');
 
     Route::get('/transaction', [DocumentController::class, 'document'])->name('transaction.document');
