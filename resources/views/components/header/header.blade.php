@@ -1,3 +1,28 @@
+@php
+    $module = '';
+    $page = '';
+
+    if (request()->routeIs('dashboard')) {
+        $module = 'Page';
+        $page = 'Dashboard';
+    } elseif (request()->routeIs('residents.*')) {
+        $module = 'Residents';
+        $page = 'Resident Profiling';
+    } elseif (request()->routeIs('transaction.document') || request()->routeIs('document-request.*') || request()->routeIs('document.*')) {
+        $module = 'Transaction';
+        $page = 'Document Request';
+    } elseif (request()->routeIs('transaction.facility') || request()->routeIs('facility.*')) {
+        $module = 'Transaction';
+        $page = 'Facility Reservation';
+    } elseif (request()->routeIs('admin.users.*')) {
+        $module = 'Admin';
+        $page = 'User Management';
+    } elseif (request()->routeIs('profile.*')) {
+        $module = 'Account';
+        $page = 'Profile Settings';
+    }
+@endphp
+
 <div class="sub-content">
     <header class="bg-slate-50 shadow-sm rounded-2xl p-4">
         <div class="flex items-center justify-between">
@@ -7,17 +32,18 @@
                 <ol class="inline-flex items-center space-x-1 md:space-x-2">
                     <li class="inline-flex items-center">
                         <span class="text-sm font-medium text-gray-500">
-                            {{-- Inside this span for the previous page directory (try to input word inside span, after that run the code and check the header design) --}}
+                            {{ $module }}
                         </span>
                     </li>
                     <li>
                         <div class="flex items-center">
-                            <span class="mx-2 text-gray-400">
-                                {{-- This span is for the "//" --}}
-                            </span>
+                            @if($module)
+                                <span class="mx-2 text-gray-400">
+                                    //
+                                </span>
+                            @endif
                             <span class="text-sm font-medium text-slate-800" aria-current="page">
-                                {{-- This span is for the current Page Directory "//" --}}
-                                Dashboard
+                                {{ $page }}
                             </span>
                         </div>
                     </li>
@@ -95,5 +121,4 @@
             </div>
         </div>
     </header>
-
 </div>
