@@ -1,7 +1,16 @@
 <div class="text-white h-full flex flex-col transition-all duration-300">
-    <nav class="flex-1 space-y-2 overflow-y-auto">
 
-        {{-- Fixed Typo in Dashboard Link --}}
+    {{-- LOGO SECTION --}}
+    <div class="flex flex-col items-center justify-center pb-4">
+
+        {{-- Your Logo Code --}}
+        <img src="{{ asset('images/logo-namayan.png') }}" alt="1N Namayan Logo"
+            class="w-[100px] h-[100px] object-contain drop-shadow-sm hover:scale-105 transition-transform duration-300 mb-4">
+    </div>
+
+    {{-- NAVIGATION MENU --}}
+    <nav class="flex-1 space-y-2 overflow-y-auto px-2">
+
         <a href="{{ route('dashboard') }}"
             class="flex items-center p-2 text-sm font-medium rounded-lg transition-colors duration-200 group
             {{ request()->routeIs('dashboard') ? 'bg-blue-700 text-white shadow-md' : 'text-slate-700 hover:bg-blue-700 hover:text-white' }}">
@@ -11,14 +20,13 @@
 
         <a href="{{ route('residents.index') }}"
             class="flex items-center p-2 text-sm font-medium rounded-lg transition-colors duration-200 group
-            {{ request()->routeIs('residents.*') ? 'bg-blue-700 text-slate-50' : 'text-slate-700 hover:bg-blue-700 hover:text-slate-50' }}">
+            {{ request()->routeIs('residents.*') ? 'bg-blue-700 text-white' : 'text-slate-700 hover:bg-blue-700 hover:text-white' }}">
             <x-lucide-users class="w-5 h-5 mr-2" />
             <span>Residents</span>
         </a>
 
         @hasanyrole('admin|help desk')
             <x-sidebar.dropdown title="Transactions" :active="request()->routeIs('transaction.document*', 'reservations.*')">
-                {{-- FIX: Simplify the icon slot. No need for extra classes or colors here. --}}
                 <x-slot name="icon">
                     <x-lucide-scroll-text class="w-5 h-5" />
                 </x-slot>
@@ -31,9 +39,9 @@
                     </a>
                 </li>
                 <li>
-                    <a href="#"
+                    <a href="{{ route('transaction.facility') }}"
                         class="flex items-center w-full p-2 text-sm font-medium transition duration-75 rounded-lg
-                {{ request()->routeIs('reservations.*') ? 'bg-blue-700 text-white' : 'text-slate-700 hover:text-white hover:bg-blue-700' }}">
+                    {{ request()->routeIs('transaction.facility*') ? 'bg-blue-700 text-white' : 'text-slate-700 hover:text-white hover:bg-blue-700' }}">
                         Facility Reservations
                     </a>
                 </li>
@@ -76,21 +84,22 @@
 
                 <x-sidebar.dropdown title="Manage Staff" :active="request()->routeIs('manageStaff.*', 'admin.users.*')">
                     <x-slot name="icon">
-                        <x-lucide-scroll-text
-                            class="w-5 h-5 {{ request()->routeIs('manageStaff.*', 'admin.users.*') ? 'text-white' : '' }}" />
+                        {{-- FIX: Removed the manual 'text-white' condition.
+             The icon will now automatically match the text color (Dark when inactive, White when active). --}}
+                        <x-lucide-scroll-text class="w-5 h-5" />
                     </x-slot>
 
                     <li>
                         <a href="{{ route('admin.users.index') }}"
                             class="flex items-center w-full p-2 text-sm font-medium transition duration-75 rounded-lg
-                            {{ request()->routeIs('admin.users.*') ? 'bg-blue-700 text-white' : 'text-slate-700 hover:text-white hover:bg-blue-700' }}">
+            {{ request()->routeIs('admin.users.*') ? 'bg-blue-700 text-white' : 'text-slate-700 hover:text-white hover:bg-blue-700' }}">
                             Account Management
                         </a>
                     </li>
                     <li>
                         <a href="#"
                             class="flex items-center w-full p-2 text-sm font-medium transition duration-75 rounded-lg
-                            {{ request()->routeIs('manageStaff.activity') ? 'bg-blue-700 text-white' : 'text-slate-700 hover:text-white hover:bg-blue-700' }}">
+            {{ request()->routeIs('manageStaff.activity') ? 'bg-blue-700 text-white' : 'text-slate-700 hover:text-white hover:bg-blue-700' }}">
                             User Activity
                         </a>
                     </li>

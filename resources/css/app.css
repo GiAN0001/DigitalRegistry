@@ -2,52 +2,60 @@
 @tailwind components;
 @tailwind utilities;
 
-/*Resident tab desktop design*/
-.main-grid{
+html, body {
+    height: 100vh; /* Force height to screen size */
+    overflow: hidden; /* Disable body scrolling */
+    margin: 0;
+}
+
+.main-grid {
     display: grid;
     grid-template-columns: repeat(16, 1fr);
     gap: 16px;
-    height: 100%;
-    margin: 32px 40px 0 40px; ;
+    height: calc(100vh - 32px);
+    margin: 32px 0 0 40px;
 }
-.side-bar{
+
+.side-bar {
     grid-column: 1 / span 3;
+    height: 100%;
+    overflow-y: auto;
+    padding-bottom: 20px;
 }
-.content{
+
+.content {
     grid-column: span 13;
-    overflow: hidden;
+    height: 100%;
+    overflow-y: auto;
+    padding-bottom: 40px;
+    padding-right: 40px;
+    scrollbar-gutter: stable;
 }
-.filters, .filters2{
+
+.filters, .filters2 {
     margin-bottom: 16px;
     display: flex;
     gap: 16px;
     align-items: center;
-    width: full;
+    width: 100%;
 }
-.analytics{
+
+.analytics {
     display: flex;
     width: 100%;
     grid-column: 4 / span 16;
     gap: 16px;
 }
 
-/* Responsive Design resident mobile sample - gian
-@media (max-width: 320px) {
-    .main-grid{
-        grid-template-columns: repeat(4, 1fr);
-        margin: 16px 16px;
-    }
-    .side-bar{
-        grid-column: 1 / span 1;
-        height: auto;
-        display: none;
-    }
-    .content{
-        grid-column: span 4;
-    }
-    .filters{
-        flex-direction: column;
-    }
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+    gap: 16px;
+    width: 100%;
+}
 
-} */
-
+@media (min-width: 768px) {
+    .dashboard-grid {
+        grid-template-columns: repeat(13, minmax(0, 1fr));
+    }
+}

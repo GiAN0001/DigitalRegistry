@@ -1,5 +1,5 @@
 <div>
-    <div class="flex justify-between items-center mb-4">
+    <div class="flex justify-between items-center mb-2">
         <h3 class="text-md font-bold text-slate-700">{{ $title }}</h3>
     </div>
     <div class="p-6 bg-slate-50 shadow-sm rounded-lg">
@@ -8,38 +8,49 @@
         <canvas id="{{ $chartId }}"></canvas>
     </div>
 
-    <script>
-        (function() {
-            // Data and Options passed from PHP
-            const chartData = JSON.parse('{!! $dataJson !!}');
-            const chartOptions = JSON.parse('{!! $optionsJson !!}');
-            const chartType = '{{ $type }}';
-            const chartId = '{{ $chartId }}';
+   <script>
+    (function() {
+        const chartData = JSON.parse('{!! $dataJson !!}');
+        const chartOptions = JSON.parse('{!! $optionsJson !!}');
+        const chartType = '{{ $type }}';
+        const chartId = '{{ $chartId }}';
 
-            // --- CRITICAL FIX: Implement a Polling Mechanism ---
-            let checkChartInterval = setInterval(function() {
-                const ctx = document.getElementById(chartId);
+        let checkChartInterval = setInterval(function() {
+            const ctx = document.getElementById(chartId);
 
-                // Check 1: Is the Chart library loaded? Check 2: Is the canvas element ready?
-                if (typeof Chart !== 'undefined' && ctx) {
+            if (typeof Chart !== 'undefined' && ctx) {
 
-                    // Library is ready: Stop the checking loop
-                    clearInterval(checkChartInterval);
+                clearInterval(checkChartInterval);
 
-                    // Initialize the Chart.js instance
-                    new Chart(ctx, {
-                        type: chartType,
-                        data: chartData,
-                        options: chartOptions
-                    });
+                new Chart(ctx, {
+                    type: chartType,
+                    data: chartData,
+                    options: {
+                        ...chartOptions,
 
-                } else if (typeof Chart === 'undefined') {
-                    // Log that we are still waiting (for debugging)
-                    console.warn("Waiting for Chart.js to load...");
-                }
-            }, 50); // Check every 50 milliseconds
+                        animation: {
 
-        })();
-    </script>
+                            duration: 1000,
+                            easing: 'easeOutQuart',
+
+                            delay: (context) => {
+                                let delay = 0;
+
+                                if (context.type === 'data' && context.mode === 'default') {
+                                    delay = context.dataIndex * 300;
+                                }
+                                return delay;
+                            }
+                        }
+                    }
+                });
+
+            } else if (typeof Chart === 'undefined') {
+                console.warn("Waiting for Chart.js...");
+            }
+        }, 50);
+    })();
+</script>
+
 </div>
 </div>
