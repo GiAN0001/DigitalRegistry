@@ -27,14 +27,20 @@ class ResidentController extends Controller
         $purok = AreaStreet::all();
 
         $query = Resident::forUser($user)
+            ->where('household_role_id', 1) 
             ->with([
                 'demographic',
                 'residencyType',
                 'healthInformation',
                 'household.areaStreet',
                 'household.houseStructure',
-                'household.householdPets.petType'
-            ]);
+                'household.householdPets.petType',
+                // 2. Load all family members for the dropdown
+                // We load demographic/health for them too so the nested table isn't empty
+                'household.residents.demographic', 
+                'household.residents.healthInformation',
+                'household.residents.residencyType'
+            ]); //MODIFIED by GIAN
 
         // 1. Filter by Purok (via Household -> AreaStreet)
         if ($request->filled('purok_name')) {
