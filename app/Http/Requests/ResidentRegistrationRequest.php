@@ -59,6 +59,32 @@ class ResidentRegistrationRequest extends FormRequest
                 'string',
                 Rule::requiredIf(fn() => $this->input('household.residency_type_id') != 1)
             ],
+
+            //STEP 2 added by GIAN
+            'members' => ['nullable', 'array'], 
+            
+            // NOTICE THE '.*.' ADDED BELOW:
+            'members.*.first_name' => ['required', 'string', 'max:100'],
+            'members.*.last_name' => ['required', 'string', 'max:100'],
+            'members.*.middle_name' => ['nullable', 'string', 'max:100'],
+            'members.*.extension' => ['nullable', 'string', 'max:10'],
+            'members.*.birthplace' => ['required', 'string', 'max:255'],
+            'members.*.birthdate' => ['required', 'date', 'before_or_equal:' . date('Y-m-d')],
+            'members.*.household_role_id' => ['required', Rule::exists('household_roles', 'id')],
+            'members.*.sex' => ['required', Rule::in(['Male', 'Female'])],
+            'members.*.civil_status' => ['required', Rule::in(['Single', 'Married', 'Widowed', 'Separated'])],
+            'members.*.nationality' => ['required', 'string', 'max:100'],
+            'members.*.occupation' => ['nullable', 'string', 'max:100'],
+            'members.*.sector' => ['nullable', Rule::in(['None', 'PWD', 'Senior Citizen', 'Solo Parent'])],
+            'members.*.vaccination' => ['nullable', Rule::in(['Private', 'Health Center', 'None'])],
+            'members.*.comorbidity' => ['nullable', 'string', 'max:255'],
+            'members.*.maintenance' => ['nullable', 'string', 'max:255'],
+
+            //STEP 4 added by GIAN
+            'pets' => ['nullable', 'array'],
+
+            'pets.*.pet_type_id' => ['required', 'exists:pet_types,id'],
+            'pets.*.quantity' => ['required', 'integer', 'min:1'],
         ];
     }
 }

@@ -280,7 +280,6 @@
                         <div class="bg-gray-50 p-3 rounded-lg border border-gray-200">
                             <div class="flex gap-3 items-start">
                                 <div class="grid grid-cols-1 md:grid-cols-4 gap-4 flex-1">
-                                    {{-- FIX: Use Alpine 'getErr' for error messages in dynamic loop --}}
                                     
                                     <div><x-input-label>Last Name <span class="text-red-500">*</span></x-input-label><x-text-input x-bind:name="`members[${index}][last_name]`" class="w-full mt-1 text-sm" placeholder="Dela Cruz" x-bind:value="member.last_name ?? ''" /><p x-show="getErr(`members.${index}.last_name`)" x-text="getErr(`members.${index}.last_name`)" class="text-sm text-red-600 space-y-1 mt-2"></p></div>
                                     <div><x-input-label>First Name <span class="text-red-500">*</span></x-input-label><x-text-input x-bind:name="`members[${index}][first_name]`" class="w-full mt-1 text-sm" placeholder="Juan" x-bind:value="member.first_name ?? ''" /><p x-show="getErr(`members.${index}.first_name`)" x-text="getErr(`members.${index}.first_name`)" class="text-sm text-red-600 space-y-1 mt-2"></p></div>

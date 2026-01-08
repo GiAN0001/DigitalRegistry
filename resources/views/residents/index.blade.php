@@ -51,7 +51,7 @@
 
         <div class="p-4 bg-white shadow-md rounded-lg grid overflow-x-auto">
             <div class="overflow-x-auto mt-6">
-                <table class="min-w-full divide-y divide-gray-200"> // Modified by GIAN whole table
+                <table class="min-w-full divide-y divide-gray-200"> {{-- Modified by GIAN --}}
                     <thead class="bg-blue-200">
                         <tr>
                             <th class="px-2 py-2 w-10"></th> 
@@ -85,11 +85,12 @@
                                     {{ $head->household->household_number ?? 'N/A' }}
                                 </td>
                                 <td class="px-2 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                    {{ $head->first_name }} {{ $head->last_name }} {{ $head->extension }}
+                                    {{ $head->first_name }} {{ $head->middle_name }} {{ $head->last_name }} {{ $head->extension }}
                                     <span class="ml-2 text-xs text-blue-600 bg-blue-100 px-2 py-0.5 rounded-full">HEAD</span>
                                 </td>
                                 <td class="px-2 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    {{ $head->household->house_number ?? '' }} 
+                                    {{ $head->household->house_number ?? '' }}
+                                    {{ $head->household->areaStreet->purok_name ?? '' }}
                                     {{ $head->household->areaStreet->street_name ?? '' }}
                                 </td>
                                 <td class="px-2 py-4 whitespace-nowrap text-sm text-gray-500">
