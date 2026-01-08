@@ -9,17 +9,15 @@ use App\Models\PetType;
 
 class HouseholdPet extends Model
 {
-    use HasFactory; // This line will now work
+    use HasFactory;
 
-    /**
-     * The table associated with the model.
-     * (Good practice to add this)
-     * @var string
-     */
-    protected $table = 'household_pets';
+    protected $table = 'household_pets'; //Modified by GIAN
+
+    protected $guarded = []; 
 
     public function petType(): BelongsTo
     {
         return $this->belongsTo(PetType::class);
     }
+    
 }
