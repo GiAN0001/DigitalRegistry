@@ -33,4 +33,8 @@ class Household extends Model
     {
         return $this->hasMany(HouseholdPet::class);
     }
+    
+    public function residents() {
+        return $this->hasMany(Resident::class); // ADDED BY GIAN
+    }
 }
