@@ -2,12 +2,31 @@
     
     <div class="p-8 max-h-[85vh] overflow-y-auto" 
          x-data="{ 
-            ownershipStatus: '{{ old('household.residency_type_id') }}', 
+           ownershipStatus: '{{ old('household.residency_type_id') }}', 
             familyMembers: @js(old('members', [])), 
             pets: @js(old('pets', [])), 
             
-            // CRITICAL FIX: Pass Laravel validation errors to Alpine
+            // Pass errors so we can display them
             serverErrors: @js($errors->toArray()),
+
+            // --- FILTERING LOGIC ---
+            allAreas: @js(App\Models\AreaStreet::all()),
+            
+            // Initialize Purok (Handle Old Input on Validation Fail)
+            selectedPurok: '{{ old('household.area_id') ? App\Models\AreaStreet::find(old('household.area_id'))?->purok_name : '' }}',
+
+            get distinctPuroks() {
+                const puroks = this.allAreas.map(a => a.purok_name);
+                return [...new Set(puroks)].sort();
+            },
+
+            get availableStreets() {
+                if (this.selectedPurok) {
+                    return this.allAreas.filter(area => area.purok_name === this.selectedPurok);
+                }
+                return this.allAreas;
+            },
+            // --- END FILTERING LOGIC ---
 
             addMember() {
                 this.familyMembers.push({ 
@@ -27,12 +46,13 @@
             removePet(index) {
                 this.pets.splice(index, 1);
             },
-            // Helper to safely get error messages for dynamic fields
             getErr(field) {
                 return this.serverErrors[field] ? this.serverErrors[field][0] : null;
             }
          }"
-         @if($errors->any()) x-init="$dispatch('open-modal', 'register-resident')" @endif
+         @if($errors->has('head.*') || $errors->has('household.*') || $errors->has('members.*')) 
+            x-init="$dispatch('open-modal', 'register-resident')" 
+         @endif
     >
 
         <div class="flex justify-between items-center bg-white z-10 pb-4">
@@ -167,29 +187,38 @@
                         <x-input-error :messages="$errors->get('household.house_number')" class="mt-2" />
                     </div>
                     
-                    {{-- 18. Purok (Area ID) --}}
+
+                    {{-- 18. Purok (Filter Only - Not sent to DB) --}}
                     <div>
                         <x-input-label>Purok <span class="text-red-500">*</span></x-input-label>
-                        <x-form-select name="household[area_id]" class="w-full h-10 mt-1 text-slate-500"
-                            model="App\Models\AreaStreet" 
-                            column="purok_name" 
-                            value-column="id"
-                            placeholder="Select purok"
-                            :selected="old('household.area_id')"
-                        />
-                        <x-input-error :messages="$errors->get('household.area_id')" class="mt-2" />
+                        <select class="w-full h-10 mt-1 text-sm text-slate-500 border border-gray-300 rounded-md shadow-sm focus:border-blue-700 focus:ring-blue-700 focus:ring-1"
+                            x-model="selectedPurok"
+                            @change="$refs.streetSelect.value = ''"> {{-- Reset street when purok changes --}}
+                            
+                            <option value="">Select Purok</option>
+                            <template x-for="purok in distinctPuroks" :key="purok">
+                                <option :value="purok" x-text="purok" :selected="purok == selectedPurok"></option>
+                            </template>
+                        </select>
+                        {{-- No error message needed here; the error appears on the Street (area_id) field --}}
                     </div>
 
-                    {{-- 19. Street (Area ID) --}}
+                    {{-- 19. Street (Actual Area ID sent to DB) --}}
                     <div>
                         <x-input-label>Street <span class="text-red-500">*</span></x-input-label>
-                        <x-form-select name="household[area_id]" class="w-full h-10 mt-1 text-slate-500"
-                            model="App\Models\AreaStreet" 
-                            column="street_name" 
-                            value-column="id"
-                            placeholder="Select street"
-                            :selected="old('household.area_id')"
-                        />
+                        <select name="household[area_id]" 
+                            x-ref="streetSelect"
+                            class="w-full h-10 mt-1 text-sm text-slate-500 border border-gray-300 rounded-md shadow-sm focus:border-blue-700 focus:ring-blue-700 focus:ring-1">
+                            
+                            <option value="" disabled selected>Select Street</option>
+                            
+                            <template x-for="street in availableStreets" :key="street.id">
+                                <option :value="street.id" 
+                                        x-text="street.street_name" 
+                                        :selected="street.id == '{{ old('household.area_id') }}'">
+                                </option>
+                            </template>
+                        </select>
                         <x-input-error :messages="$errors->get('household.area_id')" class="mt-2" />
                     </div>
                     
