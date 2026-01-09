@@ -32,6 +32,7 @@ Route::middleware(['auth'])->group(function () {
 
     //GIAN ADDED THIS
     Route::post('/residents', [ResidentController::class, 'store'])->name('residents.store');
+    Route::put('/households/{household}', [ResidentController::class, 'updateHousehold'])->name('households.update'); // added by gian
 
     Route::get('/residents/search', [ResidentController::class, 'search'])->name('residents.search');
 

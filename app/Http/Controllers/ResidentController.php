@@ -197,6 +197,47 @@ class ResidentController extends Controller
             return redirect()->route('residents.index')->with('success', 'Household and Family registered successfully!');
 
     }
+    public function updateHousehold(Request $request, Household $household) //ADDDED BY GIAN
+    {
+ 
+        $validated = $request->validate([
+            'house_number' => ['required', 'string', 'max:50'],
+            'area_id' => ['required', 'exists:area_streets,id'], // This represents the specific Street row
+            'house_structure_id' => ['required', 'exists:house_structures,id'],
+            'residency_type_id' => ['required', 'exists:residency_types,id'], // Input comes from form, saved to Residents
+            'contact_number' => ['required', 'string', 'max:30'],
+            'email' => ['nullable', 'email', 'max:255'],
+            'landlord_name' => ['nullable', 'string', \Illuminate\Validation\Rule::requiredIf($request->residency_type_id != 1)],
+            'landlord_contact' => ['nullable', 'string', \Illuminate\Validation\Rule::requiredIf($request->residency_type_id != 1)],
+        ]);
+
+        DB::beginTransaction();
+        try {
+
+            $household->residents()->update([
+                'residency_type_id' => $validated['residency_type_id'],
+                'updated_by_user_id' => Auth::id()
+            ]);
+
+            // 3. Update the Household Table
+            // Exclude residency_type_id since it doesn't exist in the households table
+            $householdData = collect($validated)->except(['residency_type_id'])->toArray();
+
+            if ($validated['residency_type_id'] == 1) {
+                $householdData['landlord_name'] = null;
+                $householdData['landlord_contact'] = null;
+            }
+            
+            $household->update($householdData);
+
+            DB::commit();
+            return back()->with('success', 'Household details updated successfully.');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->with('error', 'Update Failed: ' . $e->getMessage());
+        }
+    }
 
     private function createResidentEntry(array $data, $householdId, $residencyTypeId, $roleId)
     {
