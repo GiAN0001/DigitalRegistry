@@ -24,14 +24,13 @@ class FormSelect extends Component
         $this->placeholder = $placeholder;
 
         try {
-            // 1. If valueColumn is not set, use the display column (e.g., 'name')
+         
             $valueColumn = $valueColumn ?? $column;
 
-            // 2. Fetch data: Get 'id' and 'name' (or whatever column you chose)
-            // We use pluck to get a key-value pair: [id => name]
+           
             $this->options = $model::distinct()
-                                    ->pluck($column, $valueColumn)
-                                        ->all();
+                                    ->pluck($column)
+                                    ->all();
                                     
         } catch (\Exception $e) {
             Log::error("FormSelect Error for {$model}: " . $e->getMessage());

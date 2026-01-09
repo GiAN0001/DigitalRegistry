@@ -148,7 +148,10 @@ class ResidentController extends Controller
 
         DB::beginTransaction();
         
-            $householdData['household_number'] = $this->generateHouseholdNumber();
+            $householdData['household_number'] = $this->generateHouseholdNumber(
+                $householdData['area_id'], 
+                $householdData['house_number']
+            );
             
             $household = Household::create([
                 'household_number' => $householdData['household_number'],
@@ -237,10 +240,21 @@ class ResidentController extends Controller
         return $resident->id;
     }
 
-    private function generateHouseholdNumber(): string
+   private function generateHouseholdNumber($areaId, $houseNumber): string // MODIFIED BY GIAN
     {
-        $latest = Household::latest('id')->first();
-        $nextId = $latest ? $latest->id + 1 : 1;
-        return 'NAM-' . date('Y') . '-' . str_pad($nextId, 5, '0', STR_PAD_LEFT);
+       
+        $area = AreaStreet::find($areaId);
+        $purokCode = $area && $area->purok_code ? $area->purok_code : 'NA';
+     
+        $houseNo = trim($houseNumber);
+        
+        $count = Household::where('area_id', $areaId)
+                          ->where('house_number', $houseNumber)
+                          ->count();
+
+        $nextSequence = $count + 1;
+        $counter = str_pad($nextSequence, 3, '0', STR_PAD_LEFT); 
+
+        return "NAM-{$purokCode}-{$houseNo}-{$counter}";
     }
 }
