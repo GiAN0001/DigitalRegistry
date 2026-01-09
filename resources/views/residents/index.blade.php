@@ -63,6 +63,10 @@
                             <th class="px-2 py-2 text-left text-xs font-medium text-slate-700 uppercase tracking-wider">Ownership</th>
                             <th class="px-2 py-2 text-left text-xs font-medium text-slate-700 uppercase tracking-wider">Contact</th>
                             <th class="px-2 py-2 text-left text-xs font-medium text-slate-700 uppercase tracking-wider">Email</th>
+                            
+                            @role('admin')
+                                <th class="px-2 py-2 text-left text-xs font-medium text-slate-700 uppercase tracking-wider">Action</th>
+                            @endrole
                         </tr>
                     </thead>
 
@@ -108,10 +112,16 @@
                                 <td class="px-2 py-4 whitespace-nowrap text-sm text-gray-500">
                                     {{ $head->household->email ?? 'N/A' }}
                                 </td>
+                                @role('admin')
+                                    <td class="px-2 py-4 whitespace-nowrap">
+                                        <a href="#" class="text-blue-800  hover:underline">Edit</a>
+                                        <a href="#" class="text-red-800 hover:underline">Delete</a>
+                                    </td>
+                                @endrole
                             </tr>
 
                             <tr x-show="expanded" x-cloak x-transition.opacity class="bg-gray-50">
-                                <td colspan="9" class="px-4 py-4">
+                                <td colspan="10" class="px-4 py-4">
                                     <div class="pl-10">
                                         <h4 class="text-xs font-bold text-gray-500 uppercase mb-3 tracking-wider">Family Members & Details</h4>
                                         
@@ -127,7 +137,9 @@
                                                     <th class="px-3 py-2">Sex</th>
                                                     <th class="px-3 py-2">Status</th>
                                                     <th class="px-3 py-2">Health Informations</th>
-                                                    <th class="px-3 py-2">Actions</th>
+                                                    @role('admin')
+                                                        <th class="px-3 py-2">Actions</th>
+                                                    @endrole
                                                 </tr>
                                             </thead>
                                             <tbody class="divide-y divide-gray-200 bg-white">
@@ -160,17 +172,19 @@
                                                         <td class="px-3 py-2">{{ $member->demographic->sex ?? '-' }}</td>
                                                         <td class="px-3 py-2">{{ $member->demographic->civil_status ?? '-' }}</td>
                                                         <td class="px-3 py-2">
-                                                            <div class="flex flex-col text-xs">
-                                                                <span>Sector: {{ $member->healthInformation->sector ?? 'N/A' }}</span>
-                                                                <span>Vaccination: {{ $member->healthInformation->vaccination ?? 'N/A' }}</span>
-                                                                <span>Comorbidity: {{ $member->healthInformation->comorbidity ?? 'None' }}</span>
-                                                                <span>Maintenance:: {{ $member->healthInformation->maintenance ?? 'None'}}</span>
+                                                            <div class="flex flex-col text-xs gap-3">
+                                                                <span><span class="bg-blue-100 text-blue-800 px-2 py-0.5 rounded w-fit">Sector:</span> {{ $member->healthInformation->sector ?? 'N/A' }}</span>
+                                                                <span><span class="bg-green-100 text-green-800 px-2 py-0.5 rounded w-fit">Vaccination:</span> {{ $member->healthInformation->vaccination ?? 'None' }}</span>
+                                                                <span><span class="bg-amber-100 text-amber-800 px-2 py-0.5 rounded w-fit">Comorbidity:</span> {{ $member->healthInformation->comorbidity ?? 'None' }}</span>
+                                                                <span><span class="bg-purple-100 text-purple-800 px-2 py-0.5 rounded w-fit">Maintenance:</span> {{ $member->healthInformation->maintenance ?? 'None'}}</span>
                                                             </div>
                                                         </td>
-                                                        <td class="px-3 py-2">
-                                                            <a href="#" class="text-blue-800 hover:underline">Edit</a>
-                                                            <a href="#" class="text-red-800 hover:underline">Delete</a>
-                                                        </td>
+                                                        @role('admin')
+                                                            <td class="px-3 py-2">
+                                                                <a href="#" class="text-blue-800 hover:underline">Edit</a>
+                                                                <a href="#" class="text-red-800 hover:underline">Delete</a>
+                                                            </td>
+                                                        @endrole
                                                     </tr>
                                                 @endforeach
                                                 
