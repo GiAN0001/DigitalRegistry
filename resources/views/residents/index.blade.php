@@ -113,8 +113,8 @@
                                     {{ $head->household->email ?? 'N/A' }}
                                 </td>
                                 @role('admin')
-                                    <td class="px-2 py-4 whitespace-nowrap">
-                                        <div class="flex space-x-2">
+                                    <td class="px-2 py-4 whitespace-nowrap text-sm flex gap-2">
+                                        <div>
                                             @php
                                                 $editData = $head->household->toArray();
                                                 $editData['residency_type_id'] = $head->residency_type_id; 
@@ -195,7 +195,13 @@
                                                         </td>
                                                         @role('admin')
                                                             <td class="px-3 py-2">
-                                                                <a href="#" class="text-blue-800 hover:underline">Edit</a>
+                                                                <button 
+                                                                    x-data 
+                                                                    @click="$dispatch('open-modal', 'edit-resident-modal'); $dispatch('fetch-resident-data', {{ $member->id }})"
+                                                                    class="text-blue-600 hover:text-blue-900"
+                                                                >
+                                                                    Edit
+                                                                </button>
                                                                 <a href="#" class="text-red-800 hover:underline">Delete</a>
                                                             </td>
                                                         @endrole
@@ -251,6 +257,7 @@
 <div>
     @include('residents.modal.register-resident')
     @include('residents.modal.edit-household-modal')
+    @include('residents.modal.edit-resident-modal')
 </div>
 
 </x-app-layout>

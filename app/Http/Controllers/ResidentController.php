@@ -72,6 +72,11 @@ class ResidentController extends Controller
             });
         }
 
+        //5. Filter by Year Added added by GIAN
+        if ($request->filled('created_at')) {
+        $query->whereYear('created_at', $request->created_at);
+    }
+
         // Pagination
         $perPage = $request->input('per_page', 10);
         $residents = $query->latest()->paginate($perPage)->withQueryString();
@@ -236,6 +241,93 @@ class ResidentController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             return back()->with('error', 'Update Failed: ' . $e->getMessage());
+        }
+    }
+      
+    public function show(Resident $resident) // ADDED BY GIAN
+    {
+
+        return response()->json([
+            'id' => $resident->id,
+            'first_name' => $resident->first_name,
+            'middle_name' => $resident->middle_name,
+            'last_name' => $resident->last_name,
+            'extension' => $resident->extension,
+            'household_role_id' => $resident->household_role_id,
+            'demographic' => $resident->demographic ? $resident->demographic->only([
+                'birthplace', 'birthdate', 'sex', 'civil_status', 'nationality', 'occupation'
+            ]) : null,
+            'health_information' => $resident->healthInformation ? $resident->healthInformation->only([
+                'sector', 'vaccination', 'comorbidity', 'maintenance'
+            ]) : null,
+        ]);
+    }
+
+    public function update(Request $request, Resident $resident): RedirectResponse
+    {
+        $validated = $request->validate([
+            'resident.first_name' => ['required', 'string', 'max:100'],
+            'resident.last_name' => ['required', 'string', 'max:100'],
+            'resident.middle_name' => ['nullable', 'string', 'max:100'],
+            'resident.extension' => ['nullable', 'string', 'max:10'],
+            'resident.household_role_id' => ['required', 'exists:household_roles,id'],
+            'resident.birthplace' => ['required', 'string', 'max:255'],
+            'resident.birthdate' => ['required', 'date', 'before:today'],
+            'resident.sex' => ['required', 'in:Male,Female'],
+            'resident.civil_status' => ['required', 'in:Single,Married,Widowed,Separated'],
+            'resident.nationality' => ['required', 'string', 'max:100'],
+            'resident.occupation' => ['nullable', 'string', 'max:100'],
+            'resident.sector' => ['required', 'in:None,PWD,Senior Citizen,Solo Parent'],
+            'resident.vaccination' => ['nullable', 'in:None,Private,Health Center'],
+            'resident.comorbidity' => ['nullable', 'string', 'max:255'],
+            'resident.maintenance' => ['nullable', 'string', 'max:255'],
+        ]);
+
+        $data = $validated['resident'];
+
+        DB::beginTransaction();
+        try {
+           
+            $resident->update([
+                'first_name' => $data['first_name'],
+                'last_name' => $data['last_name'],
+                'middle_name' => $data['middle_name'],
+                'extension' => $data['extension'],
+                'household_role_id' => $data['household_role_id'],
+                'updated_by_user_id' => Auth::id(), 
+            ]);
+
+           
+            $resident->demographic()->updateOrCreate(
+                ['resident_id' => $resident->id],
+                [
+                    'birthplace' => $data['birthplace'],
+                    'birthdate' => $data['birthdate'],
+                    'sex' => $data['sex'],
+                    'civil_status' => $data['civil_status'],
+                    'nationality' => $data['nationality'],
+                    'occupation' => $data['occupation'],
+                ]
+            );
+
+            $vaccination = ($data['vaccination'] === 'None') ? null : $data['vaccination'];
+            $resident->healthInformation()->updateOrCreate(
+                ['resident_id' => $resident->id],
+                [
+                    'sector' => $data['sector'] ?? 'None',
+                    'vaccination' => $vaccination,
+                    'comorbidity' => $data['comorbidity'],
+                    'maintenance' => $data['maintenance'],
+                ]
+            );
+
+            DB::commit();
+            return back()->with('success', 'Resident profile updated successfully.');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error("Resident Update Failed (ID: {$resident->id}): " . $e->getMessage());
+            return back()->with('error', 'Failed to update resident. Details: ' . $e->getMessage());
         }
     }
 
