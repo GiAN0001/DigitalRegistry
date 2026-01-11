@@ -9,6 +9,8 @@ class Demographic extends Model
     //GIAN ADDED THIS
     protected $guarded = []; // Critical
     public $timestamps = false; // Usually demographic tables don't have created_at/updated_at
+    protected $primaryKey = 'resident_id';
+    public $incrementing = false;
     
     public function getAgeAttribute(): ?int
     {

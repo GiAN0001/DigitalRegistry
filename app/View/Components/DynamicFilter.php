@@ -25,14 +25,18 @@ class DynamicFilter extends Component
         $this->column = $column;
 
         try {
-            // This is the "Magic": It runs the query dynamically based on your inputs.
-            // 1. distinct() -> Ignores duplicates ("counts as one")
-            // 2. pluck() -> Gets only the specific column you want
-            // 3. sort() -> Arranges them A-Z
-            
-            $this->options = $model::distinct()
-                                    ->orderBy($column)
-                                    ->pluck($column);
+
+           if ($column === 'created_at') {
+            $this->options = $model::selectRaw("YEAR(created_at) as year")
+                                    ->distinct()
+                                    ->orderBy('year', 'desc')
+                                    ->pluck('year');
+            } else {
+                // Standard distinct logic for other columns (Purok, Street, etc.)
+                $this->options = $model::distinct()
+                                        ->orderBy($column)
+                                        ->pluck($column);
+            }
                                     
         } catch (\Exception $e) {
             // Safety catch in case the model/column is wrong
