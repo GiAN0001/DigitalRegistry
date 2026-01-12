@@ -158,7 +158,7 @@
                         </select>
                         <x-input-error :messages="$errors->get('head.vaccination')" class="mt-2" />
                     </div>
-                    <div class="md:col-span-2">
+                    <div class="md:col-span-1">
                         <x-input-label value="Comorbidity" />
                         <x-text-input name="head[comorbidity]" class="w-full mt-1 text-sm" placeholder="Hypertension, Diabetes" :value="old('head.comorbidity')" />
                         <x-input-error :messages="$errors->get('head.comorbidity')" class="mt-2" />
@@ -262,7 +262,7 @@
                         <x-input-error :messages="$errors->get('household.contact_number')" class="mt-2" />
                     </div>
 
-                    <div x-show="ownershipStatus != '1' && ownershipStatus != ''" class="md:col-span-3 bg-gray-50 p-4 rounded-lg border border-gray-200 mt-2">
+                    <div x-show="ownershipStatus != '1' && ownershipStatus != ''" class="md:col-span-4 bg-gray-50 p-4 rounded-lg border border-gray-200 mt-2">
                         <h4 class="text-sm font-bold text-gray-600 mb-2">Landlord Details (Required if not Owner)</h4>
                         <div class="grid grid-cols-2 gap-4">
                             {{-- 24. Landlord Name --}}
@@ -374,7 +374,7 @@
                                         </select>
                                         <p x-show="getErr(`members.${index}.vaccination`)" x-text="getErr(`members.${index}.vaccination`)" class="text-sm text-red-600 space-y-1 mt-2"></p>
                                     </div>
-                                    <div class="md:col-span-2">
+                                    <div class="md:col-span-1">
                                         <x-input-label value="Comorbidity" />
                                         <x-text-input x-bind:name="`members[${index}][comorbidity]`" class="w-full mt-1 text-sm" placeholder="Hypertension, Diabetes" x-bind:value="member.comorbidity ?? ''" />
                                         <p x-show="getErr(`members.${index}.comorbidity`)" x-text="getErr(`members.${index}.comorbidity`)" class="text-sm text-red-600 space-y-1 mt-2"></p>

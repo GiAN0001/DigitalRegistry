@@ -7,7 +7,7 @@
         $page = 'Dashboard';
     } elseif (request()->routeIs('residents.*')) {
         $module = 'Residents';
-        $page = 'Resident Profiling';
+        $page = 'Residents';
     } elseif (request()->routeIs('transaction.document') || request()->routeIs('document-request.*') || request()->routeIs('document.*')) {
         $module = 'Transaction';
         $page = 'Document Request';
@@ -39,7 +39,7 @@
                         <div class="flex items-center">
                             @if($module)
                                 <span class="mx-2 text-gray-400">
-                                    //
+                                    /
                                 </span>
                             @endif
                             <span class="text-sm font-medium text-slate-800" aria-current="page">

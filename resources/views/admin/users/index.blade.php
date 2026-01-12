@@ -1,6 +1,6 @@
 <x-app-layout>
 
-    <div class="analytics grid grid-cols-4 grid-rows-2 gap-6 mb-8">
+    <div class="analytics mb-6">
         <x-analytics-widget
             title="Total Active Users"
             :value="$totalUsers"

@@ -1,52 +1,57 @@
 <x-app-layout>
 
     <div class="sub-content">
+        <div class="filter-container">
+                <div class="filters">
+                    <x-search-bar placeholder="Search residents..." />
+                    <x-dynamic-filter
+                        model="App\Models\AreaStreet"
+                        column="purok_name"
+                        title="Filter by Purok"
+                    />
+                    <x-dynamic-filter
+                        model="App\Models\Resident"
+                        column="created_at"
+                        title="Filter by year"
+                    />
+                </div>
 
-        <div class="flex flex-wrap items-center gap-3 mt-[42px]">
+            <div class="filters2">
+                <x-rows-per-page />
+                <x-dynamic-filter
+                    model="App\Models\ResidencyType"
+                    column="name"
+                    title="Filter by Ownership Status"
+                />
+                <x-dynamic-filter
+                    model="App\Models\HouseStructure"
+                    column="house_structure_type"
+                    title="Filter by House Structure"
+                />
 
-            <x-search-bar placeholder="Search residents..." />
-
-            <x-dynamic-filter
-                model="App\Models\AreaStreet"
-                column="purok_name"
-                title="Filter by Purok"
-            />
-
-            <x-dynamic-filter
-                model="App\Models\Resident"
-                column="created_at"
-                title="Filter by year"
-            />
-        </div>
-
-        <div class="flex flex-wrap items-center gap-3 mt-4">
-
-            <x-rows-per-page />
-
-            <x-dynamic-filter
-                model="App\Models\ResidencyType"
-                column="name"
-                title="Filter by Ownership Status"
-            />
-
-            <x-dynamic-filter
-                model="App\Models\HouseStructure"
-                column="house_structure_type"
-                title="Filter by House Structure"
-            />
-
-            <div class="ml-auto">
-                <x-button
-                    x-data
-                    x-on:click.prevent="$dispatch('open-modal', 'register-resident')"
-                >
-                    <x-slot name="icon">
-                        <x-lucide-plus class="w-4 h-4" />
-                    </x-slot>
-                    Register Resident
-                </x-button>
+                <div class="ml-auto">
+                    <x-button
+                        x-data
+                        x-on:click.prevent="$dispatch('open-modal', 'register-resident')"
+                    >
+                        <x-slot name="icon">
+                            <x-lucide-plus class="w-4 h-4" />
+                        </x-slot>
+                        Register Resident
+                    </x-button>
+                </div>
             </div>
+                @if(count(request()->query()) > 0)
+                    <a href="{{ request()->url() }}" 
+                    class="flex items-center gap-2 px-4 py-2 text-sm font-medium w-48 text-slate-700 hover:text-blue-800 transition-colors duration-200"
+                    title="Clear all active filters">
+                        <x-lucide-rotate-ccw class="w-4 h-4" />
+                        Reset Filters
+                    </a>
+                @endif
+
         </div>
+        
         <div class="mt-4"></div>
 
         <div class="p-4 bg-white shadow-md rounded-lg grid overflow-x-auto">
