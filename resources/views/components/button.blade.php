@@ -3,6 +3,7 @@
     px-2 py-2.5
     bg-blue-700 hover:bg-blue-600
     text-slate-50 text-sm font-medium
+    whitespace-nowrap
     rounded-lg
     transition duration-150 ease-in-out
     focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2

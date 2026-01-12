@@ -22,7 +22,7 @@
             return this.current.toLocaleString();
         }
     }"
-    class="flex justify-between items-center gap-6 p-4 bg-white rounded-lg shadow-sm"
+    class="flex justify-between items-center gap-6 p-4 bg-white rounded-lg shadow-sm w-full"
 >
 
     <div class="">

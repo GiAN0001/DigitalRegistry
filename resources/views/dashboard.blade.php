@@ -1,5 +1,5 @@
 <x-app-layout>
-    @role('admin') // Only accessible by admin users - Modified by GIAN
+    @role('admin')
         <div>
             <div class="max-w-full">
                 <div class="dashboard-grid">

@@ -32,19 +32,17 @@ html, body {
     scrollbar-gutter: stable;
 }
 
-.filters, .filters2 {
-    margin-bottom: 16px;
-    display: flex;
-    gap: 16px;
-    align-items: center;
-    width: 100%;
-}
-
-.analytics {
+.filters2, .filters{
     display: flex;
     width: 100%;
     grid-column: 4 / span 16;
     gap: 16px;
+    margin-bottom: 16px;
+}
+
+.analytics {
+    display: flex;
+    gap: 8px;
 }
 
 .dashboard-grid {
