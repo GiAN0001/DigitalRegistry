@@ -4,6 +4,7 @@
         <div class="filter-container">
                 <div class="filters">
                     <x-search-bar placeholder="Search residents..." />
+                    
                     <x-dynamic-filter
                         model="App\Models\AreaStreet"
                         column="purok_name"

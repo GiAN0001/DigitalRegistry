@@ -16,7 +16,7 @@ use Illuminate\Support\Facades\DB;
 class UserController extends Controller
 {
    
-    public function index(): View
+    public function index(Request $request): View
     {
 
         $totalUsers = User::where('status', 1)->count();
@@ -26,12 +26,21 @@ class UserController extends Controller
         $totalHelpDesk = User::role('help desk')->count();
         
         // Fetch ALL users, eagerly loading roles and job titles.
-        $users = User::with('barangayRole') 
-            ->latest()
-            ->paginate(10);
+        $query = User::with('barangayRole') 
+            ->latest();
+         
             
-        // We handle the "cannot delete self" logic in the view (Step 3).
-        
+        //search bar -- added by GIAN
+        if ($request->filled('q')) {
+            $searchTerm = $request->q;
+            $query->where(function($q) use ($searchTerm) {
+                $q->where('first_name', 'like', "%{$searchTerm}%")
+                  ->orWhere('last_name', 'like', "%{$searchTerm}%")
+                  ->orWhere('username', 'like', "%{$searchTerm}%")
+                  ->orWhere('email', 'like', "%{$searchTerm}%");
+            });
+        }
+        $users = $query->paginate(10)->withQueryString();
         return view('admin.users.index', [
             'users' => $users,
             'totalUsers' => $totalUsers,

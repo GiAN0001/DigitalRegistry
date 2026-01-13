@@ -44,6 +44,16 @@ class ResidentController extends Controller
                 'household.residents.residencyType'
             ]); 
 
+        //search bar -- added by GIAN
+        if ($request->filled('q')) {
+            $searchTerm = $request->q;
+                $query->whereHas('household.residents', function ($q) use ($searchTerm) {
+                    $q->where('first_name', 'like', "%{$searchTerm}%")
+                    ->orWhere('last_name', 'like', "%{$searchTerm}%")
+                    ->orWhere('middle_name', 'like', "%{$searchTerm}%");
+                });
+        }
+
         // 1. Filter by Purok
         if ($request->filled('purok_name')) {
             $query->whereHas('household.areaStreet', function ($q) use ($request) {
