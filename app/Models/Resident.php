@@ -13,10 +13,12 @@ use App\Models\Household;
 use App\Models\HouseholdRole; 
 use App\Models\Demographic; 
 use App\Models\ResidencyType; 
+use App\Traits\Auditable; // GIAN ADDED THIS
 
 class Resident extends Model
 {
-    use HasFactory;
+    use HasFactory, Auditable;
+    
 
     //GIAN ADDED THIS
     protected $guarded = [];

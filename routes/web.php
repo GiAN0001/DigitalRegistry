@@ -6,6 +6,7 @@ use App\Http\Controllers\ResidentController;
 use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\FacilityController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\LogController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -27,7 +28,6 @@ Route::get('/', function () {
 Route::middleware(['auth'])->group(function () {
 
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-
     Route::get('/residents', [ResidentController::class, 'index'])->name('residents.index');
 
     //GIAN ADDED THIS
@@ -58,6 +58,7 @@ Route::middleware(['auth'])->group(function () {
 
     // Creates index, create, store, edit, update, destroy routes automatically.
         Route::resource('users', UserController::class);
+       Route::get('/logs', [LogController::class, 'index'])->name('users.logs');
 
     // Other Admin routes (Logs, Events, etc.) would go here later
     });

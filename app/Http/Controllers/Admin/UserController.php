@@ -13,6 +13,7 @@ use Spatie\Permission\Models\Role; // NEW IMPORT
 use Illuminate\Support\Facades\Hash; // NEW IMPORT
 use Illuminate\Support\Facades\DB;
 
+
 class UserController extends Controller
 {
    
@@ -162,5 +163,28 @@ class UserController extends Controller
 
            
         return redirect()->route('admin.users.index')->with('success', 'User created successfully.');
+    }
+
+    public function show(User $user)
+    {
+        // Check if the request is AJAX/JSON (commonly used for 'Fetch-on-Demand' modals)
+        if (request()->wantsJson()) {
+            return response()->json([
+                'id' => $user->id,
+                'username' => $user->username,
+                'first_name' => $user->first_name,
+                'last_name' => $user->last_name,
+                'middle_name' => $user->middle_name,
+                'email' => $user->email,
+                'contact' => $user->contact,
+                'status' => $user->status,
+                'barangay_role_id' => $user->barangay_role_id,
+                // Securely return only the primary role ID for the dropdown
+                'role_id' => $user->roles->first()?->id,
+            ]);
+        }
+
+        // Default fallback: return a view if you ever decide to have a standalone profile page
+        return view('admin.users.show', compact('user'));
     }
 }

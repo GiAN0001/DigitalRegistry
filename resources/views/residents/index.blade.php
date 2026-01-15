@@ -167,7 +167,7 @@
                                                 @foreach($head->household->residents as $member)
                                                     <tr>
                                                         <td class="px-3 py-2 font-medium text-gray-800">
-                                                            {{ $member->first_name }} {{ $member->last_name }}
+                                                            {{ $member->first_name }} {{ $member->middle_name }} {{ $member->last_name }} {{ $member->extension }}
                                                         
                                                         </td>
                                                         <td class="px-3 py-2">
