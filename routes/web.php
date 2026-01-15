@@ -34,10 +34,10 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/residents', [ResidentController::class, 'store'])->name('residents.store');
     Route::put('/households/{household}', [ResidentController::class, 'updateHousehold'])->name('households.update'); // added by gian
     Route::put('/residents/{resident}', [ResidentController::class, 'update'])->name('residents.update'); // added by gian
-    Route::get('/residents/{resident}', [ResidentController::class, 'show'])->name('residents.show');   // added by gian
-    
 
     Route::get('/residents/search', [ResidentController::class, 'search'])->name('residents.search');
+
+    Route::get('/residents/{resident}', [ResidentController::class, 'show'])->name('residents.show');  // added by gian, fixed route conflict by cath
 
     Route::get('/transaction', [DocumentController::class, 'document'])->name('transaction.document');
     Route::post('/document-request/store', [DocumentController::class, 'store'])->name('document-request.store');

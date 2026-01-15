@@ -2,7 +2,6 @@
     <div class="sub-content">
         <div class="flex flex-wrap items-center gap-2 mt-[42px] mb-6">
             <x-search-bar placeholder="Search by Name or Transaction ID" class="w-full md:flex-1" />  
-            <x-select-date class="w-full md:flex-1" />
         </div>
 
         {{-- Calendar Section --}}

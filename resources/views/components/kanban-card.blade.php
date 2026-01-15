@@ -60,7 +60,9 @@
             <p class="text-sm"><span class="font-semibold">Reason:</span> {{ $reason }}</p>
         @endif
         
-        <p class="text-xs font-semibold text-slate-500 cursor-pointer hover:text-blue-600">View Details</p>
+        @if(!in_array(strtolower($status), ['released', 'cancelled']))
+            <p class="text-xs font-semibold text-slate-500 cursor-pointer hover:text-blue-600">View Details</p>
+        @endif
     </div>
     
     <div>
