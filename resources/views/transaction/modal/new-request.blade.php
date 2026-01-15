@@ -1,5 +1,11 @@
 <x-modal name="new-request" maxWidth="max-w-[700px]" focusable>
     <div class="p-8" x-data="documentRequestForm()">
+        <div class="flex justify-between items-start mb-4">
+            <h2 class="text-3xl font-bold text-gray-900">Document Request</h2>
+            <button type="button" @click="$dispatch('close')" class="text-gray-400 hover:text-gray-600 transition-colors">
+                <x-lucide-x class="w-6 h-6"/>
+            </button>
+        </div>
         <form method="POST" action="{{ route('document-request.store') }}" id="documentForm">
             @csrf
             

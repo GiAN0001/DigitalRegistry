@@ -9,6 +9,7 @@ use App\Models\Resident;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 
 class FacilityController extends Controller
 {
@@ -20,18 +21,17 @@ class FacilityController extends Controller
         
         $reservations = FacilityReservation::with(['facility', 'resident', 'equipments', 'processedBy'])
             ->orderBy('start_date')
-            ->orderBy('time_start')  // Add secondary sort by time
+            ->orderBy('time_start')
             ->get();
 
-        // Format events for JavaScript/Alpine
         $events = $reservations->map(function($reservation) {
             return [
                 'id' => $reservation->id,
                 'title' => $reservation->event_name,
                 'date' => \Carbon\Carbon::parse($reservation->start_date)->format('Y-m-d'),
                 'time' => \Carbon\Carbon::parse($reservation->time_start)->format('g:i A'),
-                'time_sort' => \Carbon\Carbon::parse($reservation->time_start)->format('H:i'), // 24hr format for sorting
-                'resident_type' => $reservation->resident_type,
+                'time_sort' => \Carbon\Carbon::parse($reservation->time_start)->format('H:i'),
+                'resident_type' => $reservation->resident_type ?? 'resident',
             ];
         })->sortBy(['date', 'time_sort'])->values();
 
@@ -42,7 +42,6 @@ class FacilityController extends Controller
     {
         \Log::info('=== FORM SUBMISSION RECEIVED ===');
         \Log::info('All form data:', $request->all());
-        \Log::info('Auth user:', ['id' => auth()->id()]);
         
         try {
             $validated = $request->validate([
@@ -62,7 +61,7 @@ class FacilityController extends Controller
                 'equipment_quantity.*' => 'nullable|numeric|min:1',
             ]);
 
-            \Log::info('✅ VALIDATION PASSED');
+            \Log::info('✅ VALIDATION PASSED', $validated);
 
             DB::beginTransaction();
 
@@ -72,6 +71,7 @@ class FacilityController extends Controller
                 $fee = $facility->non_resident_rate ?? 0;
             }
 
+            // Build reservation data
             $reservationData = [
                 'facility_id' => $validated['facility_id'],
                 'resident_type' => $validated['resident_type'],
@@ -81,12 +81,16 @@ class FacilityController extends Controller
                 'time_start' => $validated['time_start'],
                 'time_end' => $validated['time_end'],
                 'fee' => $fee,
-                'status' => 'Pending',  // Changed to match ENUM value
-                'processed_by_user_id' => auth()->id(),
+                'status' => 'Pending',
+                'processed_by_user_id' => Auth::id(),
             ];
 
+            // Set renter_name and renter_contact based on resident type
             if ($validated['resident_type'] === 'resident') {
+                $resident = Resident::find($validated['resident_id']);
                 $reservationData['resident_id'] = $validated['resident_id'];
+                $reservationData['renter_name'] = $resident->first_name . ' ' . $resident->last_name;
+                $reservationData['renter_contact'] = $resident->contact_number ?? '';
             } else {
                 $reservationData['renter_name'] = $validated['renter_name'];
                 $reservationData['renter_contact'] = $validated['renter_contact'];
@@ -98,20 +102,24 @@ class FacilityController extends Controller
 
             \Log::info('✅ RESERVATION CREATED:', ['id' => $reservation->id]);
 
+            // Save equipment to reservation_equipment table
             if (!empty($validated['equipment_type'])) {
                 foreach ($validated['equipment_type'] as $index => $equipmentId) {
-                    if (!empty($equipmentId) && isset($validated['equipment_quantity'][$index]) && !empty($validated['equipment_quantity'][$index])) {
-                        DB::insert(
-                            "INSERT INTO reservation_equipment (facility_reservation_id, equipment_id, quantity_borrowed, status, created_at, updated_at) VALUES (?, ?, ?, 'Pending Delivery', ?, ?)",
-                            [
-                                $reservation->id,
-                                $equipmentId,
-                                (int)$validated['equipment_quantity'][$index],
-                                now(),
-                                now(),
-                            ]
-                        );
-                        \Log::info('✅ Equipment attached:', ['equipment_id' => $equipmentId]);
+                    $quantity = $validated['equipment_quantity'][$index] ?? null;
+                    
+                    // Only insert if both equipment_id and quantity are provided
+                    if (!empty($equipmentId) && !empty($quantity)) {
+                        DB::table('reservation_equipment')->insert([
+                            'facility_reservation_id' => $reservation->id,
+                            'equipment_id' => (int) $equipmentId,
+                            'quantity_borrowed' => (int) $quantity,
+                            'status' => 'Pending Delivery',  // Use correct ENUM value
+                        ]);
+                        
+                        \Log::info('✅ Equipment saved:', [
+                            'equipment_id' => $equipmentId, 
+                            'quantity' => $quantity
+                        ]);
                     }
                 }
             }
@@ -131,7 +139,7 @@ class FacilityController extends Controller
                 'file' => $e->getFile(),
                 'line' => $e->getLine(),
             ]);
-            return back()->with('error', $e->getMessage())->withInput();
+            return back()->with('error', 'Failed to create reservation: ' . $e->getMessage())->withInput();
         }
     }
 }
