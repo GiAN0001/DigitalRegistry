@@ -2,11 +2,12 @@
 namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
+use App\Traits\Auditable;
 
 class Demographic extends Model
 {
-
-    //GIAN ADDED THIS
+    use Auditable;    //GIAN ADDED THIS
+    
     protected $guarded = []; // Critical
     public $timestamps = false; // Usually demographic tables don't have created_at/updated_at
     protected $primaryKey = 'resident_id';

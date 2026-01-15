@@ -9,11 +9,12 @@ use Illuminate\Notifications\Notifiable;
 use App\Models\BarangayRole; // We need this for the function
 use App\Models\Resident;
 use App\Models\Household;
+use App\Traits\Auditable; //added by gian
 
 class User extends Authenticatable
 {
     // Add the HasRoles trait from Spatie
-    use HasRoles, Notifiable;
+    use HasRoles, Notifiable, Auditable; //modified by gian
 
     /**
      * The attributes that are mass assignable.
@@ -102,7 +103,12 @@ class User extends Authenticatable
     }
 
     
-
+    public function getFullNameAttribute(): string //added by gian
+    {
+        return collect([$this->first_name, $this->middle_name, $this->last_name])
+            ->filter()
+            ->implode(' ');
+    }
     
         
 }

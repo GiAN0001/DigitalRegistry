@@ -1,0 +1,19 @@
+<?php
+
+namespace App\Enums;
+
+// CRITICAL: Ensure ': string' is present here
+enum LogAction: string
+{
+    case AUTH_LOGIN = 'AUTH_LOGIN';
+    case AUTH_FAILED = 'AUTH_FAILED';
+    case USER_CREATED = 'USER_CREATED';
+    case USER_UPDATED = 'USER_UPDATED';
+    case USER_PASSWORD_RESET = 'USER_PASSWORD_RESET';
+    case RESIDENT_UPDATED = 'RESIDENT_UPDATED';
+    case RESIDENT_DELETED = 'RESIDENT_DELETED';
+    case DATA_EXPORTED = 'DATA_EXPORTED';
+    case HOUSEHOLD_CREATED = 'HOUSEHOLD_CREATED';
+    case HOUSEHOLD_UPDATED = 'HOUSEHOLD_UPDATED';
+    case RESIDENT_CREATED = 'RESIDENT_CREATED';
+}

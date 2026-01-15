@@ -7,12 +7,13 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use App\Models\AreaStreet;     
 use App\Models\HouseStructure; 
 use App\Models\HouseholdPet;
+use App\Traits\Auditable; // GIAN ADDED THIS
 
 class Household extends Model
 {
     protected $guarded = []; 
    
-    use HasFactory; 
+    use HasFactory, Auditable;
 
     //GIAN ADDED THIS
     
@@ -36,5 +37,15 @@ class Household extends Model
     
     public function residents() {
         return $this->hasMany(Resident::class); // ADDED BY GIAN
+    }
+
+    public static function boot() // GIAN ADDED THIS
+    {
+        parent::boot();
+        
+        // If we want to skip logging specifically for this model during the bulk save
+        static::created(function ($model) {
+            // You can leave this out if you still want to know a NEW household was made
+        });
     }
 }
