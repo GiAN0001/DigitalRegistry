@@ -1,6 +1,6 @@
 @props([
     'placeholder' => 'Search...',
-    'name' => 'q' {{-- Default search key is 'q' --}}
+    'name' => 'q', // Default search key is 'q'
 ])
 
 @php
@@ -9,28 +9,28 @@
     $currentQueries = request()->except([$name, 'page']);
 @endphp
 
-<div 
+<div
     class="relative w-full max-w-md h-10"
-    x-data="{ 
+    x-data="{
         query: '{{ request($name) }}',
         timeout: null,
         doSearch() {
             clearTimeout(this.timeout);
             this.timeout = setTimeout(() => {
                 let url = new URL('{{ $baseUrl }}');
-                
+
                 @foreach($currentQueries as $key => $value)
                     url.searchParams.set('{{ $key }}', '{{ $value }}');
                 @endforeach
-                
+
                 if (this.query) {
                     url.searchParams.set('{{ $name }}', this.query);
                 } else {
                     url.searchParams.delete('{{ $name }}');
                 }
-                
+
                 window.location.href = url.toString();
-            }, 500); 
+            }, 500);
         }
     }"
 >
@@ -38,8 +38,8 @@
         <x-lucide-search class="w-5 h-5 text-slate-700" />
     </div>
 
-    <input 
-        type="search" 
+    <input
+        type="search"
         x-model="query"
         @input="doSearch()"
         placeholder="{{ $placeholder }}"
