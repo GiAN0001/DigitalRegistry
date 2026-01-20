@@ -82,31 +82,34 @@
                     </li>
                 </x-sidebar.dropdown>
 
-                <x-sidebar.dropdown title="Manage Staff" :active="request()->routeIs('manageStaff.*', 'admin.users.*')">
+                {{-- Jaz enhance: Updated active condition on logs page --}}
+                <x-sidebar.dropdown title="Manage Staff"
+                    :active="request()->routeIs('manageStaff.*') || (request()->routeIs('admin.users.*') && !request()->routeIs('admin.users.logs'))">
                     <x-slot name="icon">
-                        {{-- FIX: Removed the manual 'text-white' condition.
-             The icon will now automatically match the text color (Dark when inactive, White when active). --}}
                         <x-lucide-scroll-text class="w-5 h-5" />
                     </x-slot>
 
                     <li>
+                        {{-- Jaz enhance: Changed to specific index route to avoid conflict with logs --}}
                         <a href="{{ route('admin.users.index') }}"
                             class="flex items-center w-full p-2 text-sm font-medium transition duration-75 rounded-lg
-            {{ request()->routeIs('admin.users.*') ? 'bg-blue-700 text-white' : 'text-slate-700 hover:text-white hover:bg-blue-700' }}">
+                            {{ request()->routeIs('admin.users.index') ? 'bg-blue-700 text-white' : 'text-slate-700 hover:text-white hover:bg-blue-700' }}">
                             Account Management
                         </a>
                     </li>
                     <li>
                         <a href="#"
                             class="flex items-center w-full p-2 text-sm font-medium transition duration-75 rounded-lg
-            {{ request()->routeIs('manageStaff.activity') ? 'bg-blue-700 text-white' : 'text-slate-700 hover:text-white hover:bg-blue-700' }}">
+                            {{ request()->routeIs('manageStaff.activity') ? 'bg-blue-700 text-white' : 'text-slate-700 hover:text-white hover:bg-blue-700' }}">
                             User Activity
                         </a>
                     </li>
                 </x-sidebar.dropdown>
 
+                {{-- Jaz enhance: Added active state logic for System Logs --}}
                 <a href="{{ route('admin.users.logs') }}"
-                    class="flex items-center w-full p-2 text-sm font-medium text-slate-700 transition duration-75 rounded-lg hover:text-white hover:bg-blue-700">
+                    class="flex items-center w-full p-2 text-sm font-medium transition duration-75 rounded-lg
+                    {{ request()->routeIs('admin.users.logs') ? 'bg-blue-700 text-white' : 'text-slate-700 hover:text-white hover:bg-blue-700' }}">
                     <x-lucide-history class="w-5 h-5 mr-2" />
                     <span>System Logs</span>
                 </a>
