@@ -58,7 +58,7 @@ Route::middleware(['auth'])->group(function () {
 
     // Creates index, create, store, edit, update, destroy routes automatically.
         Route::resource('users', UserController::class);
-       Route::get('/logs', [LogController::class, 'index'])->name('users.logs');
+        Route::get('/logs', [LogController::class, 'index'])->name('users.logs');
 
     // Other Admin routes (Logs, Events, etc.) would go here later
     });
