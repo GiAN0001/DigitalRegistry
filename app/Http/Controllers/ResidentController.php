@@ -154,64 +154,79 @@ class ResidentController extends Controller
     public function store(ResidentRegistrationRequest $request): RedirectResponse
     {
         $validated = $request->validated();
-        
         $headData = $validated['head'];
         $householdData = $validated['household'];
-
         $membersData = $validated['members'] ?? []; 
-        $petsData = $validated['pets'] ?? [];
+        $petsData = $validated['pets'] ?? []; 
 
         DB::beginTransaction();
-        
-            $householdData['household_number'] = $this->generateHouseholdNumber(
-                $householdData['area_id'], 
-                $householdData['house_number']
-            );
-            
-            $household = Household::create([
-                'household_number' => $householdData['household_number'],
-                'house_number' => $householdData['house_number'],
-                'area_id' => $householdData['area_id'],
-                'house_structure_id' => $householdData['house_structure_id'], 
-                'contact_number' => $householdData['contact_number'],
-                'email' => $householdData['email'] ?? null,
-                'landlord_name' => $householdData['landlord_name'] ?? null,
-                'landlord_contact' => $householdData['landlord_contact'] ?? null,
+        try {
+            $result = Household::withoutEvents(function () use ($headData, $householdData, $membersData, $petsData) {
+                return Resident::withoutEvents(function() use ($headData, $householdData, $membersData, $petsData) {
+                    
+                    $householdData['household_number'] = $this->generateHouseholdNumber(
+                        $householdData['area_id'], 
+                        $householdData['house_number']
+                    );
+                    
+                    $household = Household::create([
+                        'household_number' => $householdData['household_number'],
+                        'house_number' => $householdData['house_number'],
+                        'area_id' => $householdData['area_id'],
+                        'house_structure_id' => $householdData['house_structure_id'], 
+                        'contact_number' => $householdData['contact_number'],
+                        'email' => $householdData['email'] ?? null,
+                        'landlord_name' => $householdData['landlord_name'] ?? null,
+                        'landlord_contact' => $householdData['landlord_contact'] ?? null,
+                    ]);
+
+                    // Create Head of Family
+                    $headId = $this->createResidentEntry($headData, $household->id, $householdData['residency_type_id'], 1);
+
+                    // Create Family Members
+                    if (!empty($membersData)) {
+                        foreach ($membersData as $member) {
+                            $this->createResidentEntry($member, $household->id, $householdData['residency_type_id'], $member['household_role_id']);
+                        }
+                    }
+
+                    if (!empty($petsData)) {
+                        foreach ($petsData as $petData) {
+                            $household->householdPets()->create([
+                                'pet_type_id' => $petData['pet_type_id'],
+                                'quantity' => $petData['quantity'],
+                            ]);
+                        }
+                    }
+
+                    if ($householdData['residency_type_id'] == 1) {
+                        $household->update(['owner_resident_id' => $headId]);
+                    }
+
+                    return [
+                        'id' => $household->id, 
+                        'hh_number' => $household->household_number,
+                        'head_name' => "{$headData['first_name']} {$headData['last_name']}"
+                    ];
+                });
+            });
+
+            \App\Models\Log::create([
+                'user_id' => Auth::id(),
+                'log_type' => \App\Enums\LogAction::HOUSEHOLD_CREATED,
+                'description' => Auth::user()->first_name . " registered new household " . $result['hh_number'] . " with head " . $result['head_name'],
+                'date' => now(), // Manila time
             ]);
 
-            $headId = $this->createResidentEntry($headData, $household->id, $householdData['residency_type_id'], 1);
-
-
-            if (!empty($membersData)) {
-                foreach ($membersData as $member) {
-                    $this->createResidentEntry(
-                        $member, 
-                        $household->id, 
-                        $householdData['residency_type_id'], 
-                        $member['household_role_id']
-                    );
-                }
-            }
-
-
-            if (!empty($petsData)) {
-                foreach ($petsData as $petData) {
-                    $household->householdPets()->create([
-                        'pet_type_id' => $petData['pet_type_id'],
-                        'quantity' => $petData['quantity'],
-                    ]);
-                }
-            }
-
-            if ($householdData['residency_type_id'] == 1) {
-                $household->update(['owner_resident_id' => $headId]);
-            }
-
             DB::commit();
+            return redirect()->route('residents.index')->with('success', 'Household registered successfully!');
 
-            return redirect()->route('residents.index')->with('success', 'Household and Family registered successfully!');
-
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->with('error', 'Registration Failed: ' . $e->getMessage());
+        }
     }
+        
     public function updateHousehold(Request $request, Household $household) //ADDDED BY GIAN
     {
  

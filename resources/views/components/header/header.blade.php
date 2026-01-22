@@ -17,6 +17,10 @@
     } elseif (request()->routeIs('admin.users.*')) {
         $module = 'Admin';
         $page = 'User Management';
+
+        if (request()->routeIs('admin.users.logs')) {
+            $page = 'Audit Logs';
+        }     
     } elseif (request()->routeIs('profile.*')) {
         $module = 'Account';
         $page = 'Profile Settings';

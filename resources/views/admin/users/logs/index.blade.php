@@ -1,5 +1,5 @@
 <x-app-layout>
-    <div class="p-6">
+    <div>
         <h2 class="text-2xl font-bold mb-6 text-gray-800">System Audit Logs</h2>
         
         <div class="bg-white shadow rounded-lg overflow-hidden">
