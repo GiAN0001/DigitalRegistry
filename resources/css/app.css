@@ -3,8 +3,8 @@
 @tailwind utilities;
 
 html, body {
-    height: 100vh; /* Force height to screen size */
-    overflow: hidden; /* Disable body scrolling */
+    height: 100vh;
+    overflow: hidden;
     margin: 0;
 }
 
@@ -13,36 +13,7 @@ html, body {
     grid-template-columns: repeat(16, 1fr);
     gap: 16px;
     height: calc(100vh - 32px);
-    margin: 32px 0 0 40px;
-}
-
-.side-bar {
-    grid-column: 1 / span 3;
-    height: 100%;
-    overflow-y: auto;
-    padding-bottom: 20px;
-}
-
-.content {
-    grid-column: span 13;
-    height: 100%;
-    overflow-y: auto;
-    padding-bottom: 40px;
-    padding-right: 40px;
-    scrollbar-gutter: stable;
-}
-
-.filters2, .filters{
-    display: flex;
-    width: 100%;
-    grid-column: 4 / span 16;
-    gap: 16px;
-    margin-bottom: 16px;
-}
-
-.analytics {
-    display: flex;
-    gap: 8px;
+    margin: 20px 16px 0 16px;
 }
 
 .dashboard-grid {
@@ -52,7 +23,77 @@ html, body {
     width: 100%;
 }
 
-@media (min-width: 768px) {
+
+.side-bar {
+    grid-column: 1 / span 3;
+}
+.content {
+    grid-column: span 13;
+}
+
+.filters2, .filters {
+    display: flex;
+    width: 100%;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+@media (min-width: 768px) and (max-width: 1024px) {
+    .main-grid {
+        margin: 32px 24px 0 24px;
+    }
+
+    .side-bar {
+        grid-column: 1 / span 5;
+        height: 100%;
+        overflow-y: auto;
+        padding-bottom: 20px;
+    }
+
+
+    .content {
+        grid-column: span 11;
+        height: 100%;
+        overflow-y: auto;
+        padding-bottom: 80px;
+        padding-right: 0;
+        scrollbar-gutter: stable;
+    }
+
+    .filters2, .filters {
+        grid-column: 6 / span 16;
+    }
+
+    .dashboard-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (min-width: 1025px) {
+    .main-grid {
+        margin: 32px 0 0 40px;
+    }
+
+    .side-bar {
+        grid-column: 1 / span 3;
+        height: 100%;
+        overflow-y: auto;
+        padding-bottom: 20px;
+    }
+
+    .content {
+        grid-column: span 13;
+        height: 100%;
+        overflow-y: auto;
+        padding-bottom: 40px;
+        padding-right: 40px;
+        scrollbar-gutter: stable;
+    }
+
+    .filters2, .filters {
+        grid-column: 4 / span 16;
+    }
+
     .dashboard-grid {
         grid-template-columns: repeat(13, minmax(0, 1fr));
     }
