@@ -7,6 +7,7 @@ use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\FacilityController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\LogController;
+use App\Http\Controllers\TicketController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -56,13 +57,22 @@ Route::middleware(['auth'])->group(function () {
 
     Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
 
-    // Creates index, create, store, edit, update, destroy routes automatically.
+    
         Route::resource('users', UserController::class);
         Route::get('/logs', [LogController::class, 'index'])->name('users.logs');
 
     // Other Admin routes (Logs, Events, etc.) would go here later
     });
 
+    Route::middleware('auth')->group(function () { // Added by gian, ensures only authenticated users can access ticket routes
+
+        Route::resource('tickets', TicketController::class);
+
+        Route::post('/tickets/{ticket}/start', [TicketController::class, 'start'])->name('tickets.start');
+        Route::post('/tickets/{ticket}/resolve', [TicketController::class, 'resolve'])->name('tickets.resolve');
+        Route::post('/tickets/{ticket}/cancel', [TicketController::class, 'cancel'])->name('tickets.cancel');
+        Route::post('/tickets/{ticket}/mark-seen', [TicketController::class, 'markAsSeen'])->name('tickets.mark-seen');
+    });
 
 });
 
