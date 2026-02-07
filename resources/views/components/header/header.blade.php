@@ -3,11 +3,11 @@
     $page = '';
 
     if (request()->routeIs('dashboard')) {
-        $module = 'Page';
-        $page = 'Dashboard';
+        $module = 'Dashboard';
+        $page = 'Overview';
     } elseif (request()->routeIs('residents.*')) {
         $module = 'Residents';
-        $page = 'Residents';
+        $page = 'Resident List';
     } elseif (request()->routeIs('transaction.document') || request()->routeIs('document-request.*') || request()->routeIs('document.*')) {
         $module = 'Transaction';
         $page = 'Document Request';
@@ -24,6 +24,9 @@
     } elseif (request()->routeIs('profile.*')) {
         $module = 'Account';
         $page = 'Profile Settings';
+    } elseif (request()->routeIs('tickets.*')) { // Added by gian
+        $module = 'Support';
+        $page = 'Tickets';
     }
 @endphp
 

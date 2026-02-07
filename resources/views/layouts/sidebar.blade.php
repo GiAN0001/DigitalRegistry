@@ -48,11 +48,25 @@
             </x-sidebar.dropdown>
         @endhasanyrole
 
-        <a href="#"
-            class="flex items-center w-full p-2 text-sm font-medium text-slate-700 transition duration-75 rounded-lg hover:text-white hover:bg-blue-700">
-            <x-lucide-ticket class="w-5 h-5 mr-2" />
-            <span>Tickets</span>
-        </a>
+        {{-- Modified by gian --}}
+        <a href="{{ route('tickets.index') }}"  
+            class="flex items-center w-full p-2 text-sm font-medium transition duration-75 rounded-lg
+                    {{ request()->routeIs('tickets.*') ? 'bg-blue-700 text-white' : 'text-slate-700 hover:text-white hover:bg-blue-700' }}">
+                <x-lucide-ticket class="w-5 h-5 mr-2" />
+                <span class="font-medium">Tickets</span>
+                
+                @php
+                    $ticketCount = (auth()->user()->hasRole('admin')) 
+                        ? \App\Models\Ticket::where('status', 'Pending')->count() 
+                        : \App\Models\Ticket::where('user_id', auth()->id())->where('is_seen_by_user', 0)->count();
+                @endphp
+
+                @if($ticketCount > 0)
+                    <span class="ml-auto bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">
+                        {{ $ticketCount }}
+                    </span>
+                @endif
+        </a>>
 
         @role('admin')
             <div class="pt-6 mt-2">
