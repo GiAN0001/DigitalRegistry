@@ -11,6 +11,7 @@ class DynamicFilter extends Component
     public $options;
     public $title;
     public $column;
+    public $isMap = false;
 
     /**
      * Create a new component instance.
@@ -25,21 +26,26 @@ class DynamicFilter extends Component
         $this->column = $column;
 
         try {
-
-           if ($column === 'created_at') {
-            $this->options = $model::selectRaw("YEAR(created_at) as year")
-                                    ->distinct()
-                                    ->orderBy('year', 'desc')
-                                    ->pluck('year');
+            if ($column === 'created_at') {
+                $this->options = $model::selectRaw("YEAR(created_at) as year")
+                                        ->distinct()
+                                        ->orderBy('year', 'desc')
+                                        ->pluck('year');
+            } 
+            // ADDED: Logic for Month Filtering
+            elseif ($column === 'date') {
+                $this->isMap = true;
+                $this->options = $model::selectRaw("MONTH(date) as month_num")
+                                        ->distinct()
+                                        ->orderBy('month_num', 'asc')
+                                        ->get()
+                                        ->mapWithKeys(function ($item) {
+                                            return [$item->month_num => \Carbon\Carbon::create()->month($item->month_num)->format('F')];
+                                        });
             } else {
-                // Standard distinct logic for other columns (Purok, Street, etc.)
-                $this->options = $model::distinct()
-                                        ->orderBy($column)
-                                        ->pluck($column);
+                $this->options = $model::distinct()->orderBy($column)->pluck($column);
             }
-                                    
         } catch (\Exception $e) {
-            // Safety catch in case the model/column is wrong
             Log::error("DynamicFilter Error: " . $e->getMessage());
             $this->options = collect([]); 
         }

@@ -15,23 +15,40 @@ class TicketController extends Controller
     
     public function index(): View
     {
-        $user = Auth::user();
+        $user = \Auth::user();
+        $isAdmin = $user->hasRole('admin');
 
-        if ($user->hasRole('admin')) {
-            $tickets = Ticket::with('user')
-            
-                ->orderByRaw("FIELD(status, 'Pending', 'In Progress', 'Completed', 'Cancelled')")
-                ->orderByRaw("FIELD(priority, 'High', 'Medium', 'Low')")
-                ->latest('date_created')
-                ->get();
-        } else {
-            $tickets = Ticket::where('user_id', $user->id)
-                ->orderByRaw("FIELD(status, 'Pending', 'In Progress', 'Completed', 'Cancelled')")
-                ->latest('date_created')
-                ->get();
+        // 1. FORENSIC AGGREGATION: Calculate counts based on role
+        $baseQuery = Ticket::query();
+        if (!$isAdmin) {
+            $baseQuery->where('user_id', $user->id);
         }
 
-        return view('tickets.index', compact('tickets'));
+        $totalTickets = (clone $baseQuery)->count();
+        $pendingTickets = (clone $baseQuery)->where('status', 'Pending')->count();
+        $inProgressTickets = (clone $baseQuery)->where('status', 'In Progress')->count();
+        $completedTickets = (clone $baseQuery)->where('status', 'Completed')->count();
+        $cancelledTickets = (clone $baseQuery)->where('status', 'Cancelled')->count();
+
+        // 2. Main Table Query
+        $query = Ticket::with('user');
+        if (!$isAdmin) {
+            $query->where('user_id', $user->id);
+        }
+
+        $tickets = $query->orderByRaw("FIELD(status, 'Pending', 'In Progress', 'Completed', 'Cancelled')")
+            ->orderByRaw("FIELD(priority, 'High', 'Medium', 'Low')")
+            ->latest('date_created')
+            ->get();
+
+        return view('tickets.index', [
+            'tickets'           => $tickets,
+            'totalTickets'      => $totalTickets,
+            'pendingTickets'    => $pendingTickets,
+            'inProgressTickets' => $inProgressTickets,
+            'completedTickets'  => $completedTickets,
+            'cancelledTickets'  => $cancelledTickets,
+        ]);
     }
 
     

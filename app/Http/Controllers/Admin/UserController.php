@@ -157,8 +157,6 @@ class UserController extends Controller
             
             
             $role = Role::findById($roleId); 
-            
-            // Assign the Role Model object
             $user->assignRole($role);
 
            
@@ -167,7 +165,6 @@ class UserController extends Controller
 
     public function show(User $user)
     {
-        // Check if the request is AJAX/JSON (commonly used for 'Fetch-on-Demand' modals)
         if (request()->wantsJson()) {
             return response()->json([
                 'id' => $user->id,
@@ -179,12 +176,10 @@ class UserController extends Controller
                 'contact' => $user->contact,
                 'status' => $user->status,
                 'barangay_role_id' => $user->barangay_role_id,
-                // Securely return only the primary role ID for the dropdown
                 'role_id' => $user->roles->first()?->id,
             ]);
         }
 
-        // Default fallback: return a view if you ever decide to have a standalone profile page
         return view('admin.users.show', compact('user'));
     }
 }

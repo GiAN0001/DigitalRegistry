@@ -85,7 +85,7 @@ class ResidentController extends Controller
         //5. Filter by Year Added added by GIAN
         if ($request->filled('created_at')) {
         $query->whereYear('created_at', $request->created_at);
-    }
+        }
 
         // Pagination
         $perPage = $request->input('per_page', 10);

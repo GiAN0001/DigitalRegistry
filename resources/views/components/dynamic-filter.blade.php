@@ -1,7 +1,15 @@
 @props(['title'])
 
 <div x-data="{ open: false }" @click.away="open = false" class="relative inline-block text-left w-full">
-    
+    @php
+        $currentValue = request($column);
+        // Display Logic: Months get special names, others show raw value
+        if($column === 'date' && $currentValue) {
+            $displayLabel = \Carbon\Carbon::create()->month($currentValue)->format('F');
+        } else {
+            $displayLabel = $currentValue ?: $title;
+        }
+    @endphp
     <button @click="open = !open" type="button" class="
         flex w-full items-center justify-between
         rounded-lg bg-slate-50 
@@ -12,7 +20,7 @@
         hover:border-slate-200
     ">
         <span class="truncate">
-            {{ request($column) ? request($column) : $title }}
+           {{ $displayLabel }}
         </span>
         
         <x-lucide-chevron-down 
@@ -39,14 +47,16 @@
                 Clear Filter
             </a>
 
-            @forelse($options as $option)
-                <a href="{{ request()->fullUrlWithQuery([$column => $option, 'page' => 1]) }}" 
-                   class="block px-4 py-2 text-sm transition-colors duration-150
-                          {{ request($column) == $option 
-                             ? 'bg-gray-300 text-slate-700 font-medium' 
-                             : 'text-slate-700 hover:bg-gray-300 hover:text-slate-700' 
-                          }}">
-                    {{ $option }}
+            @forelse($options as $key => $value)
+                @php
+                    // If it's a map (Months), use the $key (1, 2). If not, use the $value (Street Name).
+                    $filterValue = $isMap ? $key : $value;
+                    $displayValue = $value;
+                @endphp
+                
+                <a href="{{ request()->fullUrlWithQuery([$column => $filterValue, 'page' => 1]) }}" 
+                   class="block px-4 py-2 text-sm {{ request($column) == $filterValue ? 'bg-blue-100 text-blue-700 font-bold' : 'text-slate-700 hover:bg-gray-100' }}">
+                    {{ $displayValue }}
                 </a>
             @empty
                 <span class="block px-4 py-2 text-sm text-gray-400 italic">No data found</span>

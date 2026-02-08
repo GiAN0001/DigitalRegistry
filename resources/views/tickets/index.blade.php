@@ -1,5 +1,36 @@
 <x-app-layout> {{-- file created by gian --}}
-    <div class="p-6">
+
+
+    @role('admin')
+        <div class = "analytics mb-6">
+            <x-analytics-widget
+                title="Pending Tickets"
+                :value="$pendingTickets"
+                icon-name="clock"
+                bg-color="bg-gray-500"
+                />
+            <x-analytics-widget
+                title="In Progress Tickets"
+                :value="$inProgressTickets"
+                icon-name="loader"
+                bg-color="bg-blue-500"
+                />
+            <x-analytics-widget
+                title="Completed Tickets"
+                :value="$completedTickets"
+                icon-name="check"
+                bg-color="bg-green-500"
+                />
+            <x-analytics-widget
+                title="Cancelled Tickets"
+                :value="$cancelledTickets"
+                icon-name="x"   
+                bg-color="bg-red-500"
+                />
+        </div>
+    @endrole
+
+    <div class="p-6 bg-white shadow-md rounded-lg">
         <div class="flex justify-between items-center mb-6">
             <h2 class="text-2xl font-bold text-gray-800">Support Tickets</h2>
                 <button onclick="toggleModal('createTicketModal')" 
@@ -9,53 +40,52 @@
                 </button>
         </div>
 
-        <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-            <table class="min-w-full divide-y divide-gray-200 text-left">
-                <thead class="bg-gray-50">
+        <div class="overflow-x-auto mt-6">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-blue-200">
                     <tr>
-                        <th class="px-6 py-3 text-xs font-semibold text-gray-500 uppercase">Ticket Info</th>
+                        <th class="px-3 py-3 text-left text-xs font-medium text-slate-700 uppercase tracking-wider rounded-l-lg">Ticket Info</th>
                         @role('admin')
                             <th class="px-6 py-3 text-xs font-semibold text-gray-500 uppercase">Reporter</th>
                         @endrole
-                        <th class="px-6 py-3 text-xs font-semibold text-gray-500 uppercase">Priority</th>
-                        <th class="px-6 py-3 text-xs font-semibold text-gray-500 uppercase">Status</th>
-                        <th class="px-6 py-3 text-xs font-semibold text-gray-500 uppercase">Date Opened</th>
-                        <th class="px-6 py-3 text-xs font-semibold text-gray-500 uppercase">Date Closed</th>
-                        <th class="px-6 py-3 text-xs font-semibold text-gray-500 uppercase text-right">Action</th>
+                        <th class="px-3 py-3 text-left text-xs font-medium text-slate-700 uppercase tracking-wider">Priority</th>
+                        <th class="px-3 py-3 text-left text-xs font-medium text-slate-700 uppercase tracking-wider">Status</th>
+                        <th class="px-3 py-3 text-left text-xs font-medium text-slate-700 uppercase tracking-wider">Date Opened</th>
+                        <th class="px-3 py-3 text-left text-xs font-medium text-slate-700 uppercase tracking-wider">Date Closed</th>
+                        <th class="px-3 py-3 text-left text-xs font-medium text-slate-700 uppercase tracking-wider rounded-r-lg">Action</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-200">
+                <tbody class="bg-white divide-y divide-gray-200">
                     @forelse($tickets as $ticket)
-                        <tr class="hover:bg-gray-50 transition">
-                            <td class="px-6 py-4">
-                                <div class="text-sm font-bold text-gray-900">{{ $ticket->subject }}</div>
-                                <div class="text-xs text-gray-500">{{ $ticket->ticket_type }}</div>
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-3 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                <div class="text-xs text-gray-900">{{ $ticket->ticket_type }}</div>
                             </td>
                             @role('admin')
-                                <td class="px-6 py-4 text-sm text-gray-600">
+                                <td class="px-3 py-4 whitespace-nowrap text-sm font-medium text-gray-900 text-sm text-gray-600">
                                     {{ $ticket->user->first_name }} {{ $ticket->user->last_name }}
                                 </td>
                             @endrole
-                            <td class="px-6 py-4">
+                            <td class="px-3 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                                 <span class="px-2 py-1 rounded text-xs font-bold 
                                     {{ $ticket->priority == 'High' ? 'bg-red-100 text-red-700' : ($ticket->priority == 'Medium' ? 'bg-yellow-100 text-yellow-700' : 'bg-green-100 text-green-700') }}">
                                     {{ $ticket->priority }}
                                 </span>
                             </td>
-                            <td class="px-6 py-4">
+                            <td class="px-3 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                                 <span class="px-2 py-1 rounded text-xs font-bold 
                                     {{ $ticket->status == 'Pending' ? 'bg-gray-100 text-gray-700' : ($ticket->status == 'In Progress' ? 'bg-blue-100 text-blue-700' : ($ticket->status == 'Completed' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700')) }}">
                                     {{ $ticket->status }}
                                 </span>
                             </td>
-                            <td class="px-6 py-4 text-sm text-gray-500">
+                            <td class="px-3 py-4 whitespace-nowrap text-sm font-medium text-gray-900 text-sm text-gray-500">
                                 @if($ticket->date_created instanceof \Carbon\Carbon)
                                 {{ $ticket->date_created->format('M d, Y h:i A') }}
                                 @else
                                     {{ \Carbon\Carbon::parse($ticket->date_created)->format('M d, Y h:i A') }}
                                 @endif
                             </td>
-                           <td class="px-6 py-4 text-sm text-gray-500">
+                           <td class="px-3 py-4 whitespace-nowrap text-sm font-medium text-gray-900 text-sm text-gray-500">
                                 {{-- Display date_done if ticket is Completed OR Cancelled --}}
                                 @if($ticket->date_done && in_array($ticket->status, ['Completed', 'Cancelled']))
                                     {{ \Carbon\Carbon::parse($ticket->date_done)->format('M d, Y h:i A') }}
@@ -63,7 +93,7 @@
                                     <span class="text-gray-300 italic">--</span>
                                 @endif
                             </td>
-                            <td class="px-6 py-4 text-right">
+                            <td class="px-3 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                                 <button onclick="openTicketDetails({{ $ticket->toJson() }})" 
                                     class="text-blue-600 hover:text-blue-800 text-sm font-medium transition">
                                     View Details
