@@ -2,7 +2,8 @@
 @tailwind components;
 @tailwind utilities;
 
-html, body {
+html,
+body {
     height: 100vh;
     overflow: hidden;
     margin: 0;
@@ -23,7 +24,6 @@ html, body {
     width: 100%;
 }
 
-
 .side-bar {
     grid-column: 1 / span 3;
 }
@@ -31,11 +31,18 @@ html, body {
     grid-column: span 13;
 }
 
-.filters2, .filters {
+.filters2,
+.filters {
     display: flex;
     width: 100%;
     gap: 16px;
     margin-bottom: 16px;
+}
+
+.analytics {
+    /*wag tanggalin */
+    display: flex;
+    gap: 8px;
 }
 
 @media (min-width: 768px) and (max-width: 1024px) {
@@ -50,7 +57,6 @@ html, body {
         padding-bottom: 20px;
     }
 
-
     .content {
         grid-column: span 11;
         height: 100%;
@@ -60,7 +66,8 @@ html, body {
         scrollbar-gutter: stable;
     }
 
-    .filters2, .filters {
+    .filters2,
+    .filters {
         grid-column: 6 / span 16;
     }
 
@@ -90,7 +97,8 @@ html, body {
         scrollbar-gutter: stable;
     }
 
-    .filters2, .filters {
+    .filters2,
+    .filters {
         grid-column: 4 / span 16;
     }
 
