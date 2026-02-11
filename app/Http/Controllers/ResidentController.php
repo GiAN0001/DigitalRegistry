@@ -98,6 +98,41 @@ class ResidentController extends Controller
         ]);
     }
 
+    // ADDED BY CATH
+    public function getDemographics($residentId)
+    {
+        try {
+            $demographic = \App\Models\Demographic::where('resident_id', $residentId)->first();
+
+            if (!$demographic) {
+                return response()->json([
+                    'sex' => null,
+                    'birthdate' => null,
+                    'civil_status' => null,
+                    'citizenship' => null,
+                    'annual_income' => null
+                ]);
+            }
+
+            return response()->json([
+                'sex' => $demographic->sex,
+                'birthdate' => $demographic->birthdate,
+                'civil_status' => $demographic->civil_status,
+                'citizenship' => $demographic->nationality, // Map nationality to citizenship
+                'annual_income' => null, // Will be stored in document_requests table
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Error fetching demographics: ' . $e->getMessage());
+            return response()->json([
+                'sex' => null,
+                'birthdate' => null,
+                'civil_status' => null,
+                'citizenship' => null,
+                'annual_income' => null
+            ]);
+        }
+    }
+
     public function search(Request $request)
     {
         $query = $request->get('q');

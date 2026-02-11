@@ -1,4 +1,4 @@
-<x-modal name="released" maxWidth="max-w-[500px]" focusable>
+<x-modal name="for-released" maxWidth="max-w-[500px]" focusable>
     <div class="p-8 sm:p-8">
         {{-- Close Button (X) --}}
         <div class="flex justify-end mb-4">
@@ -13,7 +13,7 @@
 
         {{-- Warning Icon --}}
         <div class="flex justify-center mb-4">
-            <x-lucide-circle-alert class="w-20 h-20 sm:w-24 sm:h-24 text-green-600 stroke-[1]"/>
+            <x-lucide-circle-alert class="w-20 h-20 sm:w-24 sm:h-24 text-orange-600 stroke-[1]"/>
         </div>
 
         {{-- Confirmation Title --}}
@@ -23,14 +23,16 @@
 
         {{-- Confirmation Message --}}
         <p class="text-slate-400 text-m font-semibold text-center mb-8 italic">
-            Do you want to release this document request?
+            Do you want to transfer this document request for release?
         </p>
+
+        <input type="hidden" id="request_id" value="" />
 
         {{-- Action Buttons --}}
         <div class="sticky bottom-0 bg-white pt-2 flex justify-end gap-3">
             <x-secondary-button x-on:click.prevent="$dispatch('close')">Cancel</x-secondary-button>
             
-            <x-primary-button class="ms-3" type="button" @click="releaseDocument()">
+            <x-primary-button class="ms-3" type="button" @click="transferForRelease()">
                 Confirm
             </x-primary-button>
         </div>
@@ -38,19 +40,19 @@
 </x-modal>
 
 <script>
-let requestIdForReleased = null;
+let requestIdForRelease = null;
 
-document.addEventListener('open-released-modal', function(e) {
-    requestIdForReleased = e.detail.requestId;
-    console.log('Released modal opened with requestId:', requestIdForReleased);
+document.addEventListener('open-release-modal', function(e) {
+    requestIdForRelease = e.detail.requestId;
+    console.log('For Release modal opened with requestId:', requestIdForRelease);
     
     setTimeout(() => {
-        window.dispatchEvent(new CustomEvent('open-modal', { detail: 'released' }));
+        window.dispatchEvent(new CustomEvent('open-modal', { detail: 'for-released' }));
     }, 100);
 });
 
-function releaseDocument() {
-    if (!requestIdForReleased) return;
+function transferForRelease() {
+    if (!requestIdForRelease) return;
     
     const now = new Date();
     const mysqlDate = now.getFullYear() + '-' + 
@@ -61,26 +63,26 @@ function releaseDocument() {
                       String(now.getSeconds()).padStart(2, '0');
     
     console.log('Sending data:', {
-        request_id: requestIdForReleased,
-        date_of_release: mysqlDate
+        request_id: requestIdForRelease,
+        for_release_at: mysqlDate
     });
     
-    fetch('{{ route("document.release") }}', {
+    fetch('{{ route("document.transfer-for-release") }}', {
         method: 'POST',
         headers: {
             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
             'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-            request_id: requestIdForReleased,
-            date_of_release: mysqlDate
+            request_id: requestIdForRelease,
+            for_release_at: mysqlDate
         })
     })
     .then(response => response.json())
     .then(data => {
-        console.log('Document released:', data);
+        console.log('Document transferred for release:', data);
         if (data.success) {
-            window.dispatchEvent(new CustomEvent('close-modal', { detail: 'released' }));
+            window.dispatchEvent(new CustomEvent('close-modal', { detail: 'for-released' }));
             setTimeout(() => {
                 window.dispatchEvent(new CustomEvent('open-modal', { detail: 'success' }));
                 setTimeout(() => {
@@ -92,9 +94,8 @@ function releaseDocument() {
         }
     })
     .catch(error => {
-        console.error('Error releasing document:', error);
-        alert('Error releasing document: ' + error.message);
+        console.error('Error transferring document:', error);
+        alert('Error transferring document: ' + error.message);
     });
 }
 </script>
-

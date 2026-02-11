@@ -35,15 +35,20 @@ Route::middleware(['auth'])->group(function () {
     Route::put('/households/{household}', [ResidentController::class, 'updateHousehold'])->name('households.update'); // added by gian
     Route::put('/residents/{resident}', [ResidentController::class, 'update'])->name('residents.update'); // added by gian
 
+    Route::get('/residents/{residentId}/demographics', [ResidentController::class, 'getDemographics']); // added by cath
     Route::get('/residents/search', [ResidentController::class, 'search'])->name('residents.search');
 
     Route::get('/residents/{resident}', [ResidentController::class, 'show'])->name('residents.show');  // added by gian, fixed route conflict by cath
 
     Route::get('/transaction', [DocumentController::class, 'document'])->name('transaction.document');
+    Route::get('/document-requests/{requestId}', [DocumentController::class, 'show']); // added by cath
     Route::post('/document-request/store', [DocumentController::class, 'store'])->name('document-request.store');
-    Route::post('/document/sign', [DocumentController::class, 'sign'])->name('document.sign');
-    Route::post('/document/release', [DocumentController::class, 'release'])->name('document.release');
-    Route::post('/document/cancel', [DocumentController::class, 'cancel'])->name('document.cancel');
+    Route::put('/document-requests/{requestId}/update', [DocumentController::class, 'update'])->name('document.update'); // added by cath
+    Route::post('/document/sign', [DocumentController::class, 'transferToSignature'])->name('document.sign'); // added and changed by cath
+    Route::post('/document/transfer-for-release', [DocumentController::class, 'transferToRelease'])->name('document.transfer-for-release'); // added and changed by cath
+    Route::post('/document/transfer-for-signature', [DocumentController::class, 'transferToSignature'])->name('document.transfer-for-signature'); // added and changed by cath
+    Route::post('/document/release', [DocumentController::class, 'release'])->name('document.release'); // added and changed by cath
+    Route::post('/document/cancel', [DocumentController::class, 'cancel'])->name('document.cancel'); // added and changed by cath
     Route::get('/transaction/facility', [FacilityController::class, 'index'])->name('transaction.facility');
     Route::post('/transaction/facility/reservation', [FacilityController::class, 'storeReservation'])->name('facility.storeReservation');
     Route::post('/facility/reservation/store', [FacilityController::class, 'storeReservation'])->name('facility.reservation.store');
