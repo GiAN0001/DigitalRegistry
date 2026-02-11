@@ -1,11 +1,8 @@
 <x-app-layout>
     <div class="sub-content">
-        <div class="flex flex-wrap items-center gap-2 mt-[42px]">
-            <x-search-bar placeholder="Search by Name or Transaction ID" class="w-full md:flex-1" />  
+        <div class="flex flex-wrap items-center gap-2 mt-4">
+            <x-search-bar placeholder="Search by Name or Request ID" class="w-full md:flex-1" />  
             <x-select-date class="w-full md:flex-1" />
-        </div>
-
-        <div class="ml-8 pt-8">
             <x-button
                 x-data
                 x-on:click.prevent="$dispatch('open-modal', 'new-request')"
@@ -17,7 +14,7 @@
             </x-button>
         </div>
         <!-- Tabs -->
-        <div class="flex mt-8 mb-6 border-b-2 border-blue-600">
+        <div class="flex mt-4 mb-6 border-b-2 border-blue-600">
             <button class="tab-button text-blue-600 font-semibold text-sm p-3 border-b-2 border-blue-600" data-tab="document-request">
                 Document Request
             </button>
@@ -31,81 +28,227 @@
             <!-- Filter Buttons -->
             <div class="flex flex-wrap gap-3 mb-6">
                 <button class="filter-btn px-6 py-2 bg-blue-600 text-white rounded-lg font-medium text-sm" data-filter="all">All</button>
-                <button class="filter-btn px-6 py-2 text-blue-600 border border-blue-600 rounded-lg font-medium text-sm" data-filter="pending">Pending</button>
-                <button class="filter-btn px-6 py-2 text-blue-600 border border-blue-600 rounded-lg font-medium text-sm" data-filter="signed">Signed</button>
+                <button class="filter-btn px-6 py-2 text-blue-600 border border-blue-600 rounded-lg font-medium text-sm" data-filter="for-fulfillment">For Fulfillment</button>
+                <button class="filter-btn px-6 py-2 text-blue-600 border border-blue-600 rounded-lg font-medium text-sm" data-filter="for-signature">For Signature</button>
+                <button class="filter-btn px-6 py-2 text-blue-600 border border-blue-600 rounded-lg font-medium text-sm" data-filter="for-release">For Release</button>
                 <button class="filter-btn px-6 py-2 text-blue-600 border border-blue-600 rounded-lg font-medium text-sm" data-filter="released">Released</button>
                 <button class="filter-btn px-6 py-2 text-blue-600 border border-blue-600 rounded-lg font-medium text-sm" data-filter="cancelled">Cancelled</button>
             </div>
 
             
-            <!-- Kanban Cards -->
-            <div class="kanban-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 overflow-visible">
-                <!-- Pending Column -->
-                <div class="kanban-column bg-white rounded-2xl shadow-sm border-t-4 border-gray-500 overflow-visible" data-status="pending">
-                    <div>
-                        <h3 class="text-xl font-bold pl-8 pt-4 pb-2">Pending <span class="text-slate-400 text-base font-medium">({{ $pendingRequests->count() }})</span></h3>
+            <!-- Kanban Cards with Horizontal Scroll -->
+            <div class="overflow-x-auto pb-4" id="kanban-view">
+                <div class="kanban-grid inline-grid grid-flow-col auto-cols-[minmax(358px,1fr)] gap-4 overflow-visible max-w-[1507px]">
+                    <!-- For Fulfillment Column (Gray) -->
+                    <div class="kanban-column bg-white rounded-2xl shadow-sm border-t-4 border-gray-500 overflow-visible min-w-[358px]" data-status="for-fulfillment">
+                        <div>
+                            <h3 class="text-xl font-bold pl-8 pt-4 pb-2">For Fulfillment <span class="text-slate-400 text-base font-medium">({{ $forFulfillmentRequests->count() }})</span></h3>
+                        </div>
+                        <div class="pl-8 pr-8 pb-8 space-y-4 overflow-visible {{ $forFulfillmentRequests->count() > 2 ? 'max-h-[683px] overflow-y-auto custom-scrollbar' : '' }}">
+                            @forelse($forFulfillmentRequests as $request)
+                                <x-kanban-card
+                                    :request-id="str_pad($request->id, 3, '0', STR_PAD_LEFT)"
+                                    :name="$request->resident_name"
+                                    :document-type="$request->documentType->name"
+                                    :fee="$request->fee"
+                                    :staff="$request->createdBy->name ?? 'N/A'"
+                                    :date="$request->created_at->format('d.m.Y')"
+                                    status="For Fulfillment"
+                                    :date-color="$request->date_color"
+                                    :text-color="$request->text_color"
+                                />
+                            @empty
+                                <p class="text-center text-gray-500 py-8">No requests for fulfillment</p>
+                            @endforelse
+                        </div>
                     </div>
-                    <div class="pl-8 pr-8 pb-8 space-y-4 overflow-visible {{ $pendingRequests->count() > 2 ? 'max-h-[683px] overflow-y-auto custom-scrollbar' : '' }}">
-                        @forelse($pendingRequests as $request)
-                            <x-kanban-card
-                                :request-id="str_pad($request->id, 3, '0', STR_PAD_LEFT)"
-                                :name="$request->resident_name"
-                                :document-type="$request->documentType->name"
-                                :fee="$request->fee"
-                                :staff="$request->staff_name"
-                                :date="$request->created_at->format('d.m.Y')"
-                                status="Pending"
-                                :date-color="$request->date_color"
-                                :text-color="$request->text_color"
-                            />
-                        @empty
-                            <p class="text-center text-gray-500 py-8">No pending requests</p>
-                        @endforelse
-                    </div>
-                </div>
 
-                <!-- Signed Column -->
-                <div class="kanban-column bg-white rounded-2xl shadow-sm border-t-4 border-amber-500 overflow-visible" data-status="signed">
-                    <div>
-                        <h3 class="text-xl font-bold pl-8 pt-4 pb-2">Signed <span class="text-slate-400 text-base font-medium">({{ $signedRequests->count() }})</span></h3>
+                   <!-- For Signature Column (Blue) -->
+                    <div class="kanban-column bg-white rounded-2xl shadow-sm border-t-4 border-blue-500 overflow-visible min-w-[358px]" data-status="for-signature">
+                        <div>
+                            <h3 class="text-xl font-bold pl-8 pt-4 pb-2">For Signature <span class="text-slate-400 text-base font-medium">({{ $forSignatureRequests->count() }})</span></h3>
+                        </div>
+                        <div class="pl-8 pr-8 pb-8 space-y-4 overflow-visible {{ $forSignatureRequests->count() > 2 ? 'max-h-[683px] overflow-y-auto custom-scrollbar' : '' }}">
+                            @forelse($forSignatureRequests as $request)
+                                <x-kanban-card 
+                                    :request-id="str_pad($request->id, 3, '0', STR_PAD_LEFT)"
+                                    :name="$request->resident_name"
+                                    :document-type="$request->documentType->name"
+                                    :fee="$request->fee"
+                                    :staff="$request->transferredSignatureBy->name ?? 'N/A'"
+                                    :date="$request->for_signature_at ? $request->for_signature_at->format('d.m.Y') : $request->created_at->format('d.m.Y')"
+                                    status="For Signature"
+                                    :date-color="$request->date_color"
+                                    :text-color="$request->text_color"
+                                    :transferred-by="$request->transferredSignatureBy->name ?? 'N/A'"
+                                />
+                            @empty
+                                <p class="text-center text-gray-500 py-8">No requests for signature</p>
+                            @endforelse
+                        </div>
                     </div>
-                    <div class="pl-8 pr-8 pb-8 space-y-4 overflow-visible {{ $signedRequests->count() > 2 ? 'max-h-[683px] overflow-y-auto custom-scrollbar' : '' }}">
-                        @forelse($signedRequests as $request)
+
+                    <!-- For Release Column (Orange) -->
+                    <div class="kanban-column bg-white rounded-2xl shadow-sm border-t-4 border-orange-500 overflow-visible min-w-[358px]" data-status="for-release">
+                        <div>
+                            <h3 class="text-xl font-bold pl-8 pt-4 pb-2">For Release <span class="text-slate-400 text-base font-medium">({{ $forReleaseRequests->count() }})</span></h3>
+                        </div>
+                        <div class="pl-8 pr-8 pb-8 space-y-4 overflow-visible {{ $forReleaseRequests->count() > 2 ? 'max-h-[683px] overflow-y-auto custom-scrollbar' : '' }}">
+                            @forelse($forReleaseRequests as $request)
+                                <x-kanban-card 
+                                    :request-id="str_pad($request->id, 3, '0', STR_PAD_LEFT)"
+                                    :name="$request->resident_name"
+                                    :document-type="$request->documentType->name"
+                                    :fee="$request->fee"
+                                    :staff="$request->transferredForReleasedBy->name ?? 'N/A'"
+                                    :date="$request->for_release_at ? $request->for_release_at->format('d.m.Y') : $request->created_at->format('d.m.Y')"
+                                    status="For Release"
+                                    :date-color="$request->date_color"
+                                    :text-color="$request->text_color"
+                                    :transferred-by="$request->transferredForReleasedBy->name ?? 'N/A'"
+                                />
+                            @empty
+                                <p class="text-center text-gray-500 py-8">No requests for release</p>
+                            @endforelse
+                        </div>
+                    </div>
+
+                   <!-- Released Column (Green) -->
+                    <div class="kanban-column bg-white rounded-2xl shadow-sm border-t-4 border-green-500 overflow-visible min-w-[358px]" data-status="released">
+                        <div>
+                            <h3 class="text-xl font-bold pl-8 pt-4 pb-3">Released <span class="text-slate-400 text-base font-medium">({{ $releasedRequests->count() }})</span></h3>
+                        </div>
+                        <div class="pl-8 pr-8 pb-8 space-y-4 overflow-visible {{ $releasedRequests->count() > 2 ? 'max-h-[683px] overflow-y-auto custom-scrollbar' : '' }}">
+                            @forelse($releasedRequests as $request)
+                                <x-kanban-card 
+                                    :request-id="str_pad($request->id, 3, '0', STR_PAD_LEFT)"
+                                    :name="$request->resident_name"
+                                    :document-type="$request->documentType->name"
+                                    :fee="$request->fee"
+                                    :staff="$request->releasedBy->name ?? 'N/A'"
+                                    :date="$request->date_of_release ? $request->date_of_release->format('d.m.Y') : $request->created_at->format('d.m.Y')"
+                                    status="Released"
+                                    :date-color="$request->date_color"
+                                    :text-color="$request->text_color"
+                                    :released-by="$request->releasedBy->name ?? 'N/A'"
+                                />
+                            @empty
+                                <p class="text-center text-gray-500 py-8">No released requests</p>
+                            @endforelse
+                        </div>
+                    </div>
+
+                    <!-- Cancelled Column (Red) -->
+                    <div class="kanban-column bg-white rounded-2xl shadow-sm border-t-4 border-red-500 overflow-visible min-w-[358px]" data-status="cancelled">
+                        <div>
+                            <h3 class="text-xl font-bold pl-8 pt-4 pb-2">Cancelled <span class="text-slate-400 text-base font-medium">({{ $cancelledRequests->count() }})</span></h3>
+                        </div>
+                        <div class="pl-8 pr-8 pb-8 space-y-4 overflow-visible {{ $cancelledRequests->count() > 2 ? 'max-h-[683px] overflow-y-auto custom-scrollbar' : '' }}">
+                            @forelse($cancelledRequests as $request)
                             <x-kanban-card 
+                                    :request-id="str_pad($request->id, 3, '0', STR_PAD_LEFT)"
+                                    :name="$request->resident_name"
+                                    :document-type="$request->documentType->name"
+                                    :fee="$request->fee"
+                                    :staff="$request->cancelledBy->name ?? 'N/A'"
+                                    :date="$request->date_of_cancellation ? $request->date_of_cancellation->format('d.m.Y') : $request->created_at->format('d.m.Y')"
+                                    status="Cancelled"
+                                    :date-color="$request->date_color"
+                                    :text-color="$request->text_color"
+                                    :rejected-by="$request->cancelledBy->name ?? 'N/A'"
+                                />
+                            @empty
+                                <p class="text-center text-gray-500 py-8">No cancelled requests</p>
+                            @endforelse
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- List View (Hidden by default, shown when filtering) -->
+            <div class="hidden" id="list-view">
+                <!-- For Fulfillment List -->
+                <div class="list-section bg-white rounded-2xl border-t-4 border-gray-500 p-8 shadow-md mb-6 hidden" data-status="for-fulfillment">
+                    <h3 class="text-xl font-bold mb-6">For Fulfillment <span class="text-slate-400 text-base font-medium">({{ $forFulfillmentRequests->count() }})</span></h3>
+                    <div class="space-y-4">
+                        @forelse($forFulfillmentRequests as $request)
+                            <x-kanban-list-card
                                 :request-id="str_pad($request->id, 3, '0', STR_PAD_LEFT)"
                                 :name="$request->resident_name"
                                 :document-type="$request->documentType->name"
                                 :fee="$request->fee"
-                                :staff="$request->staff_name"
+                                :staff="$request->createdBy->name ?? 'N/A'"
                                 :date="$request->created_at->format('d.m.Y')"
-                                status="Signed"
+                                status="For Fulfillment"
                                 :date-color="$request->date_color"
                                 :text-color="$request->text_color"
                             />
                         @empty
-                            <p class="text-center text-gray-500 py-8">No signed requests</p>
+                            <p class="text-center text-gray-500 py-8">No requests for fulfillment</p>
                         @endforelse
                     </div>
                 </div>
 
-               <!-- Released Column -->
-                <div class="kanban-column bg-white rounded-2xl shadow-sm border-t-4 border-green-500 overflow-visible" data-status="released">
-                    <div>
-                        <h3 class="text-xl font-bold pl-8 pt-4 pb-3">Released <span class="text-slate-400 text-base font-medium">({{ $releasedRequests->count() }})</span></h3>
+                <!-- For Signature List -->
+                <div class="list-section bg-white rounded-2xl border-t-4 border-blue-500 p-8 shadow-md mb-6 hidden" data-status="for-signature">
+                    <h3 class="text-xl font-bold mb-6">For Signature <span class="text-slate-400 text-base font-medium">({{ $forSignatureRequests->count() }})</span></h3>
+                    <div class="space-y-4">
+                        @forelse($forSignatureRequests as $request)
+                            <x-kanban-list-card
+                                :request-id="str_pad($request->id, 3, '0', STR_PAD_LEFT)"
+                                :name="$request->resident_name"
+                                :document-type="$request->documentType->name"
+                                :fee="$request->fee"
+                                :staff="$request->transferredSignatureBy->name ?? 'N/A'"
+                                :date="$request->for_signature_at ? $request->for_signature_at->format('d.m.Y') : $request->created_at->format('d.m.Y')"
+                                status="For Signature"
+                                :date-color="$request->date_color"
+                                :text-color="$request->text_color"
+                            />
+                        @empty
+                            <p class="text-center text-gray-500 py-8">No requests for signature</p>
+                        @endforelse
                     </div>
-                    <div class="pl-8 pr-8 pb-8 space-y-4 overflow-visible {{ $releasedRequests->count() > 2 ? 'max-h-[683px] overflow-y-auto custom-scrollbar' : '' }}">
+                </div>
+
+                <!-- For Release List -->
+                <div class="list-section bg-white rounded-2xl border-t-4 border-orange-500 p-8 shadow-md mb-6 hidden" data-status="for-release">
+                    <h3 class="text-xl font-bold mb-6">For Release <span class="text-slate-400 text-base font-medium">({{ $forReleaseRequests->count() }})</span></h3>
+                    <div class="space-y-4">
+                        @forelse($forReleaseRequests as $request)
+                            <x-kanban-list-card
+                                :request-id="str_pad($request->id, 3, '0', STR_PAD_LEFT)"
+                                :name="$request->resident_name"
+                                :document-type="$request->documentType->name"
+                                :fee="$request->fee"
+                                :staff="$request->transferredForReleasedBy->name ?? 'N/A'"
+                                :date="$request->for_release_at ? $request->for_release_at->format('d.m.Y') : $request->created_at->format('d.m.Y')"
+                                status="For Release"
+                                :date-color="$request->date_color"
+                                :text-color="$request->text_color"
+                            />
+                        @empty
+                            <p class="text-center text-gray-500 py-8">No requests for release</p>
+                        @endforelse
+                    </div>
+                </div>
+
+                <!-- Released List -->
+                <div class="list-section bg-white rounded-2xl border-t-4 border-green-500 p-8 shadow-md mb-6 hidden" data-status="released">
+                    <h3 class="text-xl font-bold mb-6">Released <span class="text-slate-400 text-base font-medium">({{ $releasedRequests->count() }})</span></h3>
+                    <div class="space-y-4">
                         @forelse($releasedRequests as $request)
-                            <x-kanban-card 
+                            <x-kanban-list-card
                                 :request-id="str_pad($request->id, 3, '0', STR_PAD_LEFT)"
                                 :name="$request->resident_name"
                                 :document-type="$request->documentType->name"
                                 :fee="$request->fee"
-                                :staff="$request->staff_name"
+                                :staff="$request->releasedBy->name ?? 'N/A'"
                                 :date="$request->date_of_release ? $request->date_of_release->format('d.m.Y') : $request->created_at->format('d.m.Y')"
                                 status="Released"
                                 :date-color="$request->date_color"
                                 :text-color="$request->text_color"
-                                :released-by="$request->releaser_name"
+                                :released-by="$request->releasedBy->name ?? 'N/A'"
                             />
                         @empty
                             <p class="text-center text-gray-500 py-8">No released requests</p>
@@ -113,25 +256,22 @@
                     </div>
                 </div>
 
-                <!-- Cancelled Column -->
-                <div class="kanban-column bg-white rounded-2xl shadow-sm border-t-4 border-red-500 overflow-visible" data-status="cancelled">
-                    <div>
-                        <h3 class="text-xl font-bold pl-8 pt-4 pb-2">Cancelled <span class="text-slate-400 text-base font-medium">({{ $cancelledRequests->count() }})</span></h3>
-                    </div>
-                    <div class="pl-8 pr-8 pb-8 space-y-4 overflow-visible {{ $cancelledRequests->count() > 2 ? 'max-h-[683px] overflow-y-auto custom-scrollbar' : '' }}">
+                <!-- Cancelled List -->
+                <div class="list-section bg-white rounded-2xl border-t-4 border-red-500 p-8 shadow-md mb-6 hidden" data-status="cancelled">
+                    <h3 class="text-xl font-bold mb-6">Cancelled <span class="text-slate-400 text-base font-medium">({{ $cancelledRequests->count() }})</span></h3>
+                    <div class="space-y-4">
                         @forelse($cancelledRequests as $request)
-                        <x-kanban-card 
+                            <x-kanban-list-card
                                 :request-id="str_pad($request->id, 3, '0', STR_PAD_LEFT)"
                                 :name="$request->resident_name"
                                 :document-type="$request->documentType->name"
                                 :fee="$request->fee"
-                                :staff="$request->staff_name"
-                                :date="$request->created_at->format('d.m.Y')"
+                                :staff="$request->cancelledBy->name ?? 'N/A'"
+                                :date="$request->date_of_cancellation ? $request->date_of_cancellation->format('d.m.Y') : $request->created_at->format('d.m.Y')"
                                 status="Cancelled"
                                 :date-color="$request->date_color"
                                 :text-color="$request->text_color"
-                                :rejected-by="$request->releaser_name"
-                                :reason="$request->remarks"
+                                :rejected-by="$request->cancelledBy->name ?? 'N/A'"
                             />
                         @empty
                             <p class="text-center text-gray-500 py-8">No cancelled requests</p>
@@ -143,9 +283,91 @@
 
         <!-- Tab Content: Request History -->
         <div id="request-history-content" class="tab-content hidden">
-            <div class="bg-white rounded-2xl shadow-sm p-8">
-                <h3 class="text-xl font-bold mb-4">Request History</h3>
-                <p class="text-gray-500">History content coming soon...</p>
+            <div class="p-6 bg-white shadow-md rounded-lg">
+                <h2 class="text-xl font-semibold text-gray-800 mb-6">Request History</h2>
+                
+                <div class="overflow-x-auto mt-6">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-blue-200">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-slate-700 uppercase tracking-wider rounded-l-lg">Request ID</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-slate-700 uppercase tracking-wider">Name</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-slate-700 uppercase tracking-wider">Date</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-slate-700 uppercase tracking-wider">Status</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-slate-700 uppercase tracking-wider rounded-r-lg">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            @forelse ($historyRequests as $request)
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                        {{ str_pad($request->id, 3, '0', STR_PAD_LEFT) }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                                        {{ $request->resident_name }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        {{ $request->created_at->format('F d, Y') }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        @php
+                                            $statusColors = [
+                                                'Released' => 'bg-green-200 text-green-800',
+                                                'Cancelled' => 'bg-red-200 text-red-700',
+                                            ];
+                                            $statusClass = $statusColors[$request->status] ?? 'bg-gray-100 text-gray-800';
+                                        @endphp
+                                        <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full {{ $statusClass }}">
+                                            {{ $request->status }}
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                        <a 
+                                            href="#"
+                                            x-data
+                                            x-on:click.prevent="
+                                                const requestId = parseInt('{{ $request->id }}');
+                                                fetch(`/document-requests/${requestId}`, {
+                                                    headers: {
+                                                        'Accept': 'application/json',
+                                                        'X-Requested-With': 'XMLHttpRequest'
+                                                    }
+                                                })
+                                                    .then(response => {
+                                                        if (!response.ok) throw new Error('Failed to fetch');
+                                                        return response.json();
+                                                    })
+                                                    .then(data => {
+                                                        $dispatch('open-modal', 'view-request');
+                                                        setTimeout(() => {
+                                                            window.dispatchEvent(new CustomEvent('load-request', { detail: data }));
+                                                        }, 100);
+                                                    })
+                                                    .catch(error => {
+                                                        console.error('Error:', error);
+                                                        alert('Failed to load request details');
+                                                    })
+                                            "
+                                            class="text-indigo-600 hover:text-blue-700"
+                                        >
+                                            View Details
+                                        </a>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="5" class="px-6 py-4 text-center text-gray-500">
+                                        No request history found.
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="mt-4">
+                    {{ $historyRequests->links() }}
+                </div>
             </div>
         </div>
     </div>
@@ -155,7 +377,40 @@
         transition: all 0.3s ease;
     }
 
-    /* Scrollbar styles - always visible but subtle */
+    /* When filtered to single column, expand to full width */
+    .kanban-grid.filtered-single {
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+        width: 100%;
+        max-width: 1507px;
+    }
+
+    .kanban-grid.filtered-single .kanban-column {
+        width: 100% !important;
+        max-width: 1507px;
+        min-width: 100% !important;
+    }
+
+    /* Horizontal scrollbar styles */
+    .overflow-x-auto::-webkit-scrollbar {
+        height: 8px;
+    }
+
+    .overflow-x-auto::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 10px;
+    }
+
+    .overflow-x-auto::-webkit-scrollbar-thumb {
+        background: rgba(136, 136, 136, 0.5);
+        border-radius: 10px;
+    }
+
+    .overflow-x-auto::-webkit-scrollbar-thumb:hover {
+        background: #555;
+    }
+
+    /* Vertical scrollbar styles */
     .custom-scrollbar::-webkit-scrollbar {
         width: 6px;
     }
@@ -170,17 +425,14 @@
         transition: background 0.3s ease;
     }
 
-    /* Show darker scrollbar on hover */
     .custom-scrollbar:hover::-webkit-scrollbar-thumb {
         background: rgba(136, 136, 136, 0.6);
     }
 
-    /* Show even darker scrollbar when actively scrolling */
     .custom-scrollbar::-webkit-scrollbar-thumb:hover {
         background: #555;
     }
 
-    /* Firefox */
     .custom-scrollbar {
         scrollbar-width: thin;
         scrollbar-color: rgba(136, 136, 136, 0.3) transparent;
@@ -197,7 +449,6 @@
         button.addEventListener('click', function() {
             const tabName = this.dataset.tab;
             
-            // Update button styles
             document.querySelectorAll('.tab-button').forEach(btn => {
                 btn.classList.remove('text-blue-600', 'border-b-2', 'border-blue-600');
                 btn.classList.add('text-slate-600');
@@ -205,7 +456,6 @@
             this.classList.remove('text-slate-600');
             this.classList.add('text-blue-600', 'border-b-2', 'border-blue-600');
             
-            // Show/hide tab content
             document.querySelectorAll('.tab-content').forEach(content => {
                 content.classList.add('hidden');
             });
@@ -213,13 +463,15 @@
         });
     });
 
-    // Status filter
+    // Status filter with view switching
     document.querySelectorAll('.filter-btn').forEach(button => {
         button.addEventListener('click', function() {
             const filter = this.dataset.filter;
-            const grid = document.querySelector('.kanban-grid');
+            const kanbanView = document.getElementById('kanban-view');
+            const listView = document.getElementById('list-view');
+            const kanbanGrid = document.querySelector('.kanban-grid');
             
-            // Update button styles
+            // Update button states
             document.querySelectorAll('.filter-btn').forEach(btn => {
                 btn.classList.remove('bg-blue-600', 'text-white');
                 btn.classList.add('text-blue-600', 'border', 'border-blue-600');
@@ -227,53 +479,36 @@
             this.classList.remove('text-blue-600', 'border', 'border-blue-600');
             this.classList.add('bg-blue-600', 'text-white');
             
-            // Show/hide columns and adjust grid
             if (filter === 'all') {
+                // Show kanban view, hide list view
+                kanbanView.classList.remove('hidden');
+                listView.classList.add('hidden');
+                kanbanGrid.classList.remove('filtered-single');
+                
+                // Show all kanban columns
                 document.querySelectorAll('.kanban-column').forEach(column => {
                     column.classList.remove('hidden');
                 });
-                grid.classList.remove('grid-cols-1', 'lg:grid-cols-1');
-                grid.classList.add('md:grid-cols-2', 'lg:grid-cols-4');
             } else {
-                grid.classList.remove('md:grid-cols-2', 'lg:grid-cols-4');
-                grid.classList.add('grid-cols-1', 'lg:grid-cols-1');
+                // Hide kanban view, show list view
+                kanbanView.classList.add('hidden');
+                listView.classList.remove('hidden');
                 
-                document.querySelectorAll('.kanban-column').forEach(column => {
-                    if (column.dataset.status === filter) {
-                        column.classList.remove('hidden');
-                    } else {
-                        column.classList.add('hidden');
+                // Hide all list sections first
+                document.querySelectorAll('.list-section').forEach(section => {
+                    section.classList.add('hidden');
+                });
+                
+                // Show only the selected list section
+                document.querySelectorAll('.list-section').forEach(section => {
+                    if (section.dataset.status === filter) {
+                        section.classList.remove('hidden');
                     }
                 });
             }
         });
     });
 
-    // Dropdown menu toggle
-    function toggleMenu(event, button) {
-        event.stopPropagation();
-        
-        const menu = button.nextElementSibling;
-        const allMenus = document.querySelectorAll('.dropdown-menu');
-        
-        allMenus.forEach(m => {
-            if (m !== menu) {
-                m.classList.add('hidden');
-            }
-        });
-        
-        if (menu.classList.contains('hidden')) {
-            const rect = button.getBoundingClientRect();
-            menu.style.position = 'fixed';
-            menu.style.top = (rect.bottom + 2) + 'px';
-            menu.style.left = rect.left + 'px';
-            menu.classList.remove('hidden');
-        } else {
-            menu.classList.add('hidden');
-        }
-    }
-
-    // Close dropdowns on click outside
     document.addEventListener('click', function(event) {
         const allMenus = document.querySelectorAll('.dropdown-menu');
         allMenus.forEach(menu => {
@@ -281,7 +516,6 @@
         });
     });
 
-    // Close dropdowns on scroll
     document.querySelectorAll('.custom-scrollbar').forEach(container => {
         container.addEventListener('scroll', function() {
             const allMenus = document.querySelectorAll('.dropdown-menu');
@@ -290,32 +524,13 @@
             });
         });
     });
-
-    // Add scrolling class when scrolling (show scrollbar only when scrolling)
-    document.addEventListener('DOMContentLoaded', function() {
-        const scrollContainers = document.querySelectorAll('.custom-scrollbar');
-        
-        scrollContainers.forEach(container => {
-            let scrollTimeout;
-            
-            container.addEventListener('scroll', function() {
-                // Add scrolling class
-                this.classList.add('scrolling');
-                
-                // Clear existing timeout
-                clearTimeout(scrollTimeout);
-                
-                // Remove scrolling class after scrolling stops
-                scrollTimeout = setTimeout(() => {
-                    this.classList.remove('scrolling');
-                }, 1000); // Hide after 1 second of no scrolling
-            });
-        });
-    });
     </script>
 
     @include('transaction.modal.new-request')
+    @include('transaction.modal.view-request')
+    @include('transaction.modal.edit-request')
     @include('transaction.modal.signed')
+    @include('transaction.modal.for-released')
     @include('transaction.modal.released')
     @include('transaction.modal.cancelled')
 </x-app-layout>
