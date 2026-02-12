@@ -39,4 +39,9 @@ class Household extends Model
         return $this->hasMany(Resident::class); // ADDED BY GIAN
     }
 
+    public function christmasBoxes() // added by GIAN
+    {
+        return $this->hasMany(ChristmasBox::class);
+    }
+
 }

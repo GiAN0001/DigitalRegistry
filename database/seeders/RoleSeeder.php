@@ -14,15 +14,28 @@ class RoleSeeder extends Seeder
      */
     public function run(): void
     {
-        // Reset cached roles and permissions
         app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
 
-        // --- 1. CREATE YOUR SYSTEM ROLES ---
-        // Using firstOrCreate() prevents "duplicate" errors if you run this again
+     
+        $superAdminRole = Role::firstOrCreate(['name' => 'super admin']);
         $adminRole = Role::firstOrCreate(['name' => 'admin']);
         $staffRole = Role::firstOrCreate(['name' => 'staff']);
         $helpDeskRole = Role::firstOrCreate(['name' => 'help desk']);
 
+        $superUser = User::firstOrCreate(
+            ['username' => 'superadmin'], //added by GIAN
+            [
+                'password'         => Hash::make('super123'), 
+                'first_name'       => 'System',
+                'last_name'        => 'Superuser',
+                'email'            => 'superadmin@example.com',
+                'contact'          => '0000000000',
+                'status'           => 1,
+                'barangay_role_id' => 1, 
+                'added_by'         => null
+            ]
+        );
+        $superUser->assignRole($superAdminRole);
         
         // --- 2. CREATE YOUR USER ACCOUNTS ---
         // We use firstOrCreate() to find the user by 'username' or create them.

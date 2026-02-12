@@ -30,7 +30,7 @@
                     <div id="detailNotesDisplay" class="p-3 bg-blue-50 border border-blue-100 text-blue-800 rounded italic text-sm mb-4"></div>
                 </div>
 
-                @role('admin')
+                @hasanyrole('admin|super admin')
                     <div id="adminActionSection" class="hidden">
                         <form id="resolveForm" method="POST">
                             @csrf
@@ -51,7 +51,7 @@
                             </div>
                         </form>
                     </div>
-                @endrole
+                @endhasanyrole
 
                 <div id="userCancelSection" class="hidden border-t border-dashed pt-4 mt-4">
                     <form id="cancelForm" method="POST">

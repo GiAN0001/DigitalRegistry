@@ -90,7 +90,7 @@
                                     <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">Inactive</span>
                                 @endif
                             </td>
-                            <td class="px-3 py-4 whitespace-nowrap text-sm font-medium">
+                            <td class="px-3 py-4 whitespace-nowrap text-sm">
 
                                 <a href="#"
                                     x-data
@@ -100,7 +100,7 @@
                                         // 2. Dispatch the user data as JSON
                                         $dispatch('edit-user-data', {{ $user->toJson() }})
                                     "
-                                    class="text-indigo-600 hover:text-blue-700 ml-4">
+                                    class="text-blue-800 hover:text-blue-700 ml-4">
                                         Edit
                                 </a>
 
@@ -111,7 +111,7 @@
                                             $dispatch('open-modal', 'delete-confirmation-modal');
                                             $dispatch('set-delete-target', {{ $user->id }})
                                         "
-                                        class="text-red-600 hover:text-red-900 ml-4">
+                                        class="text-red-800 hover:text-red-900 ml-4">
                                             Delete
                                     </a>
 

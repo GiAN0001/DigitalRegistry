@@ -16,9 +16,8 @@ class TicketController extends Controller
     public function index(): View
     {
         $user = \Auth::user();
-        $isAdmin = $user->hasRole('admin');
+        $isAdmin = $user->hasanyrole('admin|super admin');
 
-        // 1. FORENSIC AGGREGATION: Calculate counts based on role
         $baseQuery = Ticket::query();
         if (!$isAdmin) {
             $baseQuery->where('user_id', $user->id);
@@ -30,7 +29,7 @@ class TicketController extends Controller
         $completedTickets = (clone $baseQuery)->where('status', 'Completed')->count();
         $cancelledTickets = (clone $baseQuery)->where('status', 'Cancelled')->count();
 
-        // 2. Main Table Query
+
         $query = Ticket::with('user');
         if (!$isAdmin) {
             $query->where('user_id', $user->id);
@@ -85,7 +84,7 @@ class TicketController extends Controller
 
     public function start(Ticket $ticket)
     {
-        if (!auth()->user()->hasRole('admin')) abort(403);
+        if (!auth()->user()->hasanyrole('admin|super admin')) abort(403);
 
         $ticket->update(['status' => 'In Progress']);
         return back()->with('success', 'Working on ticket: ' . $ticket->subject);
@@ -95,7 +94,7 @@ class TicketController extends Controller
     public function show(Ticket $ticket): View
     {
         
-        if (Auth::user()->hasRole('admin') && $ticket->status === 'Pending') {
+        if (Auth::user()->hasanyrole('admin|super admin') && $ticket->status === 'Pending') {
             $ticket->update(['status' => 'In Progress']);
         }
 
@@ -110,7 +109,7 @@ class TicketController extends Controller
    
     public function resolve(Request $request, Ticket $ticket)
     {
-        if (!auth()->user()->hasRole('admin')) abort(403);
+        if (!auth()->user()->hasanyrole('admin|super admin')) abort(403);
 
         $validator = \Validator::make($request->all(), [
             'resolution_notes' => 'required|string|min:10'

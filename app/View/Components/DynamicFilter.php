@@ -20,10 +20,15 @@ class DynamicFilter extends Component
      * @param string $column The column to fetch (e.g., 'purok_name')
      * @param string $title  The label for the button
      */
-    public function __construct($model, $column, $title = 'Select...')
+    public function __construct($model, $column, $title = 'Select...', $manualOptions = null) //modified by GIAN
     {
         $this->title = $title;
         $this->column = $column;
+
+        if ($manualOptions) { // added by GIAN
+            $this->options = collect($manualOptions);
+            return;
+        }
 
         try {
             if ($column === 'created_at') {

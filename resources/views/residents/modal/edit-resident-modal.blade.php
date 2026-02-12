@@ -109,30 +109,31 @@
                     />
                     <x-input-error :messages="$errors->get('resident.extension')" class="mt-2" />
                 </div>
-
-                <div class="md:col-span-2">
-                    <x-input-label>Place of Birth <span class="text-red-500">*</span></x-input-label>
-                    <x-text-input 
-                        name="resident[birthplace]" 
-                        x-model="resident.birthplace" 
-                        value="{{ old('resident.birthplace') }}"
-                        x-init="if($el.value) resident.birthplace = $el.value"
-                        class="w-full mt-1"  
-                    />
-                    <x-input-error :messages="$errors->get('resident.birthplace')" class="mt-2" />
-                </div>
-                <div>
-                    <x-input-label>Date of Birth <span class="text-red-500">*</span></x-input-label>
-                    <x-text-input 
-                        type="date" 
-                        name="resident[birthdate]" 
-                        x-model="resident.birthdate" 
-                        value="{{ old('resident.birthdate') }}"
-                        x-init="if($el.value) resident.birthdate = $el.value"
-                        class="w-full mt-1"  
-                    />
-                    <x-input-error :messages="$errors->get('resident.birthdate')" class="mt-2" />
-                </div>
+                    <div class="md:col-span-2">
+                        <x-input-label>Place of Birth <span class="text-red-500">*</span></x-input-label>
+                        <x-text-input 
+                            name="resident[birthplace]" 
+                            x-model="resident.birthplace" 
+                            value="{{ old('resident.birthplace') }}"
+                            x-init="if($el.value) resident.birthplace = $el.value"
+                            class="w-full mt-1"  
+                        />
+                        <x-input-error :messages="$errors->get('resident.birthplace')" class="mt-2" />
+                    </div>
+                    @role('super admin')
+                        <div>
+                            <x-input-label>Date of Birth <span class="text-red-500">*</span></x-input-label>
+                            <x-text-input 
+                                type="date" 
+                                name="resident[birthdate]" 
+                                x-model="resident.birthdate" 
+                                value="{{ old('resident.birthdate') }}"
+                                x-init="if($el.value) resident.birthdate = $el.value"
+                                class="w-full mt-1"  
+                            />
+                            <x-input-error :messages="$errors->get('resident.birthdate')" class="mt-2" />
+                        </div>
+                    @endrole
                 <div>
                     <x-input-label>Sex <span class="text-red-500">*</span></x-input-label>
                     <select 
@@ -198,58 +199,59 @@
                     />
                     <x-input-error :messages="$errors->get('resident.occupation')" class="mt-2" />
                 </div>
-
-                <div>
-                    <x-input-label>Sector</x-input-label>
-                    <select 
-                        name="resident[sector]" 
-                        x-model="resident.sector" 
-                        x-init="let oldVal = '{{ old('resident.sector') }}'; if(oldVal) resident.sector = oldVal"
-                        class="w-full mt-1 border-gray-300 rounded-md shadow-sm"
-                    >
-                        <option value="None">None</option>
-                        <option value="Senior Citizen">Senior Citizen</option>
-                        <option value="PWD">PWD</option>
-                        <option value="Solo Parent">Solo Parent</option>
-                    </select>
-                    <x-input-error :messages="$errors->get('resident.sector')" class="mt-2" />
-                </div>
-                <div>
-                    <x-input-label>Vaccinations</x-input-label>
-                    <select 
-                        name="resident[vaccination]" 
-                        x-model="resident.vaccination" 
-                        x-init="let oldVal = '{{ old('resident.vaccination') }}'; if(oldVal) resident.vaccination = oldVal"
-                        class="w-full mt-1 border-gray-300 rounded-md shadow-sm"
-                    >
-                        <option value="None">None</option>
-                        <option value="Private">Private</option>
-                        <option value="Health Center">Health Center</option>
-                    </select>
-                    <x-input-error :messages="$errors->get('resident.vaccination')" class="mt-2" />
-                </div>
-                <div class="md:col-span-2">
-                    <x-input-label>Comorbidity</x-input-label>
-                    <x-text-input 
-                        name="resident[comorbidity]" 
-                        x-model="resident.comorbidity" 
-                        value="{{ old('resident.comorbidity') }}"
-                        x-init="if($el.value) resident.comorbidity = $el.value"
-                        placeholder="e.g. Hypertension" class="w-full mt-1" 
-                    />
-                    <x-input-error :messages="$errors->get('resident.comorbidity')" class="mt-2" />
-                </div>
-                <div class="md:col-span-4">
-                    <x-input-label>Maintenance Medication</x-input-label>
-                    <x-text-input 
-                        name="resident[maintenance]" 
-                        x-model="resident.maintenance" 
-                        value="{{ old('resident.maintenance') }}"
-                        x-init="if($el.value) resident.maintenance = $el.value"
-                        class="w-full mt-1" 
-                    />
-                    <x-input-error :messages="$errors->get('resident.maintenance')" class="mt-2" />
-                </div>
+                @role('super admin')
+                    <div>
+                        <x-input-label>Sector</x-input-label>
+                        <select 
+                            name="resident[sector]" 
+                            x-model="resident.sector" 
+                            x-init="let oldVal = '{{ old('resident.sector') }}'; if(oldVal) resident.sector = oldVal"
+                            class="w-full mt-1 border-gray-300 rounded-md shadow-sm"
+                        >
+                            <option value="None">None</option>
+                            <option value="Senior Citizen">Senior Citizen</option>
+                            <option value="PWD">PWD</option>
+                            <option value="Solo Parent">Solo Parent</option>
+                        </select>
+                        <x-input-error :messages="$errors->get('resident.sector')" class="mt-2" />
+                    </div>
+                    <div>
+                        <x-input-label>Vaccinations</x-input-label>
+                        <select 
+                            name="resident[vaccination]" 
+                            x-model="resident.vaccination" 
+                            x-init="let oldVal = '{{ old('resident.vaccination') }}'; if(oldVal) resident.vaccination = oldVal"
+                            class="w-full mt-1 border-gray-300 rounded-md shadow-sm"
+                        >
+                            <option value="None">None</option>
+                            <option value="Private">Private</option>
+                            <option value="Health Center">Health Center</option>
+                        </select>
+                        <x-input-error :messages="$errors->get('resident.vaccination')" class="mt-2" />
+                    </div>
+                    <div class="md:col-span-2">
+                        <x-input-label>Comorbidity</x-input-label>
+                        <x-text-input 
+                            name="resident[comorbidity]" 
+                            x-model="resident.comorbidity" 
+                            value="{{ old('resident.comorbidity') }}"
+                            x-init="if($el.value) resident.comorbidity = $el.value"
+                            placeholder="e.g. Hypertension" class="w-full mt-1" 
+                        />
+                        <x-input-error :messages="$errors->get('resident.comorbidity')" class="mt-2" />
+                    </div>
+                    <div class="md:col-span-4">
+                        <x-input-label>Maintenance Medication</x-input-label>
+                        <x-text-input 
+                            name="resident[maintenance]" 
+                            x-model="resident.maintenance" 
+                            value="{{ old('resident.maintenance') }}"
+                            x-init="if($el.value) resident.maintenance = $el.value"
+                            class="w-full mt-1" 
+                        />
+                        <x-input-error :messages="$errors->get('resident.maintenance')" class="mt-2" />
+                    </div>
+                @endrole
             </div>
 
             <div class="mt-8 flex justify-end gap-3 border-t pt-6">
