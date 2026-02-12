@@ -11,30 +11,43 @@ class DocumentRequest extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
+   protected $fillable = [
         'resident_id',
         'document_type_id',
         'purpose_id',
         'other_purpose',
+        'email',
+        'contact_no',
+        'annual_income',
         'years_of_stay',
         'months_of_stay',
         'created_by_user_id',
+        'transferred_signature_by_user_id',
+        'transferred_for_released_by_user_id',
+        'released_by_user_id',
+        'cancelled_by_user_id',
         'status',
+        'for_signature_at',
+        'for_release_at',
+        'date_of_release',
+        'date_of_cancel',
         'remarks',
         'fee',
-        'date_of_release',
-        'date_signed',
-        'date_of_cancel',
-        'released_by_user_id',
+        'update_by_user_id',
+        'date_of_edited',
     ];
 
     protected $casts = [
+        'for_signature_at' => 'datetime',
+        'for_release_at' => 'datetime',
         'date_of_release' => 'datetime',
+        'date_of_cancel' => 'datetime',
+        'date_of_edited' => 'datetime',
         'fee' => 'decimal:2',
+        'annual_income' => 'decimal:2',
     ];
 
-    // Add this line to automatically append accessors
-    protected $appends = ['resident_name', 'staff_name', 'releaser_name', 'date_color', 'text_color', 'border_color'];
+    protected $appends = ['resident_name', 'date_color', 'text_color', 'border_color'];
 
     // Relationships
     public function resident(): BelongsTo
@@ -47,128 +60,104 @@ class DocumentRequest extends Model
         return $this->belongsTo(DocumentType::class, 'document_type_id');
     }
 
-    public function createdByUser(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'created_by_user_id');
-    }
-
-    public function purpose()
+    public function purpose(): BelongsTo
     {
         return $this->belongsTo(DocumentPurpose::class, 'purpose_id');
     }
 
-    public function releasedByUser(): BelongsTo
+    public function createdBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by_user_id');
+    }
+
+    public function transferredSignatureBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'transferred_signature_by_user_id');
+    }
+
+    public function transferredForReleasedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'transferred_for_released_by_user_id');
+    }
+
+    public function releasedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'released_by_user_id');
     }
 
+    public function cancelledBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'cancelled_by_user_id');
+    }
+
+    public function updatedByUser()
+    {
+        return $this->belongsTo(User::class, 'update_by_user_id');
+    }
+
     // Scopes
-    /**
-     * Scope to fetch with joined resident and user names (for better performance)
-     */
     public function scopeWithNames($query)
     {
         return $query
             ->leftJoin('residents', 'document_requests.resident_id', '=', 'residents.id')
             ->leftJoin('users as creators', 'document_requests.created_by_user_id', '=', 'creators.id')
+            ->leftJoin('users as signature_transferrers', 'document_requests.transferred_signature_by_user_id', '=', 'signature_transferrers.id')
+            ->leftJoin('users as release_transferrers', 'document_requests.transferred_for_released_by_user_id', '=', 'release_transferrers.id')
             ->leftJoin('users as releasers', 'document_requests.released_by_user_id', '=', 'releasers.id')
+            ->leftJoin('users as cancellers', 'document_requests.cancelled_by_user_id', '=', 'cancellers.id')
             ->select(
                 'document_requests.*',
                 DB::raw("CONCAT(residents.first_name, ' ', residents.last_name) as resident_name"),
-                DB::raw("CONCAT(creators.first_name, ' ', creators.last_name) as staff_name"),
-                DB::raw("CONCAT(releasers.first_name, ' ', releasers.last_name) as releaser_name")
+                DB::raw("CONCAT(creators.first_name, ' ', creators.last_name) as created_by_name"),
+                DB::raw("CONCAT(signature_transferrers.first_name, ' ', signature_transferrers.last_name) as transferred_signature_by_name"),
+                DB::raw("CONCAT(release_transferrers.first_name, ' ', release_transferrers.last_name) as transferred_for_released_by_name"),
+                DB::raw("CONCAT(releasers.first_name, ' ', releasers.last_name) as released_by_name"),
+                DB::raw("CONCAT(cancellers.first_name, ' ', cancellers.last_name) as cancelled_by_name")
             );
     }
 
     // Accessors
-    /**
-     * Get resident name (from join or relationship)
-     */
     public function getResidentNameAttribute()
     {
-        // If fetched via join, use that
         if (isset($this->attributes['resident_name'])) {
             return $this->attributes['resident_name'];
         }
         
-        // Otherwise use relationship
         return $this->resident 
             ? $this->resident->first_name . ' ' . $this->resident->last_name 
             : 'N/A';
     }
 
-    /**
-     * Get staff name (from join or relationship)
-     */
-    public function getStaffNameAttribute()
-    {
-        // If fetched via join, use that
-        if (isset($this->attributes['staff_name'])) {
-            return $this->attributes['staff_name'];
-        }
-        
-        // Otherwise use relationship
-        if ($this->createdByUser) {
-            return $this->createdByUser->first_name . ' ' . $this->createdByUser->last_name;
-        }
-        
-        return 'N/A';
-    }
-
-    /**
-     * Get releaser name (from join or relationship)
-     */
-    public function getReleaserNameAttribute()
-    {
-        // If fetched via join, use that
-        if (isset($this->attributes['releaser_name'])) {
-            return $this->attributes['releaser_name'];
-        }
-        
-        // Otherwise use relationship
-        if ($this->releasedByUser) {
-            return $this->releasedByUser->first_name . ' ' . $this->releasedByUser->last_name;
-        }
-        
-        return null;
-    }
-
-    /**
-     * Get date color based on status
-     */
     public function getDateColorAttribute()
     {
         return match($this->status) {
-            'Pending' => 'bg-gray-200',
-            'Signed' => 'bg-yellow-200',
+            'For Fulfillment' => 'bg-gray-200',
+            'For Signature' => 'bg-blue-200',
+            'For Release' => 'bg-orange-200',
             'Released' => 'bg-green-200',
             'Cancelled' => 'bg-red-200',
             default => 'bg-gray-200',
         };
     }
 
-    /**
-     * Get text color based on status
-     */
     public function getTextColorAttribute()
     {
         return match($this->status) {
-            'Pending' => 'text-gray-700',
-            'Signed' => 'text-amber-800',
+            'For Fulfillment' => 'text-gray-700',
+            'For Signature' => 'text-blue-800',
+            'For Release' => 'text-orange-800',
             'Released' => 'text-green-800',
             'Cancelled' => 'text-red-700',
             default => 'text-gray-700',
         };
     }
 
-    /**
-     * Get border color based on status
-     */
     public function getBorderColorAttribute()
     {
         return match($this->status) {
-            'Pending' => 'border-gray-500',
-            'Signed' => 'border-amber-500',
+            'For Fulfillment' => 'border-gray-500',
+            'For Signature' => 'border-blue-500',
+            'For Release' => 'border-orange-500',
             'Released' => 'border-green-500',
             'Cancelled' => 'border-red-500',
             default => 'border-gray-500',

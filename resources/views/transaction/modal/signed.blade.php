@@ -1,5 +1,5 @@
 <x-modal name="signed" maxWidth="max-w-[500px]" focusable>
-    <div class="p-8 sm:p-12">
+    <div class="p-8 sm:p-8">
         {{-- Close Button (X) --}}
         <div class="flex justify-end mb-4">
             <button
@@ -23,17 +23,18 @@
 
         {{-- Confirmation Message --}}
         <p class="text-slate-400 text-m font-semibold text-center mb-8 italic">
-            Do you want to sign this document request?
+            Do you want to transfer this document request for signature?
         </p>
 
         <input type="hidden" id="request_id" value="" />
 
         {{-- Action Buttons --}}
-        <div class="flex justify-between items-center mt-6">
-            <button type="button" class="py-3 text-gray-600 hover:text-gray-800" @click="$dispatch('close')">Cancel</button>
-            <button type="button" @click="signDocument()" class="px-6 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition shadow-md">
+        <div class="sticky bottom-0 bg-white pt-2 flex justify-end gap-3">
+            <x-secondary-button x-on:click.prevent="$dispatch('close')">Cancel</x-secondary-button>
+            
+            <x-primary-button class="ms-3" type="button" @click="signDocument()">
                 Confirm
-            </button>
+            </x-primary-button>
         </div>
     </div>
 </x-modal>
@@ -61,6 +62,11 @@ function signDocument() {
                       String(now.getMinutes()).padStart(2, '0') + ':' +
                       String(now.getSeconds()).padStart(2, '0');
     
+    console.log('Sending data:', {
+        request_id: requestIdToSign,
+        for_signature_at: mysqlDate
+    });
+    
     fetch('{{ route("document.sign") }}', {
         method: 'POST',
         headers: {
@@ -69,12 +75,12 @@ function signDocument() {
         },
         body: JSON.stringify({
             request_id: requestIdToSign,
-            date_signed: mysqlDate
+            for_signature_at: mysqlDate  // Changed from date_signed
         })
     })
     .then(response => response.json())
     .then(data => {
-        console.log('Document signed:', data);
+        console.log('Document transferred:', data);
         if (data.success) {
             // Close the sign modal
             window.dispatchEvent(new CustomEvent('close-modal', { detail: 'signed' }));
@@ -91,8 +97,8 @@ function signDocument() {
         }
     })
     .catch(error => {
-        console.error('Error signing document:', error);
-        alert('Error signing document: ' + error.message);
+        console.error('Error transferring document:', error);
+        alert('Error transferring document: ' + error.message);
     });
 }
 </script>
