@@ -25,7 +25,7 @@
             <span>Residents</span>
         </a>
 
-        @hasanyrole('admin|help desk')
+        @hasanyrole('admin|help desk|super admin')
             <x-sidebar.dropdown title="Transactions" :active="request()->routeIs('transaction.document*', 'reservations.*')">
                 <x-slot name="icon">
                     <x-lucide-scroll-text class="w-5 h-5" />
@@ -56,7 +56,7 @@
                 <span class="font-medium">Tickets</span>
                 
                 @php
-                    $ticketCount = (auth()->user()->hasRole('admin')) 
+                    $ticketCount = (auth()->user()->hasanyrole('admin|super admin')) 
                         ? \App\Models\Ticket::where('status', 'Pending')->count() 
                         : \App\Models\Ticket::where('user_id', auth()->id())->where('is_seen_by_user', 0)->count();
                 @endphp
@@ -68,7 +68,7 @@
                 @endif
         </a>>
 
-        @role('admin')
+        @hasanyrole('admin|super admin')
             <div class="pt-6 mt-2">
                 <p class="px-3 text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">
                     Administration
@@ -81,9 +81,9 @@
                     </x-slot>
 
                     <li>
-                        <a href="#"
+                        <a href="{{ route('admin.christmas.index') }}"
                             class="flex items-center w-full p-2 text-sm font-medium transition duration-75 rounded-lg
-                            {{ request()->routeIs('services.christmas.*') ? 'bg-blue-700 text-white' : 'text-slate-700 hover:text-white hover:bg-blue-700' }}">
+                            {{ request()->routeIs('admin.christmas.*') ? 'bg-blue-700 text-white' : 'text-slate-700 hover:text-white hover:bg-blue-700' }}">
                             Christmas Boxes
                         </a>
                     </li>
@@ -128,6 +128,6 @@
                     <span>System Logs</span>
                 </a>
             </div>
-        @endrole
+        @endhasanyrole
     </nav>
 </div>

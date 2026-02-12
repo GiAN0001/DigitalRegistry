@@ -52,27 +52,25 @@
                 @endif
 
         </div>
-        
-        <div class="mt-4"></div>
 
-        <div class="p-4 bg-white shadow-md rounded-lg grid overflow-x-auto">
+        <div class="p-4 mt-4 bg-white shadow-md rounded-lg grid overflow-x-auto">
             <div class="overflow-x-auto mt-6">
                 <table class="min-w-full divide-y divide-gray-200"> {{-- Modified by GIAN --}}
                     <thead class="bg-blue-200">
                         <tr>
-                            <th class="px-2 py-2 w-10"></th> 
-                            <th class="px-2 py-2 text-left text-xs font-medium text-slate-700 uppercase tracking-wider">Household No</th>
-                            <th class="px-2 py-2 text-left text-xs font-medium text-slate-700 uppercase tracking-wider">Head of Family</th>
-                            <th class="px-2 py-2 text-left text-xs font-medium text-slate-700 uppercase tracking-wider">Address</th>
-                            <th class="px-2 py-2 text-left text-xs font-medium text-slate-700 uppercase tracking-wider">Members</th>
-                            <th class="px-2 py-2 text-left text-xs font-medium text-slate-700 uppercase tracking-wider">House Structure</th>
-                            <th class="px-2 py-2 text-left text-xs font-medium text-slate-700 uppercase tracking-wider">Ownership</th>
-                            <th class="px-2 py-2 text-left text-xs font-medium text-slate-700 uppercase tracking-wider">Contact</th>
-                            <th class="px-2 py-2 text-left text-xs font-medium text-slate-700 uppercase tracking-wider">Email</th>
+                            <th class="px-2 py-2 w-10 rounded-l-lg"></th> 
+                            <th class="px-2 py-2 text-left text-xs font-bold text-slate-700 uppercase tracking-wider">Household No</th>
+                            <th class="px-2 py-2 text-left text-xs font-bold text-slate-700 uppercase tracking-wider">Head of Family</th>
+                            <th class="px-2 py-2 text-left text-xs font-bold text-slate-700 uppercase tracking-wider">Address</th>
+                            <th class="px-2 py-2 text-left text-xs font-bold text-slate-700 uppercase tracking-wider">Members</th>
+                            <th class="px-2 py-2 text-left text-xs font-bold text-slate-700 uppercase tracking-wider">House Structure</th>
+                            <th class="px-2 py-2 text-left text-xs font-bold text-slate-700 uppercase tracking-wider">Ownership</th>
+                            <th class="px-2 py-2 text-left text-xs font-bold text-slate-700 uppercase tracking-wider">Contact</th>
+                            <th class="px-2 py-2 text-left text-xs font-bold text-slate-700 uppercase tracking-wider">Email</th>
                             
-                            @role('admin')
-                                <th class="px-2 py-2 text-left text-xs font-medium text-slate-700 uppercase tracking-wider">Action</th>
-                            @endrole
+                            @hasanyrole('admin|super admin')
+                                <th class="px-2 py-2 text-left text-xs font-medium text-slate-700 uppercase tracking-wider rounded-r-lg">Action</th>
+                            @endhasanyrole
                         </tr>
                     </thead>
 
@@ -118,7 +116,7 @@
                                 <td class="px-2 py-4 whitespace-nowrap text-sm text-gray-500">
                                     {{ $head->household->email ?? 'N/A' }}
                                 </td>
-                                @role('admin')
+                                @hasanyrole('admin|super admin')
                                     <td class="px-2 py-4 whitespace-nowrap text-sm flex gap-2">
                                         <div>
                                             @php
@@ -137,7 +135,7 @@
                                         </div>
                                         <a href="#" class="text-red-800 hover:underline">Delete</a>
                                     </td>
-                                @endrole
+                                @endhasanyrole
                             </tr>
 
                             <tr x-show="expanded" x-cloak x-transition.opacity class="bg-gray-50">
@@ -151,19 +149,25 @@
                                                     <th class="px-3 py-2">Name</th>
                                                     <th class="px-3 py-2">Role</th>
                                                     <th class="px-3 py-2">Occupation</th>
-                                                    <th class="px-3 py-2">Birthdate</th>
+                                                    @role('super admin')
+                                                       <th class="px-3 py-2">Birthdate</th>
+                                                    @endrole
                                                     <th class="px-3 py-2">Birthplace</th>
                                                     <th class="px-3 py-2">Age</th>
                                                     <th class="px-3 py-2">Sex</th>
                                                     <th class="px-3 py-2">Status</th>
-                                                    <th class="px-3 py-2">Health Informations</th>
-                                                    @role('admin')
-                                                        <th class="px-3 py-2">Actions</th>
+
+                                                    @role('super admin')
+                                                        <th class="px-3 py-2">Health Informations</th>
                                                     @endrole
+
+                                                    @hasanyrole('admin|super admin')
+                                                        <th class="px-3 py-2">Actions</th>
+                                                    @endhasanyrole
                                                 </tr>
                                             </thead>
                                             <tbody class="divide-y divide-gray-200 bg-white">
-                                                {{-- Loop through ALL residents in this household --}}
+                                    
                                                 @foreach($head->household->residents as $member)
                                                     <tr>
                                                         <td class="px-3 py-2 font-medium text-gray-800">
@@ -182,7 +186,11 @@
                                                         <td class="px-3 py-2 ">
                                                             {{ $member->demographic->occupation ?? 'N/A' }}
                                                         </td>
-                                                        <td class="px-3 py-2">{{ $member->demographic->birthdate ?? '-' }}</td>
+                                                        @role('super admin')
+                                                            <td class="px-3 py-2">
+                                                                {{ $member->demographic->birthdate ?? '-' }}
+                                                            </td>
+                                                        @endrole
                                                         <td class="px-3 py-2 ">
                                                             {{ $member->demographic->birthplace ?? 'N/A' }}
                                                         </td>
@@ -191,15 +199,17 @@
                                                         </td>
                                                         <td class="px-3 py-2">{{ $member->demographic->sex ?? '-' }}</td>
                                                         <td class="px-3 py-2">{{ $member->demographic->civil_status ?? '-' }}</td>
-                                                        <td class="px-3 py-2">
-                                                            <div class="flex flex-col text-xs gap-3">
-                                                                <span><span class="bg-blue-100 text-blue-800 px-2 py-0.5 rounded w-fit">Sector:</span> {{ $member->healthInformation->sector ?? 'N/A' }}</span>
-                                                                <span><span class="bg-green-100 text-green-800 px-2 py-0.5 rounded w-fit">Vaccination:</span> {{ $member->healthInformation->vaccination ?? 'None' }}</span>
-                                                                <span><span class="bg-amber-100 text-amber-800 px-2 py-0.5 rounded w-fit">Comorbidity:</span> {{ $member->healthInformation->comorbidity ?? 'None' }}</span>
-                                                                <span><span class="bg-purple-100 text-purple-800 px-2 py-0.5 rounded w-fit">Maintenance:</span> {{ $member->healthInformation->maintenance ?? 'None'}}</span>
-                                                            </div>
-                                                        </td>
-                                                        @role('admin')
+                                                        @role('super admin')
+                                                            <td class="px-3 py-2">
+                                                                <div class="flex flex-col text-xs gap-3">
+                                                                    <span><span class="bg-blue-100 text-blue-800 px-2 py-0.5 rounded w-fit">Sector:</span> {{ $member->healthInformation->sector ?? 'N/A' }}</span>
+                                                                    <span><span class="bg-green-100 text-green-800 px-2 py-0.5 rounded w-fit">Vaccination:</span> {{ $member->healthInformation->vaccination ?? 'None' }}</span>
+                                                                    <span><span class="bg-amber-100 text-amber-800 px-2 py-0.5 rounded w-fit">Comorbidity:</span> {{ $member->healthInformation->comorbidity ?? 'None' }}</span>
+                                                                    <span><span class="bg-purple-100 text-purple-800 px-2 py-0.5 rounded w-fit">Maintenance:</span> {{ $member->healthInformation->maintenance ?? 'None'}}</span>
+                                                                </div>
+                                                            </td>
+                                                        @endrole
+                                                        @hasanyrole('admin|super admin')
                                                             <td class="px-3 py-2">
                                                                 <button 
                                                                     x-data 
@@ -210,7 +220,7 @@
                                                                 </button>
                                                                 <a href="#" class="text-red-800 hover:underline">Delete</a>
                                                             </td>
-                                                        @endrole
+                                                        @endhasanyrole
                                                     </tr>
                                                 @endforeach
                                                 

@@ -1,7 +1,7 @@
 <x-app-layout> {{-- file created by gian --}}
 
 
-    @role('admin')
+    @hasanyrole('admin|super admin')
         <div class = "analytics mb-6">
             <x-analytics-widget
                 title="Pending Tickets"
@@ -28,7 +28,7 @@
                 bg-color="bg-red-500"
                 />
         </div>
-    @endrole
+    @endhasanyrole
 
     <div class="p-6 bg-white shadow-md rounded-lg">
         <div class="flex justify-between items-center mb-6">
@@ -45,7 +45,7 @@
                 <thead class="bg-blue-200">
                     <tr>
                         <th class="px-3 py-3 text-left text-xs font-medium text-slate-700 uppercase tracking-wider rounded-l-lg">Ticket Info</th>
-                        @role('admin')
+                        @hasanyrole('admin|super admin')
                             <th class="px-6 py-3 text-xs font-semibold text-gray-500 uppercase">Reporter</th>
                         @endrole
                         <th class="px-3 py-3 text-left text-xs font-medium text-slate-700 uppercase tracking-wider">Priority</th>
@@ -61,19 +61,19 @@
                             <td class="px-3 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                                 <div class="text-xs text-gray-900">{{ $ticket->ticket_type }}</div>
                             </td>
-                            @role('admin')
+                            @hasanyrole('admin|super admin')
                                 <td class="px-3 py-4 whitespace-nowrap text-sm font-medium text-gray-900 text-sm text-gray-600">
                                     {{ $ticket->user->first_name }} {{ $ticket->user->last_name }}
                                 </td>
-                            @endrole
+                            @endhasanyrole
                             <td class="px-3 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                <span class="px-2 py-1 rounded text-xs font-bold 
+                                <span class="px-2 py-1 rounded-full text-xs font-bold 
                                     {{ $ticket->priority == 'High' ? 'bg-red-100 text-red-700' : ($ticket->priority == 'Medium' ? 'bg-yellow-100 text-yellow-700' : 'bg-green-100 text-green-700') }}">
                                     {{ $ticket->priority }}
                                 </span>
                             </td>
                             <td class="px-3 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                <span class="px-2 py-1 rounded text-xs font-bold 
+                                <span class="px-2 py-1 rounded-full text-xs font-bold 
                                     {{ $ticket->status == 'Pending' ? 'bg-gray-100 text-gray-700' : ($ticket->status == 'In Progress' ? 'bg-blue-100 text-blue-700' : ($ticket->status == 'Completed' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700')) }}">
                                     {{ $ticket->status }}
                                 </span>
@@ -93,9 +93,9 @@
                                     <span class="text-gray-300 italic">--</span>
                                 @endif
                             </td>
-                            <td class="px-3 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                            <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-900">
                                 <button onclick="openTicketDetails({{ $ticket->toJson() }})" 
-                                    class="text-blue-600 hover:text-blue-800 text-sm font-medium transition">
+                                    class="text-blue-600 hover:text-blue-800 text-sm transition">
                                     View Details
                                 </button>
                             </td>
@@ -132,7 +132,7 @@ function openTicketDetails(ticket) {
     document.getElementById('detailFiledDate').innerText = ticket.date_created;
     document.getElementById('detailDoneDate').innerText = ticket.date_done || 'Pending';
 
-    const isAdmin = {{ auth()->user()->hasRole('admin') ? 'true' : 'false' }};
+    const isAdmin = {{ auth()->user()->hasanyrole('admin|super admin') ? 'true' : 'false' }};
     const currentUserId = {{ auth()->id() }};
     
 

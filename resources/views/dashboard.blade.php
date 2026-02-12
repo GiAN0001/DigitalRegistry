@@ -1,5 +1,5 @@
 <x-app-layout>
-    @role('admin')
+    @hasanyrole('admin|super admin') {{-- Only show to admin and super admin added by gian --}}
         <div>
             <div class="max-w-full">
                 <div class="dashboard-grid">
@@ -137,5 +137,5 @@
                 };
             }
         </script>
-    @endrole
+    @endhasanyrole
 </x-app-layout>

@@ -28,6 +28,10 @@
         $module = 'Support';
         $page = 'Tickets';
     }
+    else if (request()->routeIs('admin.christmas.*')) {
+        $module = 'Social Services';
+        $page = 'Christmas Box';
+    }
 @endphp
 
 <div class="sub-content">

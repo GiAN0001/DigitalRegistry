@@ -72,17 +72,13 @@ class Resident extends Model
     // --- RBAC LOGIC (SCOPE) ---
     public function scopeForUser(Builder $query, User $user): Builder
     {
-        if ($user->hasRole('admin') || $user->hasRole('help desk')) {
-            // Admins and Help Desk see everyone
+        if ($user->hasRole('admin') || $user->hasRole('help desk') || $user->hasRole('super admin')) {
             return $query; 
         }
 
         if ($user->hasRole('staff')) {
-            // Staff only see residents they added
             return $query->where('added_by_user_id', $user->id);
         }
-
-        // Failsafe: if user has no role, they see nothing
         return $query->where('id', null); 
     }
 }

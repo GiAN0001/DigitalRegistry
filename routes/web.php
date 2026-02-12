@@ -8,6 +8,7 @@ use App\Http\Controllers\FacilityController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\LogController;
 use App\Http\Controllers\TicketController;
+use App\Http\Controllers\ChristmasBoxController; // added by GIAN
 use Illuminate\Support\Facades\Route;
 
 
@@ -60,13 +61,19 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     // --------------------------------------
 
-    Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
+    
+
+
+
+    Route::middleware(['auth', 'role:admin|super admin'])->prefix('admin')->name('admin.')->group(function () {
 
     
         Route::resource('users', UserController::class);
         Route::get('/logs', [LogController::class, 'index'])->name('users.logs');
 
-    // Other Admin routes (Logs, Events, etc.) would go here later
+        Route::get('/christmas', [ChristmasBoxController::class, 'index'])->name('christmas.index'); // added by GIAN
+        Route::post('/christmas/{household}/release', [ChristmasBoxController::class, 'release'])->name('christmas.release');
+        Route::post('/christmas/{household}/revert', [ChristmasBoxController::class, 'revert'])->name('christmas.revert');
     });
 
     Route::middleware('auth')->group(function () { // Added by gian, ensures only authenticated users can access ticket routes
