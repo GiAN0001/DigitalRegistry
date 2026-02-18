@@ -150,4 +150,9 @@
             {{ $heads->links() }}
         </div>
     </div>
+    @if(session('success'))
+        <x-success-modal name="action-success" :show="true">
+            {{ session('success') }}
+        </x-success-modal>
+    @endif
 </x-app-layout>

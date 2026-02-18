@@ -58,15 +58,9 @@ class Resident extends Model
     {
         return $this->first_name . ' ' . $this->last_name;
     }
-
-    public function demographics() // added by cath
+    public function tupadParticipations()
     {
-        return $this->hasOne(ResidentDemographics::class);
-    }
-
-    public function address() // added by cath
-    {
-        return $this->hasOne(ResidentAddress::class);
+        return $this->hasMany(TupadParticipation::class);
     }
 
     // --- RBAC LOGIC (SCOPE) ---

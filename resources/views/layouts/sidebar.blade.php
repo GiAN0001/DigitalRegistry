@@ -88,9 +88,9 @@
                         </a>
                     </li>
                     <li>
-                        <a href="#"
+                        <a href="{{ route('admin.tupad.index') }}"
                             class="flex items-center w-full p-2 text-sm font-medium transition duration-75 rounded-lg
-                            {{ request()->routeIs('services.tupad.*') ? 'bg-blue-700 text-white' : 'text-slate-700 hover:text-white hover:bg-blue-700' }}">
+                            {{ request()->routeIs('admin.tupad.*') ? 'bg-blue-700 text-white' : 'text-slate-700 hover:text-white hover:bg-blue-700' }}">
                             TUPAD Program
                         </a>
                     </li>

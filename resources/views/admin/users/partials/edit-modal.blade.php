@@ -5,7 +5,6 @@
             // Blade generates the static base URL (e.g., /admin/users) once.
             updateUrlBase: '{{ url("admin/users") }}'
         }"
-        {{-- CRITICAL: Listener moved directly to the div to capture the data immediately --}}
         x-on:edit-user-data.window="user = $event.detail;"
         class="p-6"
     >

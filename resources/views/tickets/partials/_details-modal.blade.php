@@ -38,7 +38,9 @@
                                 <label class="block text-xs font-bold uppercase text-gray-400 mb-1">Admin Resolution Notes</label>
                                 <textarea name="resolution_notes" id="detailNotesInput" rows="3" 
                                         class="w-full border-gray-300 rounded-md shadow-sm text-sm focus:ring-blue-500" 
-                                        placeholder="Describe the fix...">{{ old('resolution_notes') }}</textarea>
+                                        placeholder="Describe the fix...">{{ old('resolution_notes') }}
+                                </textarea>
+                                <x-input-error :messages="$errors->get('resolution_notes')" class="mt-2" />
                             </div>
                             
                             <div class="mt-4 flex justify-between">

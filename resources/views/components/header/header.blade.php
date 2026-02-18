@@ -15,7 +15,7 @@
         $module = 'Transaction';
         $page = 'Facility Reservation';
     } elseif (request()->routeIs('admin.users.*')) {
-        $module = 'Admin';
+        $module = 'Manage Staff';
         $page = 'User Management';
 
         if (request()->routeIs('admin.users.logs')) {
@@ -32,6 +32,12 @@
         $module = 'Social Services';
         $page = 'Christmas Box';
     }
+    else if (request()->routeIs('admin.tupad.*')) {
+        $module = 'Social Services';
+        $page = 'TUPAD Program';
+    }
+
+
 @endphp
 
 <div class="sub-content">
