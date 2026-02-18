@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\LogController;
 use App\Http\Controllers\TicketController;
 use App\Http\Controllers\ChristmasBoxController; // added by GIAN
+use App\Http\Controllers\Admin\TupadController; // added by GIAN
 use Illuminate\Support\Facades\Route;
 
 
@@ -74,6 +75,11 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/christmas', [ChristmasBoxController::class, 'index'])->name('christmas.index'); // added by GIAN
         Route::post('/christmas/{household}/release', [ChristmasBoxController::class, 'release'])->name('christmas.release');
         Route::post('/christmas/{household}/revert', [ChristmasBoxController::class, 'revert'])->name('christmas.revert');
+
+        Route::get('/tupad', [TupadController::class, 'index'])->name('tupad.index'); // added by GIAN
+        Route::post('/admin/tupad/employ', [TupadController::class, 'employ'])->name('tupad.employ'); // added by GIAN
+        Route::post('/admin/tupad/drop', [TupadController::class, 'drop'])->name('tupad.drop'); // added by GIAN
+        Route::put('/admin/tupad/update', [TupadController::class, 'update'])->name('tupad.update'); // added by GIAN
     });
 
     Route::middleware('auth')->group(function () { // Added by gian, ensures only authenticated users can access ticket routes
