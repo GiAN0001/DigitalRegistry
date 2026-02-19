@@ -70,7 +70,6 @@ Route::middleware(['auth'])->group(function () {
 
     
         Route::resource('users', UserController::class);
-        Route::get('/logs', [LogController::class, 'index'])->name('users.logs');
 
         Route::get('/christmas', [ChristmasBoxController::class, 'index'])->name('christmas.index'); // added by GIAN
         Route::post('/christmas/{household}/release', [ChristmasBoxController::class, 'release'])->name('christmas.release');
@@ -80,6 +79,10 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/admin/tupad/employ', [TupadController::class, 'employ'])->name('tupad.employ'); // added by GIAN
         Route::post('/admin/tupad/drop', [TupadController::class, 'drop'])->name('tupad.drop'); // added by GIAN
         Route::put('/admin/tupad/update', [TupadController::class, 'update'])->name('tupad.update'); // added by GIAN
+    });
+
+    Route::middleware(['auth', 'role:super admin'])->prefix('administrator')->name('admin.')->group(function () {
+         Route::get('/logs', [LogController::class, 'index'])->name('users.logs');
     });
 
     Route::middleware('auth')->group(function () { // Added by gian, ensures only authenticated users can access ticket routes
