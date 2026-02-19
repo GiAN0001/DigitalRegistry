@@ -88,9 +88,9 @@
                         </a>
                     </li>
                     <li>
-                        <a href="#"
+                        <a href="{{ route('admin.tupad.index') }}"
                             class="flex items-center w-full p-2 text-sm font-medium transition duration-75 rounded-lg
-                            {{ request()->routeIs('services.tupad.*') ? 'bg-blue-700 text-white' : 'text-slate-700 hover:text-white hover:bg-blue-700' }}">
+                            {{ request()->routeIs('admin.tupad.*') ? 'bg-blue-700 text-white' : 'text-slate-700 hover:text-white hover:bg-blue-700' }}">
                             TUPAD Program
                         </a>
                     </li>
@@ -111,22 +111,17 @@
                             Account Management
                         </a>
                     </li>
-                    <li>
-                        <a href="#"
-                            class="flex items-center w-full p-2 text-sm font-medium transition duration-75 rounded-lg
-                            {{ request()->routeIs('manageStaff.activity') ? 'bg-blue-700 text-white' : 'text-slate-700 hover:text-white hover:bg-blue-700' }}">
-                            User Activity
-                        </a>
-                    </li>
                 </x-sidebar.dropdown>
-
+                
+                @role ('super admin')
                 {{-- Jaz enhance: Added active state logic for System Logs --}}
-                <a href="{{ route('admin.users.logs') }}"
-                    class="flex items-center w-full p-2 text-sm font-medium transition duration-75 rounded-lg
-                    {{ request()->routeIs('admin.users.logs') ? 'bg-blue-700 text-white' : 'text-slate-700 hover:text-white hover:bg-blue-700' }}">
-                    <x-lucide-history class="w-5 h-5 mr-2" />
-                    <span>System Logs</span>
-                </a>
+                    <a href="{{ route('admin.users.logs') }}"
+                        class="flex items-center w-full p-2 text-sm font-medium transition duration-75 rounded-lg
+                        {{ request()->routeIs('admin.users.logs') ? 'bg-blue-700 text-white' : 'text-slate-700 hover:text-white hover:bg-blue-700' }}">
+                        <x-lucide-history class="w-5 h-5 mr-2" />
+                        <span>System Logs</span>
+                    </a>
+                @endrole
             </div>
         @endhasanyrole
     </nav>

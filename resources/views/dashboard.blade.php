@@ -1,24 +1,29 @@
 <x-app-layout>
     @hasanyrole('admin|super admin') {{-- Only show to admin and super admin added by gian --}}
+        <div class="analytics mb-6">
+            <x-analytics-widget 
+            title="Total Residents" 
+            :value="$totalResidents" 
+            icon-name="users"
+            bg-color="bg-blue-500" />
+    
+
+            <x-analytics-widget 
+            title="Total Households" 
+            :value="$totalHousehold" 
+            icon-name="house"
+            bg-color="bg-blue-500" />
+
+
+            <x-analytics-widget 
+            title="Total Active Users" 
+            :value="$totalActiveUsers" 
+            icon-name="square-user"
+            bg-color="bg-blue-500" />
+        </div>
         <div>
             <div class="max-w-full">
                 <div class="dashboard-grid">
-
-                    <div class="col-span-1 md:col-span-1 lg:col-span-3">
-                        <x-analytics-widget title="Total Residents" :value="$totalResidents" icon-name="users"
-                            bg-color="bg-blue-500" />
-                    </div>
-
-                    <div class="col-span-1 md:col-span-1 lg:col-span-3">
-                        <x-analytics-widget title="Total Households" :value="$totalHousehold" icon-name="house"
-                            bg-color="bg-blue-500" />
-                    </div>
-
-                    <div class="col-span-1 md:col-span-1 lg:col-span-3">
-                        <x-analytics-widget title="Total Active Users" :value="$totalActiveUsers" icon-name="square-user"
-                            bg-color="bg-blue-500" />
-                    </div>
-
                     <div class="col-span-1 md:col-span-2 lg:col-span-9 flex flex-col h-full">
                         <div>
                             <div class="flex justify-between items-center mb-2">

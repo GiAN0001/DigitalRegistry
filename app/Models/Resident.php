@@ -58,6 +58,10 @@ class Resident extends Model
     {
         return $this->first_name . ' ' . $this->last_name;
     }
+    public function tupadParticipations()
+    {
+        return $this->hasMany(TupadParticipation::class);
+    }
 
     // --- RBAC LOGIC (SCOPE) ---
     public function scopeForUser(Builder $query, User $user): Builder
