@@ -1,6 +1,27 @@
 <x-app-layout>
     <div class="sub-content">
-        <div class="flex flex-wrap items-center gap-2 mt-[42px] mb-6">
+
+        {{-- Analytics Widgets for Equipment Types --}}
+        <div class="max-w-full">
+            <div class="dashboard-grid">
+                @forelse($equipments as $equipment)
+                    <div class="col-span-1 md:col-span-1 lg:col-span-3">
+                        <x-analytics-widget 
+                            :title="$equipment->equipment_type" 
+                            :value="$equipment->total_quantity" 
+                            icon-name="box"
+                            bg-color="bg-blue-500"
+                        />
+                    </div>
+                @empty
+                    <div class="col-span-1">
+                        <p class="text-gray-500">No equipment available</p>
+                    </div>
+                @endforelse
+            </div>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2 mt-4 mb-4">
             <x-search-bar placeholder="Search by Name or Transaction ID" class="w-full md:flex-1" />  
         </div>
 
@@ -110,7 +131,7 @@
                             <template x-for="(day, index) in calendarDays" :key="index">
                                 <div 
                                     @click="selectedDate = day.fullDate; selectedDateFormatted = formatDate(day.fullDate)"
-                                    class="min-h-[120px] p-2 border border-gray-200 transition cursor-pointer"
+                                    class="min-h-[160px] p-2 border border-gray-200 transition cursor-pointer flex flex-col"
                                     :class="{
                                         'bg-gray-50': !day.isCurrentMonth,
                                         'bg-white hover:bg-gray-100': day.isCurrentMonth && !day.isToday,
@@ -132,7 +153,7 @@
                                     </div>
                                     
                                     {{-- Event Cards --}}
-                                    <div class="space-y-1">
+                                    <div class="space-y-1 flex-1 overflow-hidden flex flex-col">
                                         <template x-for="event in day.events" :key="event.id">
                                             <div 
                                                 class="text-xs px-2 py-1 rounded cursor-pointer hover:opacity-80 transition-opacity truncate"

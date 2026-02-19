@@ -35,7 +35,95 @@ class FacilityController extends Controller
             ];
         })->sortBy(['date', 'time_sort'])->values();
 
-        return view('transaction.facility', compact('facilities', 'equipments', 'residents', 'reservations', 'events'));
+        // Add equipment statistics
+        $equipmentStats = [
+            [
+                'label' => 'Total Equipment',
+                'value' => Equipment::sum('total_quantity'),
+                'icon' => 'box',
+                'color' => 'blue'
+            ],
+            [
+                'label' => 'Equipment Types',
+                'value' => Equipment::count(),
+                'icon' => 'layers',
+                'color' => 'green'
+            ],
+            [
+                'label' => 'Currently Borrowed',
+                'value' => DB::table('reservation_equipment')
+                    ->where('status', 'borrowed')
+                    ->sum('quantity_borrowed'),
+                'icon' => 'arrow-right',
+                'color' => 'orange'
+            ],
+            [
+                'label' => 'Available Equipment',
+                'value' => Equipment::sum('total_quantity') - DB::table('reservation_equipment')
+                    ->where('status', 'borrowed')
+                    ->sum('quantity_borrowed'),
+                'icon' => 'check-circle',
+                'color' => 'green'
+            ]
+        ];
+
+        return view('transaction.facility', compact('facilities', 'equipments', 'residents', 'reservations', 'events', 'equipmentStats'));
+    }
+
+    public function facility(): View
+    {
+        $facilities = Facility::all();
+        $equipments = Equipment::all();
+        $residents = Resident::all();
+        
+        $reservations = FacilityReservation::with(['facility', 'resident', 'equipments'])
+            ->orderBy('start_date', 'asc')
+            ->get();
+
+        $events = $reservations->map(function($reservation) {
+            return [
+                'id' => $reservation->id,
+                'title' => $reservation->resident->name ?? 'N/A',
+                'date' => $reservation->start_date->format('Y-m-d'),
+                'time' => $reservation->start_date->format('H:i'),
+                'time_sort' => $reservation->start_date->format('H:i:s'),
+                'resident_type' => 'Resident'
+            ];
+        })->toArray();
+
+        // Equipment statistics
+        $equipmentStats = [
+            [
+                'label' => 'Total Equipment',
+                'value' => Equipment::sum('total_quantity'),
+                'icon' => 'box',
+                'color' => 'blue'
+            ],
+            [
+                'label' => 'Equipment Types',
+                'value' => Equipment::count(),
+                'icon' => 'layers',
+                'color' => 'green'
+            ],
+            [
+                'label' => 'Currently Borrowed',
+                'value' => DB::table('reservation_equipment')
+                    ->where('status', 'borrowed')
+                    ->sum('quantity_borrowed'),
+                'icon' => 'arrow-right',
+                'color' => 'orange'
+            ],
+            [
+                'label' => 'Available Equipment',
+                'value' => Equipment::sum('total_quantity') - DB::table('reservation_equipment')
+                    ->where('status', 'borrowed')
+                    ->sum('quantity_borrowed'),
+                'icon' => 'check-circle',
+                'color' => 'green'
+            ]
+        ];
+
+        return view('transaction.facility', compact('facilities', 'equipments', 'residents', 'reservations', 'events', 'equipmentStats'));
     }
 
     public function storeReservation(Request $request)

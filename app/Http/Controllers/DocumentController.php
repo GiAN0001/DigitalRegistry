@@ -18,7 +18,7 @@ class DocumentController extends Controller
             ->with(['documentType', 'purpose'])
             ->orderBy('document_requests.id', 'asc');
 
-        // Get all requests and separate by date
+        // Get all requests
         $allRequests = DocumentRequest::withNames()
             ->with(['documentType', 'resident'])
             ->orderBy('document_requests.id', 'asc')
@@ -26,48 +26,45 @@ class DocumentController extends Controller
 
         $threeDaysAgo = now()->subDays(3);
 
-        // Separate requests: older than 3 days vs newer
-        $requestsOlderThan3Days = $allRequests->filter(function($request) use ($threeDaysAgo) {
-            $dateToCheck = $request->status === 'Released' 
-                ? ($request->date_of_release ?? $request->created_at)
-                : ($request->status === 'Cancelled' 
-                    ? ($request->date_of_cancellation ?? $request->created_at)
-                    : $request->created_at);
-            return $dateToCheck <= $threeDaysAgo;
+        // Separate requests: Keep all in-progress requests, only old Released/Cancelled go to history
+        $inProgressStatuses = ['For Fulfillment', 'For Signature', 'For Release'];
+        
+        $kanbancards = $allRequests->filter(function($request) use ($inProgressStatuses) {
+            // Keep all in-progress requests regardless of age
+            return in_array($request->status, $inProgressStatuses) 
+                || ($request->status === 'Released')
+                || ($request->status === 'Cancelled');
         });
 
-        $requestsNewerThan3Days = $allRequests->filter(function($request) use ($threeDaysAgo) {
-            $dateToCheck = $request->status === 'Released' 
-                ? ($request->date_of_release ?? $request->created_at)
-                : ($request->status === 'Cancelled' 
-                    ? ($request->date_of_cancellation ?? $request->created_at)
-                    : $request->created_at);
-            return $dateToCheck > $threeDaysAgo;
-        });
-
-        // For Fulfillment - only show if newer than 3 days
-        $forFulfillmentRequests = $requestsNewerThan3Days
+            // For Fulfillment - all of them
+        $forFulfillmentRequests = $kanbancards
             ->where('status', 'For Fulfillment')
             ->values();
         
-        // For Signature - only show if newer than 3 days
-        $forSignatureRequests = $requestsNewerThan3Days
+        // For Signature - all of them
+        $forSignatureRequests = $kanbancards
             ->where('status', 'For Signature')
             ->values();
         
-        // For Release - only show if newer than 3 days
-        $forReleaseRequests = $requestsNewerThan3Days
+        // For Release - all of them
+        $forReleaseRequests = $kanbancards
             ->where('status', 'For Release')
             ->values();
         
-        // Released - show if newer than 3 days
-        $releasedRequests = $requestsNewerThan3Days
+        // Released - newer than 3 days
+        $releasedRequests = $kanbancards
             ->where('status', 'Released')
+            ->filter(function($request) use ($threeDaysAgo) {
+                return ($request->date_of_release ?? $request->created_at) > $threeDaysAgo;
+            })
             ->values();
         
-        // Cancelled - show if newer than 3 days
-        $cancelledRequests = $requestsNewerThan3Days
+        // Cancelled - newer than 3 days
+        $cancelledRequests = $kanbancards
             ->where('status', 'Cancelled')
+            ->filter(function($request) use ($threeDaysAgo) {
+                return ($request->date_of_cancellation ?? $request->created_at) > $threeDaysAgo;
+            })
             ->values();
 
         // History: Show Released and Cancelled if older than 3 days - paginate at query level
