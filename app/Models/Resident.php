@@ -59,16 +59,6 @@ class Resident extends Model
         return $this->first_name . ' ' . $this->last_name;
     }
 
-    public function demographics() // added by cath
-    {
-        return $this->hasOne(ResidentDemographics::class);
-    }
-
-    public function address() // added by cath
-    {
-        return $this->hasOne(ResidentAddress::class);
-    }
-
     // --- RBAC LOGIC (SCOPE) ---
     public function scopeForUser(Builder $query, User $user): Builder
     {
