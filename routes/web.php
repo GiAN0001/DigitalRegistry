@@ -43,28 +43,29 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/residents/{resident}', [ResidentController::class, 'show'])->name('residents.show');  // added by gian, fixed route conflict by cath
 
-    Route::get('/transaction', [DocumentController::class, 'document'])->name('transaction.document');
-    Route::get('/document-requests/{requestId}', [DocumentController::class, 'show']); // added by cath
-    Route::post('/document-request/store', [DocumentController::class, 'store'])->name('document-request.store');
-    Route::put('/document-requests/{requestId}/update', [DocumentController::class, 'update'])->name('document.update'); // added by cath
-    Route::post('/document/sign', [DocumentController::class, 'transferToSignature'])->name('document.sign'); // added and changed by cath
-    Route::post('/document/transfer-for-release', [DocumentController::class, 'transferToRelease'])->name('document.transfer-for-release'); // added and changed by cath
-    Route::post('/document/transfer-for-signature', [DocumentController::class, 'transferToSignature'])->name('document.transfer-for-signature'); // added and changed by cath
-    Route::post('/document/release', [DocumentController::class, 'release'])->name('document.release'); // added and changed by cath
-    Route::post('/document/cancel', [DocumentController::class, 'cancel'])->name('document.cancel'); // added and changed by cath
-    Route::get('/transaction/facility', [FacilityController::class, 'index'])->name('transaction.facility');
-    Route::post('/transaction/facility/reservation', [FacilityController::class, 'storeReservation'])->name('facility.storeReservation');
-    Route::post('/facility/reservation/store', [FacilityController::class, 'storeReservation'])->name('facility.reservation.store');
-
     // --- ADDED: Profile Settings Routes ---
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     // --------------------------------------
 
-    
-
-
+    //Modified by Cath
+    Route::middleware(['role:help desk|admin|super admin'])->group(function () {
+        Route::get('/transaction', [DocumentController::class, 'document'])->name('transaction.document');
+        Route::get('/document-requests/{requestId}', [DocumentController::class, 'show']);
+        Route::post('/document-request/store', [DocumentController::class, 'store'])->name('document-request.store');
+        Route::put('/document-requests/{requestId}/update', [DocumentController::class, 'update'])->name('document.update');
+        Route::post('/document/sign', [DocumentController::class, 'transferToSignature'])->name('document.sign');
+        Route::post('/document/transfer-for-release', [DocumentController::class, 'transferToRelease'])->name('document.transfer-for-release');
+        Route::post('/document/transfer-for-signature', [DocumentController::class, 'transferToSignature'])->name('document.transfer-for-signature');
+        Route::post('/document/release', [DocumentController::class, 'release'])->name('document.release');
+        Route::post('/document/cancel', [DocumentController::class, 'cancel'])->name('document.cancel');
+        
+        Route::get('/transaction/facility', [FacilityController::class, 'index'])->name('transaction.facility');
+        Route::post('/transaction/facility/reservation', [FacilityController::class, 'storeReservation'])->name('facility.storeReservation');
+        Route::post('/facility/reservation/store', [FacilityController::class, 'storeReservation'])->name('facility.reservation.store');
+    });
+    //
 
     Route::middleware(['auth', 'role:admin|super admin'])->prefix('admin')->name('admin.')->group(function () {
 

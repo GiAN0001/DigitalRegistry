@@ -24,17 +24,30 @@
                 </select>
             </div>
 
-            {{-- Resident Type --}}
-            <div class="mb-6">
-                <x-input-label for="resident_type" class="text-sm font-semibold text-slate-800">
-                    Resident Type <span class="text-red-500">*</span>
-                </x-input-label>
-                <select id="resident_type" name="resident_type" required x-model="residentType" @change="resetResidentFields()"
-                    class="w-full px-4 py-3 text-sm text-slate-500 border border-gray-300 rounded-lg focus:border-blue-700 focus:ring-1 focus:ring-blue-700 focus:outline-none mt-2">
-                    <option value="">Select Resident Type</option>
-                    <option value="resident">Resident</option>
-                    <option value="non-resident">Non-Resident</option>
-                </select>
+            {{-- Resident Type and Purpose Category --}}
+            <div class="grid grid-cols-2 gap-4 mb-6">
+                <div>
+                    <x-input-label for="resident_type" class="text-sm font-semibold text-slate-800">
+                        Resident Type <span class="text-red-500">*</span>
+                    </x-input-label>
+                    <select id="resident_type" name="resident_type" required x-model="residentType" @change="resetResidentFields()"
+                        class="w-full px-4 py-3 text-sm text-slate-500 border border-gray-300 rounded-lg focus:border-blue-700 focus:ring-1 focus:ring-blue-700 focus:outline-none mt-2">
+                        <option value="">Select Resident Type</option>
+                        <option value="resident">Resident</option>
+                        <option value="non-resident">Non-Resident</option>
+                    </select>
+                </div>
+                <div>
+                    <x-input-label for="purpose_category" class="text-sm font-semibold text-slate-800">
+                        Purpose Category <span class="text-red-500">*</span>
+                    </x-input-label>
+                    <select id="purpose_category" name="purpose_category" required
+                        class="w-full px-4 py-3 text-sm text-slate-500 border border-gray-300 rounded-lg focus:border-blue-700 focus:ring-1 focus:ring-blue-700 focus:outline-none mt-2">
+                        <option value="">Select Purpose Category</option>
+                        <option value="Sports">Sports</option>
+                        <option value="Non-Sports">Non-Sports</option>
+                    </select>
+                </div>
             </div>
 
             {{-- Event Name --}}
@@ -47,8 +60,8 @@
             </div>
 
             <!-- Name with search for Residents -->
-            <div class="mb-4" x-show="residentType === 'resident'" x-cloak>
-                <x-input-label for="searchInput">Name <span class="text-red-500">*</span></x-input-label>
+            <div class="mb-6" x-show="residentType === 'resident'" x-cloak>
+                <x-input-label for="searchInput" class="text-sm font-semibold text-slate-800">Name <span class="text-red-500">*</span></x-input-label>
                 <div class="relative">
                     <x-text-input 
                         id="searchInput" 
@@ -75,19 +88,10 @@
                 <!-- Hidden input for resident_id -->
                 <input type="hidden" name="resident_id" x-model="residentId" />
             </div>
-
-            <!-- Contact No. for Residents (Display only) -->
-            <div class="mb-6" x-show="residentType === 'resident'" x-cloak>
-                <x-input-label for="resident_contact_display" class="text-sm font-semibold text-slate-800">
-                    Contact No.
-                </x-input-label>
-                <input type="text" id="resident_contact_display" x-model="residentContact" readonly
-                    class="w-full px-4 py-3 text-sm text-slate-500 bg-gray-100 border border-gray-300 rounded-lg mt-2">
-            </div>
-
+                    
             <!-- Name field for Non-Residents -->
-            <div class="mb-4" x-show="residentType === 'non-resident'" x-cloak>
-                <x-input-label for="renter_name_non">Name <span class="text-red-500">*</span></x-input-label>
+            <div class="mb-6" x-show="residentType === 'non-resident'" x-cloak>
+                <x-input-label for="renter_name_non" class="text-sm font-semibold text-slate-800">Name <span class="text-red-500">*</span></x-input-label>
                 <x-text-input 
                     id="renter_name_non" 
                     name="renter_name"
@@ -95,17 +99,26 @@
                     x-model="renterName"
                     x-bind:required="residentType === 'non-resident'"
                     class="w-full mt-1 text-sm text-slate-700"
-                    placeholder="Enter name..." 
+                    placeholder="Enter name" 
                     autocomplete="off" />
             </div>
 
-            {{-- Contact No. for Non-Residents --}}
-            <div class="mb-6" x-show="residentType === 'non-resident'" x-cloak>
-                <x-input-label for="non_resident_contact" class="text-sm font-semibold text-slate-800">
-                    Contact No. <span class="text-red-500">*</span>
-                </x-input-label>
-                <input type="text" id="non_resident_contact" name="renter_contact" x-model="renterContact" x-bind:required="residentType === 'non-resident'" placeholder="Enter Contact No."
-                    class="w-full px-4 py-3 text-sm text-slate-500 border border-gray-300 rounded-lg focus:border-blue-700 focus:ring-1 focus:ring-blue-700 focus:outline-none mt-2">
+            {{-- Email and Contact No. in one row --}}
+            <div class="grid grid-cols-2 gap-4 mb-6">
+                <div>
+                    <x-input-label for="email" class="text-sm font-semibold text-slate-800">
+                        Email Address <span class="text-red-500">*</span>
+                    </x-input-label>
+                    <input type="email" id="email" name="email" required placeholder="Enter Email Address"
+                        class="w-full px-4 py-3 text-sm text-slate-500 border border-gray-300 rounded-lg focus:border-blue-700 focus:ring-1 focus:ring-blue-700 focus:outline-none mt-2">
+                </div>
+                <div>
+                    <x-input-label for="contact_no" class="text-sm font-semibold text-slate-800">
+                        Contact No. <span class="text-red-500">*</span>
+                    </x-input-label>
+                    <input type="text" id="contact_no" name="renter_contact" x-model="residentType === 'resident' ? residentContact : renterContact" x-bind:required="residentType === 'non-resident'" placeholder="Enter Contact No."
+                        class="w-full px-4 py-3 text-sm text-slate-500 border border-gray-300 rounded-lg focus:border-blue-700 focus:ring-1 focus:ring-blue-700 focus:outline-none mt-2" :readonly="residentType === 'resident'">
+                </div>
             </div>
 
             {{-- Start Date and End Date --}}
@@ -132,15 +145,39 @@
                     <x-input-label for="time_start" class="text-sm font-semibold text-slate-800">
                         Time Start <span class="text-red-500">*</span>
                     </x-input-label>
-                    <input type="time" id="time_start" name="time_start" required
-                        class="w-full px-4 py-3 text-sm text-slate-500 border border-gray-300 rounded-lg focus:border-blue-700 focus:ring-1 focus:ring-blue-700  focus:outline-none mt-2">
+                    <select id="time_start" name="time_start" required
+                        class="w-full px-4 py-3 text-sm text-slate-500 border border-gray-300 rounded-lg focus:border-blue-700 focus:ring-1 focus:ring-blue-700 focus:outline-none mt-2">
+                        <option value="">Select Start Hour</option>
+                        @for($hour = 6; $hour <= 22; $hour++)
+                            @php
+                                $displayHour = $hour > 12 ? $hour - 12 : ($hour == 12 ? 12 : $hour);
+                                $period = $hour >= 12 ? 'PM' : 'AM';
+                                $timeValue = str_pad($hour, 2, '0', STR_PAD_LEFT) . ':00:00';
+                            @endphp
+                            <option value="{{ $timeValue }}">
+                                {{ str_pad($displayHour, 2, '0', STR_PAD_LEFT) }}:00 {{ $period }}
+                            </option>
+                        @endfor
+                    </select>
                 </div>
                 <div>
                     <x-input-label for="time_end" class="text-sm font-semibold text-slate-800">
                         Time End <span class="text-red-500">*</span>
                     </x-input-label>
-                    <input type="time" id="time_end" name="time_end" required
+                    <select id="time_end" name="time_end" required
                         class="w-full px-4 py-3 text-sm text-slate-500 border border-gray-300 rounded-lg focus:border-blue-700 focus:ring-1 focus:ring-blue-700 focus:outline-none mt-2">
+                        <option value="">Select End Hour</option>
+                        @for($hour = 6; $hour <= 22; $hour++)
+                            @php
+                                $displayHour = $hour > 12 ? $hour - 12 : ($hour == 12 ? 12 : $hour);
+                                $period = $hour >= 12 ? 'PM' : 'AM';
+                                $timeValue = str_pad($hour, 2, '0', STR_PAD_LEFT) . ':00:00';
+                            @endphp
+                            <option value="{{ $timeValue }}">
+                                {{ str_pad($displayHour, 2, '0', STR_PAD_LEFT) }}:00 {{ $period }}
+                            </option>
+                        @endfor
+                    </select>
                 </div>
             </div>
 
