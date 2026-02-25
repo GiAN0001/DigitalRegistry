@@ -3,6 +3,7 @@
 <div class="relative inline-block w-auto h-10">
     <input 
         type="date" 
+        name="date" {{-- <-- Added by Cath --}}
         {{ $disabled ? 'disabled' : '' }} 
         {!! $attributes->merge(['class' => 'block w-full h-10 pl-10 pr-4 py-2 text-sm font-normal text-slate-500 bg-slate-50 border-none rounded-lg shadow-sm focus:outline-none focus:ring-1 focus:ring-slate-200 date-input']) !!}
         value="{{ $value }}"

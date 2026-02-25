@@ -12,31 +12,50 @@ use Illuminate\View\View;
 
 class DocumentController extends Controller
 {
-    public function document(): View
+    public function document(Request $request): View
     {
-        $baseQuery = DocumentRequest::withNames()
-            ->with(['documentType', 'purpose'])
-            ->orderBy('document_requests.id', 'asc');
+        $search = $request->input('search', '');
+        $date = $request->input('date');
+        $threeDaysAgo = now()->subDays(3);
+        $inProgressStatuses = ['For Fulfillment', 'For Signature', 'For Release'];
 
-        // Get all requests
-        $allRequests = DocumentRequest::withNames()
-            ->with(['documentType', 'resident'])
+        $baseQuery = DocumentRequest::withNames()
+    ->with(['documentType', 'purpose', 'resident']);
+
+        if ($search) {
+            $baseQuery->where(function ($q) use ($search) {
+                $q->whereHas('resident', function ($query) use ($search) {
+                    $query->where('first_name', 'like', '%' . $search . '%')
+                        ->orWhere('last_name', 'like', '%' . $search . '%');
+                })
+                ->orWhere('document_requests.id', 'like', '%' . $search . '%');
+            });
+        }
+
+        if ($date) {
+            $baseQuery->whereDate('document_requests.created_at', $date);
+        }
+
+        $name = $request->input('name');
+        if ($name) {
+            $baseQuery->whereHas('documentType', function ($q) use ($name) {
+                $q->where('name', $name);
+            });
+        }
+
+        $allRequests = $baseQuery
             ->orderBy('document_requests.id', 'asc')
             ->get();
-
-        $threeDaysAgo = now()->subDays(3);
+           
 
         // Separate requests: Keep all in-progress requests, only old Released/Cancelled go to history
-        $inProgressStatuses = ['For Fulfillment', 'For Signature', 'For Release'];
-        
         $kanbancards = $allRequests->filter(function($request) use ($inProgressStatuses) {
-            // Keep all in-progress requests regardless of age
             return in_array($request->status, $inProgressStatuses) 
                 || ($request->status === 'Released')
                 || ($request->status === 'Cancelled');
         });
-
-            // For Fulfillment - all of them
+        
+        // For Fulfillment - all of them
         $forFulfillmentRequests = $kanbancards
             ->where('status', 'For Fulfillment')
             ->values();
@@ -68,7 +87,7 @@ class DocumentController extends Controller
             ->values();
 
         // History: Show Released and Cancelled if older than 3 days - paginate at query level
-        $historyRequests = DocumentRequest::withNames()
+        $historyQuery = DocumentRequest::withNames()
             ->with(['documentType', 'resident'])
             ->where(function($query) use ($threeDaysAgo) {
                 $query->where('document_requests.status', 'Released')
@@ -77,12 +96,24 @@ class DocumentController extends Controller
                         $q->where('document_requests.status', 'Cancelled')
                             ->where('document_requests.date_of_cancel', '<=', $threeDaysAgo);
                     });
-            })
+            });
+
+        if ($search) {
+            $historyQuery->where(function ($q) use ($search) {
+                $q->whereHas('resident', function ($query) use ($search) {
+                    $query->where('first_name', 'like', '%' . $search . '%')
+                        ->orWhere('last_name', 'like', '%' . $search . '%');
+                })
+                ->orWhere('document_requests.id', 'like', '%' . $search . '%');
+            });
+        }
+
+        $historyRequests = $historyQuery
             ->orderBy('document_requests.id', 'desc')
             ->paginate(15);
 
-        $documentTypes = DocumentType::all();
-        $documentPurposes = DocumentPurpose::all();
+            $documentTypes = DocumentType::all();
+            $documentPurposes = DocumentPurpose::all();
 
         return view('transaction.document', compact(
             'forFulfillmentRequests',
@@ -92,7 +123,9 @@ class DocumentController extends Controller
             'cancelledRequests',
             'historyRequests',
             'documentTypes',
-            'documentPurposes'
+            'documentPurposes',
+            'search',
+            'date'
         ));
     }
 

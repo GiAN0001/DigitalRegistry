@@ -1,3 +1,18 @@
+@php
+    $jsReservations = \App\Models\FacilityReservation::whereIn('status', ['For Approval', 'For Payment', 'Paid'])
+        ->get()
+        ->map(function($r) {
+            return [
+                'facility_id' => $r->facility_id,
+                'start_date' => \Carbon\Carbon::parse($r->start_date)->format('Y-m-d'),
+                'end_date' => \Carbon\Carbon::parse($r->end_date)->format('Y-m-d'),
+                'time_start' => $r->getRawOriginal('time_start'),
+                'time_end' => $r->getRawOriginal('time_end'),
+                'status' => $r->status,
+            ];
+        });
+@endphp
+
 <x-modal name="new-reservation" maxWidth="max-w-[700px]" focusable>
     <div class="p-8">
         <div class="flex justify-between items-start mb-4">
@@ -6,8 +21,7 @@
                 <x-lucide-x class="w-6 h-6"/>
             </button>
         </div>
-
-        <form method="POST" action="{{ route('facility.reservation.store') }}" id="reservationForm" x-data="reservationForm()" @submit="handleSubmit($event)">
+        <form method="POST" action="{{ route('facility.reservation.store') }}" id="reservationForm" x-data="reservationForm()" @submit="handleSubmit($event)" x-cloak>
             @csrf
             
             {{-- Facility Selection --}}
@@ -15,7 +29,7 @@
                 <x-input-label for="facility_id" class="text-sm font-semibold text-slate-700">
                     Facility <span class="text-red-500">*</span>
                 </x-input-label>
-                <select id="facility_id" name="facility_id" required
+                <select id="facility_id" name="facility_id" required x-model="facilityId"
                     class="w-full px-4 py-3 text-sm text-slate-500 border border-gray-300 rounded-lg focus:border-blue-700 focus:ring-1 focus:ring-blue-700 focus:outline-none mt-2">
                     <option value="">Select Facility</option>
                     @foreach($facilities as $facility)
@@ -128,7 +142,7 @@
                         Start Date <span class="text-red-500">*</span>
                     </x-input-label>
                     <input type="date" id="start_date" name="start_date" required
-                        class="w-full px-4 py-3 text-sm text-slate-500 border border-gray-300 rounded-lg focus:border-blue-700 focus:ring-1 focus:ring-blue-700 focus:outline-none mt-2">
+                            class="w-full px-4 py-3 text-sm text-slate-500 border border-gray-300 rounded-lg focus:border-blue-700 focus:ring-1 focus:ring-blue-700 focus:outline-none mt-2">
                 </div>
                 <div>
                     <x-input-label for="end_date" class="text-sm font-semibold text-slate-800">
@@ -146,18 +160,10 @@
                         Time Start <span class="text-red-500">*</span>
                     </x-input-label>
                     <select id="time_start" name="time_start" required
+                        x-model="timeStart"
+                        @change="onTimeStartChange()"
                         class="w-full px-4 py-3 text-sm text-slate-500 border border-gray-300 rounded-lg focus:border-blue-700 focus:ring-1 focus:ring-blue-700 focus:outline-none mt-2">
                         <option value="">Select Start Hour</option>
-                        @for($hour = 6; $hour <= 22; $hour++)
-                            @php
-                                $displayHour = $hour > 12 ? $hour - 12 : ($hour == 12 ? 12 : $hour);
-                                $period = $hour >= 12 ? 'PM' : 'AM';
-                                $timeValue = str_pad($hour, 2, '0', STR_PAD_LEFT) . ':00:00';
-                            @endphp
-                            <option value="{{ $timeValue }}">
-                                {{ str_pad($displayHour, 2, '0', STR_PAD_LEFT) }}:00 {{ $period }}
-                            </option>
-                        @endfor
                     </select>
                 </div>
                 <div>
@@ -167,13 +173,17 @@
                     <select id="time_end" name="time_end" required
                         class="w-full px-4 py-3 text-sm text-slate-500 border border-gray-300 rounded-lg focus:border-blue-700 focus:ring-1 focus:ring-blue-700 focus:outline-none mt-2">
                         <option value="">Select End Hour</option>
-                        @for($hour = 6; $hour <= 22; $hour++)
+                        @for($hour = 7; $hour <= 22; $hour++)
                             @php
-                                $displayHour = $hour > 12 ? $hour - 12 : ($hour == 12 ? 12 : $hour);
+                                $displayHour = $hour > 12 ? $hour - 12 : ($hour == 0 ? 12 : $hour);
                                 $period = $hour >= 12 ? 'PM' : 'AM';
                                 $timeValue = str_pad($hour, 2, '0', STR_PAD_LEFT) . ':00:00';
                             @endphp
-                            <option value="{{ $timeValue }}">
+                            <option 
+                                value="{{ $timeValue }}"
+                                :disabled="getUnavailableEndTimes().includes('{{ $timeValue }}')"
+                                :class="getUnavailableEndTimes().includes('{{ $timeValue }}') ? 'text-red-400' : ''"
+                            >
                                 {{ str_pad($displayHour, 2, '0', STR_PAD_LEFT) }}:00 {{ $period }}
                             </option>
                         @endfor
@@ -215,15 +225,147 @@
             </div>
 
             <!-- Action Buttons -->
-            <div class="flex justify-between items-center mt-6">
-                <button type="button" class="py-3 text-gray-600 hover:text-gray-800" @click="$dispatch('close')">Cancel</button>
-                <button type="submit" class="px-6 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition shadow-md">
+            <div class="sticky bottom-0 bg-white pt-4 border-t border-gray-200 flex justify-end gap-3">
+                <x-secondary-button @click="$dispatch('close')">Cancel</x-secondary-button>
+                
+                <x-primary-button class="ms-3" type="submit">
                     Confirm
-                </button>
+                </x-primary-button>
             </div>
         </form>
     </div>
 </x-modal>
+
+<script>
+    function buildTimeStartOptions() {
+        const select = document.getElementById('time_start');
+        const facilityId = document.getElementById('facility_id')?.value;
+        const startDate = document.getElementById('start_date')?.value;
+        const endDate = document.getElementById('end_date')?.value || startDate;
+        
+        if (!facilityId || !startDate) {
+            select.innerHTML = '<option value="">Select Start Hour</option>';
+            return;
+        }
+        
+        // Get booked times
+        const unavailable = (window.existingReservations || [])
+            .filter(r => {
+                return r.facility_id == facilityId &&
+                    ['For Approval', 'For Payment', 'Paid'].includes(r.status) &&
+                    startDate <= r.end_date && endDate >= r.start_date;
+            })
+            .flatMap(r => {
+                let rStartHour = parseInt(r.time_start.split(':')[0]);
+                let rEndHour = parseInt(r.time_end.split(':')[0]);
+                let times = [];
+                for (let h = rStartHour; h < rEndHour; h++) {
+                    times.push(String(h).padStart(2, '0') + ':00:00');
+                }
+                return times;
+            });
+        
+        // Keep the default option
+        const defaultOption = document.createElement('option');
+        defaultOption.value = '';
+        defaultOption.textContent = 'Select Start Hour';
+        select.innerHTML = '';
+        select.appendChild(defaultOption);
+        
+        for (let hour = 6; hour <= 21; hour++) {
+            const timeValue = String(hour).padStart(2, '0') + ':00:00';
+            
+            // Skip if this time is booked
+            if (unavailable.includes(timeValue)) {
+                continue;
+            }
+            
+            const displayHour = hour > 12 ? hour - 12 : (hour === 0 ? 12 : hour);
+            const period = hour >= 12 ? 'PM' : 'AM';
+            
+            const option = document.createElement('option');
+            option.value = timeValue;
+            option.textContent = String(displayHour).padStart(2, '0') + ':00 ' + period;
+            select.appendChild(option);
+        }
+    }
+
+    function buildTimeEndOptions() {
+        const select = document.getElementById('time_end');
+        const timeStart = document.getElementById('time_start')?.value;
+        
+        if (!timeStart) {
+            select.innerHTML = '<option value="">Select End Hour</option>';
+            return;
+        }
+        
+        const startHour = parseInt(timeStart.split(':')[0]);
+        const facilityId = document.getElementById('facility_id')?.value;
+        const startDate = document.getElementById('start_date')?.value;
+        const endDate = document.getElementById('end_date')?.value || startDate;
+        
+        // Get booked times
+        const unavailable = (window.existingReservations || [])
+            .filter(r => {
+                return r.facility_id == facilityId &&
+                    ['For Approval', 'For Payment', 'Paid'].includes(r.status) &&
+                    startDate <= r.end_date && endDate >= r.start_date;
+            })
+            .flatMap(r => {
+                let rStartHour = parseInt(r.time_start.split(':')[0]);
+                let rEndHour = parseInt(r.time_end.split(':')[0]);
+                let times = [];
+                for (let h = rStartHour; h < rEndHour; h++) {
+                    times.push(String(h).padStart(2, '0') + ':00:00');
+                }
+                return times;
+            });
+        
+        // Keep the default option
+        const defaultOption = document.createElement('option');
+        defaultOption.value = '';
+        defaultOption.textContent = 'Select End Hour';
+        select.innerHTML = '';
+        select.appendChild(defaultOption);
+        
+        for (let hour = 7; hour <= 22; hour++) {
+            const timeValue = String(hour).padStart(2, '0') + ':00:00';
+            
+            // Skip if this hour is <= start hour OR booked
+            if (hour <= startHour || unavailable.includes(timeValue)) {
+                continue;
+            }
+            
+            const displayHour = hour > 12 ? hour - 12 : (hour === 0 ? 12 : hour);
+            const period = hour >= 12 ? 'PM' : 'AM';
+            
+            const option = document.createElement('option');
+            option.value = timeValue;
+            option.textContent = String(displayHour).padStart(2, '0') + ':00 ' + period;
+            select.appendChild(option);
+        }
+    }
+    
+    // Rebuild when facility/date changes
+    document.getElementById('facility_id')?.addEventListener('change', () => {
+        buildTimeStartOptions();
+        buildTimeEndOptions();
+    });
+    document.getElementById('start_date')?.addEventListener('change', () => {
+        buildTimeStartOptions();
+        buildTimeEndOptions();
+    });
+    document.getElementById('end_date')?.addEventListener('change', () => {
+        buildTimeStartOptions();
+        buildTimeEndOptions();
+    });
+    
+    // Rebuild when start time changes
+    document.getElementById('time_start')?.addEventListener('change', buildTimeEndOptions);
+    
+    // Initial build
+    buildTimeStartOptions();
+</script>
 
 <script>
     function reservationForm() {
@@ -233,12 +375,18 @@
             residentContact: '',
             renterName: '',
             renterContact: '',
+            timeStart: '',
+            timeEnd: '',
+            startDate: '',
+            endDate: '',
+            facilityId: '',
             equipmentItems: [{}],
             searchQuery: '',
             open: false,
             suggestions: [],
             selectingResident: false,
             searchTimeout: null,
+            errorMessage: '',
 
             handleSubmit(event) {
                 if (this.residentType === 'resident' && !this.residentId) {
@@ -259,8 +407,64 @@
                         return false;
                     }
                 }
+
+                const facilityId = document.getElementById('facility_id').value;
+                const startDate = document.getElementById('start_date').value;
+                const endDate = document.getElementById('end_date').value;
+                const timeStart = document.getElementById('time_start').value;
+                const timeEnd = document.getElementById('time_end').value;
+
+                const hasConflict = (window.existingReservations || [])
+                    .some(r =>
+                        r.facility_id == facilityId &&
+                        ['For Approval', 'For Payment', 'Paid'].includes(r.status) &&
+                        startDate <= r.end_date && 
+                        endDate >= r.start_date &&
+                        timeStart < r.time_end &&
+                        timeEnd > r.time_start
+                    );
+
+                if (hasConflict) {
+                    event.preventDefault();
+                    this.errorMessage = 'This time slot is already booked for the selected facility and date.';
+                    this.$dispatch('open-modal', 'reservation-error');
+                    return false;
+                }
+                // === END CONFLICT CHECK ===
+
+                // If no conflict, submit the form
+                document.getElementById('reservationForm').submit();
+                return false;
+            },
+
+            onTimeStartChange() {
+                if (!this.timeStart) {
+                    this.timeEnd = '';
+                    return;
+                }
+
+                // Parse start hour and add 1 hour
+                let startHour = parseInt(this.timeStart.split(':')[0]);
+                let endHour = startHour + 1;
+
+                // Format end hour
+                if (endHour > 22) {
+                    endHour = 22;
+                }
+
+                this.timeEnd = String(endHour).padStart(2, '0') + ':00:00';
                 
-                return true;
+                // Update the actual select element
+                document.getElementById('time_end').value = this.timeEnd;
+            },
+
+            formatTime(timeString) {
+                if (!timeString) return '';
+                const [hour] = timeString.split(':');
+                const hourNum = parseInt(hour);
+                const displayHour = hourNum > 12 ? hourNum - 12 : (hourNum === 0 ? 12 : hourNum);
+                const period = hourNum >= 12 ? 'PM' : 'AM';
+                return `${String(displayHour).padStart(2, '0')}:00 ${period}`;
             },
 
             resetResidentFields() {
@@ -280,12 +484,86 @@
             removeEquipmentRow(index) {
                 this.equipmentItems.splice(index, 1);
             },
+
+            getUnavailableTimes() {
+                const facilityId = document.getElementById('facility_id')?.value;
+                const startDate = document.getElementById('start_date')?.value;
+                const endDate = document.getElementById('end_date')?.value || startDate;
+
+                if (!facilityId || !startDate) return [];
+
+                let unavailable = [];
+
+                (window.existingReservations || [])
+                    .filter(r =>
+                        r.facility_id == facilityId &&
+                        ['For Approval', 'For Payment', 'Paid'].includes(r.status) &&
+                        startDate <= r.end_date && endDate >= r.start_date
+                    )
+                    .forEach(r => {
+                        let startHour = parseInt(r.time_start.split(':')[0]);
+                        let endHour = parseInt(r.time_end.split(':')[0]);
+
+                        for (let h = startHour; h < endHour; h++) {
+                            let timeValue = String(h).padStart(2, '0') + ':00:00';
+                            if (!unavailable.includes(timeValue)) {
+                                unavailable.push(timeValue);
+                            }
+                        }
+                    });
+
+                return unavailable;
+            },
+
+            getUnavailableEndTimes() {
+                const facilityId = document.getElementById('facility_id')?.value;
+                const startDate = document.getElementById('start_date')?.value;
+                const endDate = document.getElementById('end_date')?.value || startDate;
+
+                if (!facilityId || !startDate || !this.timeStart) return [];
+
+                let unavailable = [];
+                let selectedStartHour = parseInt(this.timeStart.split(':')[0]);
+
+                // === DISABLE ALL HOURS <= SELECTED START HOUR ===
+                for (let h = 6; h <= selectedStartHour; h++) {
+                    unavailable.push(String(h).padStart(2, '0') + ':00:00');
+                }
+                // === END DISABLE ===
+
+                // Find the earliest booked time after selected start time
+                let earliestConflict = 23;
+
+                (window.existingReservations || [])
+                    .filter(r =>
+                        r.facility_id == facilityId &&
+                        ['For Approval', 'For Payment', 'Paid'].includes(r.status) &&
+                        startDate <= r.end_date && endDate >= r.start_date
+                    )
+                    .forEach(r => {
+                        let rStartHour = parseInt(r.time_start.split(':')[0]);
+                        if (rStartHour > selectedStartHour && rStartHour < earliestConflict) {
+                            earliestConflict = rStartHour;
+                        }
+                    });
+
+                // Disable all hours after the earliest conflict
+                for (let h = earliestConflict + 1; h <= 22; h++) {
+                    let timeValue = String(h).padStart(2, '0') + ':00:00';
+                    if (!unavailable.includes(timeValue)) {
+                        unavailable.push(timeValue);
+                    }
+                }
+
+                return unavailable;
+            },
             
             selectResident(resident) {
                 this.selectingResident = true;
                 this.searchQuery = resident.full_name;
                 this.residentId = resident.id;
                 this.residentContact = resident.contact_number || '';
+                document.getElementById('email').value = resident.email || '';
                 this.suggestions = [];
                 this.open = false;
                 setTimeout(() => this.selectingResident = false, 100);
@@ -317,4 +595,7 @@
             }
         }
     }
+
+    window.reservations = @json($jsReservations);
+    window.existingReservations = @json($jsReservations);
 </script>

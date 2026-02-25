@@ -1,8 +1,23 @@
 <x-app-layout>
     <div class="sub-content">
         <div class="flex flex-wrap items-center gap-2 mt-4">
-            <x-search-bar placeholder="Search by Name or Request ID" class="w-full md:flex-1" />  
-            <x-select-date class="w-full md:flex-1" />
+            <x-search-bar 
+                name="search"
+                placeholder="Search by Name or Request ID" 
+                class="w-full md:flex-1"
+                value="{{ $search ?? '' }}"
+            />
+            <x-select-date 
+                class="w-full md:flex-1"
+                :value="$date ?? ''"
+            />
+            <div class="w-full md:flex-1">
+                <x-dynamic-filter
+                    model="App\Models\DocumentType"
+                    column="name"
+                    title="Filter by Document Type"
+                />
+            </div>
             <x-button
                 x-data
                 x-on:click.prevent="$dispatch('open-modal', 'new-request')"
@@ -508,6 +523,60 @@
             }
         });
     });
+
+    const dateInput = document.querySelector('input[name="date"]');
+    if (dateInput) {
+        dateInput.addEventListener('change', debounce(function() {
+            const params = new URLSearchParams(window.location.search);
+            const dateValue = dateInput.value;
+            if (dateValue) {
+                params.set('date', dateValue);
+            } else {
+                params.delete('date');
+            }
+            window.location.href = window.location.pathname + (params.toString() ? '?' + params.toString() : '');
+        }, 300));
+    }
+    function debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func.apply(this, args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    }
+
+    const searchInput = document.querySelector('input[name="search"]');
+    
+    if (searchInput) {
+        searchInput.addEventListener('input', debounce(function() {
+            const searchValue = searchInput.value;
+            const params = new URLSearchParams(window.location.search);
+            
+            if (searchValue) {
+                params.set('search', searchValue);
+            } else {
+                params.delete('search');
+            }
+            
+            window.location.href = window.location.pathname + (params.toString() ? '?' + params.toString() : '');
+        }, 300));
+    }
+    
+    function debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    }
 
     document.addEventListener('click', function(event) {
         const allMenus = document.querySelectorAll('.dropdown-menu');
