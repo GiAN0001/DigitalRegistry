@@ -39,8 +39,6 @@ class FacilityReservation extends Model
     protected $casts = [
         'start_date' => 'date',
         'end_date' => 'date',
-        'time_start' => 'datetime',
-        'time_end' => 'datetime',
         'for_payment_at' => 'datetime',
         'paid_at' => 'datetime',
         'date_of_cancelled' => 'datetime',

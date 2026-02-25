@@ -52,6 +52,7 @@ Route::middleware(['auth'])->group(function () {
     //Modified by Cath
     Route::middleware(['role:help desk|admin|super admin'])->group(function () {
         Route::get('/transaction', [DocumentController::class, 'document'])->name('transaction.document');
+        Route::get('/document', [DocumentController::class, 'document'])->name('document.index'); // Added by Cath
         Route::get('/document-requests/{requestId}', [DocumentController::class, 'show']);
         Route::post('/document-request/store', [DocumentController::class, 'store'])->name('document-request.store');
         Route::put('/document-requests/{requestId}/update', [DocumentController::class, 'update'])->name('document.update');
@@ -62,8 +63,10 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/document/cancel', [DocumentController::class, 'cancel'])->name('document.cancel');
         
         Route::get('/transaction/facility', [FacilityController::class, 'index'])->name('transaction.facility');
+        Route::get('/facility/reservation/{id}', [FacilityController::class, 'show'])->middleware('auth'); // added by cath
         Route::post('/transaction/facility/reservation', [FacilityController::class, 'storeReservation'])->name('facility.storeReservation');
         Route::post('/facility/reservation/store', [FacilityController::class, 'storeReservation'])->name('facility.reservation.store');
+        Route::post('/facility/reservation/{id}/approve-payment', [FacilityController::class, 'approveForPayment']);
     });
     //
 

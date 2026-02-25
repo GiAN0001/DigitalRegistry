@@ -1,5 +1,7 @@
 <x-app-layout>
+    <div x-data="{ successMessage: '' }"></div>
     <div class="sub-content">
+        
 
         {{-- Analytics Widgets for Equipment Types --}}
         <div class="max-w-full">
@@ -157,10 +159,10 @@
                                         <template x-for="event in day.events" :key="event.id">
                                             <div 
                                                 class="text-xs px-2 py-1 rounded cursor-pointer hover:opacity-80 transition-opacity truncate"
-                                                :class="event.resident_type.toLowerCase() === 'resident' ? 'bg-blue-200 text-blue-900' : 'bg-gray-200 text-gray-900'"
+                                                :class="getStatusColor(event.status)"
                                             >
                                                 <div class="font-semibold truncate" x-text="event.title"></div>
-                                                <div class="text-[10px]" x-text="event.time"></div>
+                                                <div class="text-[10px] opacity-80" x-text="event.time"></div>
                                             </div>
                                         </template>
                                         <template x-if="day.moreCount > 0">
@@ -201,6 +203,7 @@
                     </div>
                 </div>
             </div>
+        </div>
     </div>
 
     <script>
@@ -233,6 +236,17 @@
                 return date.toLocaleDateString('en-US', { month: 'long', day: 'numeric' });
             },
             
+            getStatusColor(status) {
+                const colors = {
+                    'For Approval': 'bg-blue-200 text-blue-900',
+                    'For Payment': 'bg-orange-200 text-orange-900',
+                    'Paid': 'bg-green-200 text-green-900',
+                    'Cancelled': 'bg-red-200 text-red-900',
+                    'Rejected': 'bg-gray-200 text-gray-900'
+                };
+                return colors[status] || 'bg-blue-200 text-blue-900';
+            },
+            
             generateCalendar() {
                 const year = this.currentDate.getFullYear();
                 const month = this.currentDate.getMonth();
@@ -258,7 +272,12 @@
                     // Filter events for this date and sort by time_sort
                     const dayEvents = this.events
                         .filter(e => e.date === dateStr)
-                        .sort((a, b) => a.time_sort.localeCompare(b.time_sort));
+                        .sort((a, b) => {
+                            if (a.time_sort && b.time_sort) {
+                                return a.time_sort.localeCompare(b.time_sort);
+                            }
+                            return 0;
+                        });
                     
                     this.calendarDays.push({
                         date: current.getDate(),
@@ -295,5 +314,9 @@
     }
     </script>
 
-@include('transaction.modal.new-reservation')
+    @include('transaction.modal.approve-for-payment')
+    @include('transaction.modal.success-message')
+    @include('transaction.modal.new-reservation')
+    @include('transaction.modal.view-reservation')
+    @include('transaction.modal.reservation-error')
 </x-app-layout>
