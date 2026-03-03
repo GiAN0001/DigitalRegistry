@@ -299,8 +299,9 @@
             </x-button>
         </div>
     </div>
+</x-modal>
 
-    <script>
+<script>
     function editRequestForm() {
         return {
             requestId: '',
@@ -427,7 +428,7 @@
 
                     const data = await response.json();
 
-                    if (!response.ok) {
+                if (!response.ok) {
                         if (data.errors) {
                             this.errors = {};
                             for (const [key, messages] of Object.entries(data.errors)) {
@@ -441,7 +442,13 @@
                     }
 
                     this.$dispatch('close');
-                    window.location.reload();
+                    setTimeout(() => {
+                        window.dispatchEvent(new CustomEvent('set-success-message', { detail: 'Document successfully edited!' }));
+                        window.dispatchEvent(new CustomEvent('open-modal', { detail: 'success-modal' }));
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 2000);
+                    }, 300);
                 } catch (error) {
                     console.error('Error updating request:', error);
                     alert('Failed to update request: ' + error.message);
@@ -450,5 +457,4 @@
             }
         }
     }
-    </script>
-</x-modal>
+</script>

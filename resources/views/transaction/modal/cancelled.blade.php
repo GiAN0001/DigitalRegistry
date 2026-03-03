@@ -103,14 +103,14 @@ function cancelDocument() {
     })
     .then(response => response.json())
     .then(data => {
-        console.log('Document cancelled:', data);
         if (data.success) {
-            // Close modal
             window.dispatchEvent(new CustomEvent('close-modal', { detail: 'cancelled' }));
-            
-            // Reload page without alert
             setTimeout(() => {
-                window.location.reload();
+                window.dispatchEvent(new CustomEvent('set-success-message', { detail: 'Document successfully cancelled!' }));
+                window.dispatchEvent(new CustomEvent('open-modal', { detail: 'success-modal' }));
+                setTimeout(() => {
+                    window.location.reload();
+                }, 2000);
             }, 300);
         } else {
             alert('Error: ' + data.message);

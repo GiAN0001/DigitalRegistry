@@ -60,11 +60,6 @@ function releaseDocument() {
                       String(now.getMinutes()).padStart(2, '0') + ':' +
                       String(now.getSeconds()).padStart(2, '0');
     
-    console.log('Sending data:', {
-        request_id: requestIdForReleased,
-        date_of_release: mysqlDate
-    });
-    
     fetch('{{ route("document.release") }}', {
         method: 'POST',
         headers: {
@@ -78,11 +73,11 @@ function releaseDocument() {
     })
     .then(response => response.json())
     .then(data => {
-        console.log('Document released:', data);
         if (data.success) {
             window.dispatchEvent(new CustomEvent('close-modal', { detail: 'released' }));
             setTimeout(() => {
-                window.dispatchEvent(new CustomEvent('open-modal', { detail: 'success' }));
+                window.dispatchEvent(new CustomEvent('set-success-message', { detail: 'Document successfully released!' }));
+                window.dispatchEvent(new CustomEvent('open-modal', { detail: 'success-modal' }));
                 setTimeout(() => {
                     window.location.reload();
                 }, 2000);
@@ -97,4 +92,3 @@ function releaseDocument() {
     });
 }
 </script>
-

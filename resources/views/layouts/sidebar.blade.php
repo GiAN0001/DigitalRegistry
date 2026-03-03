@@ -66,7 +66,7 @@
                         {{ $ticketCount }}
                     </span>
                 @endif
-        </a>>
+        </a>
 
         @hasanyrole('admin|super admin')
             <div class="pt-6 mt-2">

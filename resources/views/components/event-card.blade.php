@@ -5,7 +5,8 @@
     $statusColors = [
         'For Approval' => 'border-blue-600',
         'For Payment' => 'border-orange-600',
-        'Paid' => 'border-green-600',
+        'Paid' => 'border-yellow-600',
+        'Completed' => 'border-green-600',
         'Cancelled' => 'border-red-600',
         'Rejected' => 'border-gray-600',
     ];

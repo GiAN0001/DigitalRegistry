@@ -64,9 +64,22 @@ Route::middleware(['auth'])->group(function () {
         
         Route::get('/transaction/facility', [FacilityController::class, 'index'])->name('transaction.facility');
         Route::get('/facility/reservation/{id}', [FacilityController::class, 'show'])->middleware('auth'); // added by cath
+        Route::post('/facility/reservation/{id}/status', [FacilityController::class, 'updateReservationStatus'])->name('facility.reservation.updateStatus'); // added by cath
+        Route::get('/facility/equipment/{id}', [FacilityController::class, 'getEquipmentDetails'])->middleware('auth'); // added by cath
+        Route::post('/facility/reservation/{id}/reject', [FacilityController::class, 'rejectReservation']); // Added by Cath
         Route::post('/transaction/facility/reservation', [FacilityController::class, 'storeReservation'])->name('facility.storeReservation');
         Route::post('/facility/reservation/store', [FacilityController::class, 'storeReservation'])->name('facility.reservation.store');
         Route::post('/facility/reservation/{id}/approve-payment', [FacilityController::class, 'approveForPayment']);
+        Route::get('/equipment-types', [FacilityController::class, 'getEquipmentTypes']); // added by cath
+        Route::post('/equipment', [FacilityController::class, 'addEquipment']); // added by cath
+        Route::put('/equipment-reservation/{id}/status', [FacilityController::class, 'updateEquipmentReservationStatus']); // added by cath
+        Route::put('/equipment-reservation/{id}/status', [FacilityController::class, 'updateEquipmentReservationStatus'])->name('equipment.status.update');
+        Route::get('/facility/available-times', [App\Http\Controllers\FacilityController::class, 'getAvailableTimes']); // added by cath
+        Route::post('/facility/reservation/{id}/mark-paid', [FacilityController::class, 'markAsPaid']);
+        Route::post('/facility/reservation/{id}/cancel', [FacilityController::class, 'cancelReservation']); // added by cath
+        Route::post('/facility/reservation/{id}/cancel', [FacilityController::class, 'cancelReservation'])->name('facility.reservation.cancel'); // added by cath
+        Route::post('/facility/reservation/equipment/{id}/delivered', [FacilityController::class, 'markEquipmentAsDelivered'])->name('facility.reservation.equipment.delivered'); // added by cath
+        Route::post('/facility/reservation/equipment/{id}/returned', [FacilityController::class, 'markEquipmentAsReturned'])->name('facility.reservation.equipment.returned'); // added by cath
     });
     //
 
