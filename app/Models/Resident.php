@@ -62,6 +62,16 @@ class Resident extends Model
     {
         return $this->hasMany(TupadParticipation::class);
     }
+    public static function getCurrentCensusCycle(): string // GIAN ADDED THIS  
+    {
+        $year = date('Y');
+        
+        // CHANGE THIS LOGIC TO REDEFINE THE CYCLE OF THE CENSUS. CURRENTLY, IT ASSUMES 2 CYCLES A YEAR (SEMESTERS).
+        // Example: If you want 3 cycles a year, you would change this math.
+        $semester = (date('n') <= 6) ? 1 : 2; 
+
+        return "{$year}-{$semester}";
+    }
 
     // --- RBAC LOGIC (SCOPE) ---
     public function scopeForUser(Builder $query, User $user): Builder

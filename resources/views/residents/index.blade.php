@@ -1,5 +1,17 @@
 <x-app-layout>
 
+    @if(session('success'))
+            <x-success-modal name="action-success" :show="true">
+                {{ session('success') }}
+            </x-success-modal>
+    @endif
+    @if(session('error'))
+        <x-error-modal name="action-error" :show="true">
+            <div class="text-center">
+                <p class="text-gray-600 mb-4">{{ session('error') }}</p>
+            </div>
+        </x-error-modal>
+    @endif
     <div class="sub-content">
         <div class="filter-container">
                 <div class="filters">
@@ -10,10 +22,11 @@
                         column="purok_name"
                         title="Filter by Purok"
                     />
-                    <x-dynamic-filter
+                
+                   <x-dynamic-filter
                         model="App\Models\Resident"
-                        column="created_at"
-                        title="Filter by year"
+                        column="census_cycle"
+                        title="Filter by Census Cycle"
                     />
                 </div>
 
