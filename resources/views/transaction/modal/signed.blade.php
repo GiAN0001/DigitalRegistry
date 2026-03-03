@@ -62,11 +62,6 @@ function signDocument() {
                       String(now.getMinutes()).padStart(2, '0') + ':' +
                       String(now.getSeconds()).padStart(2, '0');
     
-    console.log('Sending data:', {
-        request_id: requestIdToSign,
-        for_signature_at: mysqlDate
-    });
-    
     fetch('{{ route("document.sign") }}', {
         method: 'POST',
         headers: {
@@ -75,19 +70,17 @@ function signDocument() {
         },
         body: JSON.stringify({
             request_id: requestIdToSign,
-            for_signature_at: mysqlDate  // Changed from date_signed
+            for_signature_at: mysqlDate
         })
     })
     .then(response => response.json())
     .then(data => {
         console.log('Document transferred:', data);
         if (data.success) {
-            // Close the sign modal
             window.dispatchEvent(new CustomEvent('close-modal', { detail: 'signed' }));
-            // Open the success modal
             setTimeout(() => {
-                window.dispatchEvent(new CustomEvent('open-modal', { detail: 'success' }));
-                // Reload page after success modal is shown
+                window.dispatchEvent(new CustomEvent('set-success-message', { detail: 'Document successfully transferred for signature!' }));
+                window.dispatchEvent(new CustomEvent('open-modal', { detail: 'success-modal' }));
                 setTimeout(() => {
                     window.location.reload();
                 }, 2000);

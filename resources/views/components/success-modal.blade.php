@@ -1,9 +1,7 @@
-
 @props(['name', 'show' => false])
 
-{{-- Pass the :show attribute to the base x-modal --}}
 <x-modal :name="$name" :show="$show" maxWidth="max-w-lg" focusable>
-    <div class="p-8 sm:p-12">
+    <div class="p-8 sm:p-8">
         {{-- Close Button (X) --}}
         <div class="flex justify-end mb-4">
             <button type="button" @click="$dispatch('close')" class="text-gray-400 hover:text-gray-600 transition-colors">
@@ -14,7 +12,7 @@
         </div>
 
         {{-- Success Icon --}}
-        <div class="flex justify-center mb-6">
+        <div class="flex justify-center mb-4">
             <div class="w-20 h-20 sm:w-24 sm:h-24 rounded-full border-4 border-green-500 flex items-center justify-center">
                 <svg class="w-10 h-10 sm:w-12 sm:h-12 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
@@ -22,16 +20,14 @@
             </div>
         </div>
 
-        <h2 class="text-3xl sm:text-4xl font-bold text-gray-800 text-center mb-4">Success!</h2>
+        <h2 class="text-xl font-semibold text-slate-700 text-center mb-2">Success!</h2>
 
-        <p class="text-gray-500 text-base sm:text-lg text-center mb-8">
+        <p class="text-slate-400 text-m font-semibold text-center mb-8">
             {{ $slot }}
         </p>
 
         <div class="flex justify-center">
-            <button type="button" @click="$dispatch('close')" class="w-full sm:w-auto px-10 py-3 bg-red-600 text-white text-lg font-semibold rounded-xl hover:bg-red-700 transition-colors">
-                Close
-            </button>
+            <x-secondary-button @click="$dispatch('close')">Cancel</x-secondary-button>
         </div>
     </div>
 </x-modal>

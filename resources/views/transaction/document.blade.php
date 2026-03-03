@@ -300,6 +300,13 @@
         <div id="request-history-content" class="tab-content hidden">
             <div class="p-6 bg-white shadow-md rounded-lg">
                 <h2 class="text-xl font-semibold text-gray-800 mb-6">Request History</h2>
+
+                <!-- Filter Buttons -->
+                <div class="flex flex-wrap gap-3 mb-6">
+                    <button class="history-filter-btn px-6 py-2 bg-blue-600 text-white rounded-lg font-medium text-sm" data-filter="all">All</button>
+                    <button class="history-filter-btn px-6 py-2 text-blue-600 border border-blue-600 rounded-lg font-medium text-sm" data-filter="Released">Released</button>
+                    <button class="history-filter-btn px-6 py-2 text-blue-600 border border-blue-600 rounded-lg font-medium text-sm" data-filter="Cancelled">Cancelled</button>
+                </div>
                 
                 <div class="overflow-x-auto mt-6">
                     <table class="min-w-full divide-y divide-gray-200">
@@ -314,7 +321,7 @@
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200">
                             @forelse ($historyRequests as $request)
-                                <tr class="hover:bg-gray-50">
+                                <tr class="hover:bg-gray-50 history-row" data-status="{{ $request->status }}">
                                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                                         {{ str_pad($request->id, 3, '0', STR_PAD_LEFT) }}
                                     </td>
@@ -363,24 +370,30 @@
                                                         alert('Failed to load request details');
                                                     })
                                             "
-                                            class="text-indigo-600 hover:text-blue-700"
+                                            class="text-blue-500 hover:text-blue-700"
                                         >
                                             View Details
                                         </a>
                                     </td>
                                 </tr>
                             @empty
-                                <tr>
+                                <tr class="history-empty-row">
                                     <td colspan="5" class="px-6 py-4 text-center text-gray-500">
                                         No request history found.
                                     </td>
                                 </tr>
                             @endforelse
+                            <tr class="history-no-results hidden">
+                                <td colspan="5" class="px-6 py-4 text-center text-gray-500">
+                                    No results found for this filter.
+                                </td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
 
-                <div class="mt-4">
+                {{-- Pagination Info & Links at Bottom --}}
+                <div>
                     {{ $historyRequests->links() }}
                 </div>
             </div>
@@ -459,23 +472,39 @@
     </style>
 
     <script>
-    // Tab switching
     document.querySelectorAll('.tab-button').forEach(button => {
         button.addEventListener('click', function() {
             const tabName = this.dataset.tab;
-            
+            localStorage.setItem('activeDocumentTab', tabName);
+
             document.querySelectorAll('.tab-button').forEach(btn => {
                 btn.classList.remove('text-blue-600', 'border-b-2', 'border-blue-600');
                 btn.classList.add('text-slate-600');
             });
             this.classList.remove('text-slate-600');
             this.classList.add('text-blue-600', 'border-b-2', 'border-blue-600');
-            
+
             document.querySelectorAll('.tab-content').forEach(content => {
                 content.classList.add('hidden');
             });
             document.getElementById(tabName + '-content').classList.remove('hidden');
         });
+    });
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const activeTab = localStorage.getItem('activeDocumentTab') || 'document-request';
+        document.querySelectorAll('.tab-button').forEach(btn => {
+            btn.classList.remove('text-blue-600', 'border-b-2', 'border-blue-600');
+            btn.classList.add('text-slate-600');
+            if (btn.dataset.tab === activeTab) {
+                btn.classList.remove('text-slate-600');
+                btn.classList.add('text-blue-600', 'border-b-2', 'border-blue-600');
+            }
+        });
+        document.querySelectorAll('.tab-content').forEach(content => {
+            content.classList.add('hidden');
+        });
+        document.getElementById(activeTab + '-content').classList.remove('hidden');
     });
 
     // Status filter with view switching
@@ -593,6 +622,53 @@
             });
         });
     });
+
+    // History filter
+    document.querySelectorAll('.history-filter-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const filter = this.dataset.filter;
+
+            // Update button states
+            document.querySelectorAll('.history-filter-btn').forEach(btn => {
+                btn.classList.remove('bg-blue-600', 'text-white', 'bg-blue-600', 'bg-blue-600');
+                const originalColor = btn.dataset.filter === 'Released' ? 'blue' : btn.dataset.filter === 'Cancelled' ? 'blue' : 'blue';
+                btn.classList.add(`text-${originalColor}-600`, 'border', `border-${originalColor}-600`);
+            });
+            this.classList.remove('border');
+            if (filter === 'all') {
+                this.classList.remove('text-blue-600', 'border-blue-600');
+                this.classList.add('bg-blue-600', 'text-white');
+            } else if (filter === 'Released') {
+                this.classList.remove('text-blue-600', 'border-blue-600');
+                this.classList.add('bg-blue-600', 'text-white');
+            } else if (filter === 'Cancelled') {
+                this.classList.remove('text-blue-600', 'border-blue-600');
+                this.classList.add('bg-blue-600', 'text-white');
+            }
+
+            // Filter rows
+            const rows = document.querySelectorAll('.history-row');
+            const emptyRow = document.querySelector('.history-empty-row');
+            const noResults = document.querySelector('.history-no-results');
+            let visibleCount = 0;
+
+            rows.forEach(row => {
+                if (filter === 'all' || row.dataset.status === filter) {
+                    row.classList.remove('hidden');
+                    visibleCount++;
+                } else {
+                    row.classList.add('hidden');
+                }
+            });
+
+            if (emptyRow) emptyRow.classList.add('hidden');
+            if (visibleCount === 0) {
+                noResults.classList.remove('hidden');
+            } else {
+                noResults.classList.add('hidden');
+            }
+        });
+    });
     </script>
 
     @include('transaction.modal.new-request')
@@ -602,4 +678,21 @@
     @include('transaction.modal.for-released')
     @include('transaction.modal.released')
     @include('transaction.modal.cancelled')
+
+    <div x-data="{ 
+            successMessage: '{{ session('success') ?? 'Action completed successfully!' }}'
+         }" 
+         x-init="
+            @if(session('success'))
+                setTimeout(() => {
+                    $dispatch('open-modal', 'success-modal');
+                }, 300);
+            @endif
+         "
+         @set-success-message.window="successMessage = $event.detail">
+        <x-success-modal name="success-modal">
+            <span x-text="successMessage"></span>
+        </x-success-modal>
+    </div>
+
 </x-app-layout>
