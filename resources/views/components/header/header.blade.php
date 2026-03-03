@@ -20,7 +20,7 @@
 
         if (request()->routeIs('admin.users.logs')) {
             $page = 'Audit Logs';
-        }     
+        }
     } elseif (request()->routeIs('profile.*')) {
         $module = 'Account';
         $page = 'Profile Settings';
@@ -97,7 +97,7 @@
 
                     <div class="flex items-center px-4 p-2 border-b border-gray-100">
                         <img class="w-6 h-6 rounded-full"
-                            src="https://ui-avatars.com/api/?name={{ Auth::user()->first_name }}+{{ Auth::user()->last_name }}&color=7F9CF5&background=EBF4FF"
+                            src="https://ui-avatars.com/api/?name={{ strtoupper(substr(Auth::user()->first_name, 0, 1) . substr(Auth::user()->last_name, 0, 1)) }}&color=7F9CF5&background=EBF4FF"
                             alt="User avatar">
                         <div class="ml-3 overflow-hidden">
                             <div class="text-xs text-gray-900 truncate">{{ Auth::user()->first_name }}
