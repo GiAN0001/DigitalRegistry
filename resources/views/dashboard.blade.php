@@ -1,18 +1,4 @@
 <x-app-layout>
-    @hasanyrole('admin|super admin')
-        {{-- ADMIN & SUPER ADMIN VIEW --}}
-
-
-    @role('staff')
-        <div class="analytics">
-            <x-analytics-widget 
-            title="Total Residents" 
-            :value="$totalResidents" 
-            icon-name="users"
-            bg-color="bg-blue-500" />
-        </div>
-    @endrole
-
     @hasanyrole('admin|super admin') {{-- Only show to admin and super admin added by gian --}}
         <div class="analytics mb-6">
             <x-analytics-widget title="Total Residents" :value="$totalResidents" icon-name="users" bg-color="bg-blue-500" />
