@@ -12,122 +12,134 @@ use Illuminate\View\View;
 
 class DocumentController extends Controller
 {
-    public function document(Request $request): View
-    {
-        $search = $request->input('search', '');
-        $date = $request->input('date');
-        $threeDaysAgo = now()->subDays(3);
-        $inProgressStatuses = ['For Fulfillment', 'For Signature', 'For Release'];
 
-        $baseQuery = DocumentRequest::withNames()
-    ->with(['documentType', 'purpose', 'resident']);
 
-        if ($search) {
-            $baseQuery->where(function ($q) use ($search) {
-                $q->whereHas('resident', function ($query) use ($search) {
-                    $query->where('first_name', 'like', '%' . $search . '%')
-                        ->orWhere('last_name', 'like', '%' . $search . '%');
-                })
-                ->orWhere('document_requests.id', 'like', '%' . $search . '%');
-            });
-        }
+public function document(Request $request): View
+{
+    $search = $request->input('search', '');
+    $date = $request->input('date');
+    $threeDaysAgo = now()->subDays(3);
+    $inProgressStatuses = ['For Fulfillment', 'For Signature', 'For Release'];
 
-        if ($date) {
-            $baseQuery->whereDate('document_requests.created_at', $date);
-        }
+    $baseQuery = DocumentRequest::withNames()
+        ->with(['documentType', 'purpose', 'resident']);
 
-        $name = $request->input('name');
-        if ($name) {
-            $baseQuery->whereHas('documentType', function ($q) use ($name) {
-                $q->where('name', $name);
-            });
-        }
-
-        $allRequests = $baseQuery
-            ->orderBy('document_requests.id', 'asc')
-            ->get();
-           
-
-        // Separate requests: Keep all in-progress requests, only old Released/Cancelled go to history
-        $kanbancards = $allRequests->filter(function($request) use ($inProgressStatuses) {
-            return in_array($request->status, $inProgressStatuses) 
-                || ($request->status === 'Released')
-                || ($request->status === 'Cancelled');
+    if ($search) {
+        $baseQuery->where(function ($q) use ($search) {
+            $q->whereHas('resident', function ($query) use ($search) {
+                $query->where('first_name', 'like', '%' . $search . '%')
+                    ->orWhere('last_name', 'like', '%' . $search . '%');
+            })
+            ->orWhere('document_requests.id', 'like', '%' . $search . '%');
         });
-        
-        // For Fulfillment - all of them
-        $forFulfillmentRequests = $kanbancards
-            ->where('status', 'For Fulfillment')
-            ->values();
-        
-        // For Signature - all of them
-        $forSignatureRequests = $kanbancards
-            ->where('status', 'For Signature')
-            ->values();
-        
-        // For Release - all of them
-        $forReleaseRequests = $kanbancards
-            ->where('status', 'For Release')
-            ->values();
-        
-        // Released - newer than 3 days
-        $releasedRequests = $kanbancards
-            ->where('status', 'Released')
-            ->filter(function($request) use ($threeDaysAgo) {
-                return ($request->date_of_release ?? $request->created_at) > $threeDaysAgo;
-            })
-            ->values();
-        
-        // Cancelled - newer than 3 days
-        $cancelledRequests = $kanbancards
-            ->where('status', 'Cancelled')
-            ->filter(function($request) use ($threeDaysAgo) {
-                return ($request->date_of_cancellation ?? $request->created_at) > $threeDaysAgo;
-            })
-            ->values();
+    }
 
-        // History: Show Released and Cancelled if older than 3 days - paginate at query level
-        $historyQuery = DocumentRequest::withNames()
-            ->with(['documentType', 'resident'])
-            ->where(function($query) use ($threeDaysAgo) {
-                $query->where('document_requests.status', 'Released')
-                    ->where('document_requests.date_of_release', '<=', $threeDaysAgo)
-                    ->orWhere(function($q) use ($threeDaysAgo) {
-                        $q->where('document_requests.status', 'Cancelled')
-                            ->where('document_requests.date_of_cancel', '<=', $threeDaysAgo);
+    if ($date) {
+        $baseQuery->whereDate('document_requests.created_at', $date);
+    }
+
+    $name = $request->input('name');
+    if ($name) {
+        $baseQuery->whereHas('documentType', function ($q) use ($name) {
+            $q->where('name', $name);
+        });
+    }
+
+    $allRequests = $baseQuery
+        ->orderBy('document_requests.id', 'asc')
+        ->get();
+       
+
+    // Separate requests: Keep all in-progress requests, only old Released/Cancelled go to history
+    $kanbancards = $allRequests->filter(function($request) use ($inProgressStatuses) {
+        return in_array($request->status, $inProgressStatuses) 
+            || ($request->status === 'Released')
+            || ($request->status === 'Cancelled');
+    });
+    
+    // For Fulfillment - all of them
+    $forFulfillmentRequests = $kanbancards
+        ->where('status', 'For Fulfillment')
+        ->values();
+    
+    // For Signature - all of them
+    $forSignatureRequests = $kanbancards
+        ->where('status', 'For Signature')
+        ->values();
+    
+    // For Release - all of them
+    $forReleaseRequests = $kanbancards
+        ->where('status', 'For Release')
+        ->values();
+    
+    // Released - newer than 3 days
+    $releasedRequests = $kanbancards
+        ->where('status', 'Released')
+        ->filter(function($request) use ($threeDaysAgo) {
+            return ($request->date_of_release ?? $request->created_at) > $threeDaysAgo;
+        })
+        ->values();
+    
+    // Cancelled - newer than 3 days
+    $cancelledRequests = $kanbancards
+        ->where('status', 'Cancelled')
+        ->filter(function($request) use ($threeDaysAgo) {
+            return ($request->date_of_cancel ?? $request->created_at) > $threeDaysAgo;
+        })
+        ->values();
+
+    // History: Show Released and Cancelled if older than 3 days OR if date_of_cancel/date_of_release is NULL (assume old)
+    $historyQuery = DocumentRequest::withNames()
+        ->with(['documentType', 'resident'])
+        ->where(function($query) use ($threeDaysAgo) {
+            // Released older than 3 days
+            $query->where(function($q) use ($threeDaysAgo) {
+                $q->where('document_requests.status', 'Released')
+                    ->where(function($subQ) use ($threeDaysAgo) {
+                        $subQ->where('document_requests.date_of_release', '<=', $threeDaysAgo)
+                            ->orWhereNull('document_requests.date_of_release');
+                    });
+            })
+            // OR Cancelled older than 3 days
+            ->orWhere(function($q) use ($threeDaysAgo) {
+                $q->where('document_requests.status', 'Cancelled')
+                    ->where(function($subQ) use ($threeDaysAgo) {
+                        $subQ->where('document_requests.date_of_cancel', '<=', $threeDaysAgo)
+                            ->orWhereNull('document_requests.date_of_cancel');
                     });
             });
+        });
 
-        if ($search) {
-            $historyQuery->where(function ($q) use ($search) {
-                $q->whereHas('resident', function ($query) use ($search) {
-                    $query->where('first_name', 'like', '%' . $search . '%')
-                        ->orWhere('last_name', 'like', '%' . $search . '%');
-                })
-                ->orWhere('document_requests.id', 'like', '%' . $search . '%');
-            });
-        }
-
-        $historyRequests = $historyQuery
-            ->orderBy('document_requests.id', 'desc')
-            ->paginate(15);
-
-            $documentTypes = DocumentType::all();
-            $documentPurposes = DocumentPurpose::all();
-
-        return view('transaction.document', compact(
-            'forFulfillmentRequests',
-            'forSignatureRequests',
-            'forReleaseRequests',
-            'releasedRequests',
-            'cancelledRequests',
-            'historyRequests',
-            'documentTypes',
-            'documentPurposes',
-            'search',
-            'date'
-        ));
+    if ($search) {
+        $historyQuery->where(function ($q) use ($search) {
+            $q->whereHas('resident', function ($query) use ($search) {
+                $query->where('first_name', 'like', '%' . $search . '%')
+                    ->orWhere('last_name', 'like', '%' . $search . '%');
+            })
+            ->orWhere('document_requests.id', 'like', '%' . $search . '%');
+        });
     }
+
+    $historyRequests = $historyQuery
+        ->orderBy('document_requests.id', 'desc')
+        ->paginate(10);
+
+    $documentTypes = DocumentType::all();
+    $documentPurposes = DocumentPurpose::all();
+
+    return view('transaction.document', compact(
+        'forFulfillmentRequests',
+        'forSignatureRequests',
+        'forReleaseRequests',
+        'releasedRequests',
+        'cancelledRequests',
+        'historyRequests',
+        'documentTypes',
+        'documentPurposes',
+        'search',
+        'date'
+    ));
+}
 
     public function store(Request $request)
     {

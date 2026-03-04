@@ -62,11 +62,6 @@ function transferForRelease() {
                       String(now.getMinutes()).padStart(2, '0') + ':' +
                       String(now.getSeconds()).padStart(2, '0');
     
-    console.log('Sending data:', {
-        request_id: requestIdForRelease,
-        for_release_at: mysqlDate
-    });
-    
     fetch('{{ route("document.transfer-for-release") }}', {
         method: 'POST',
         headers: {
@@ -80,11 +75,11 @@ function transferForRelease() {
     })
     .then(response => response.json())
     .then(data => {
-        console.log('Document transferred for release:', data);
         if (data.success) {
             window.dispatchEvent(new CustomEvent('close-modal', { detail: 'for-released' }));
             setTimeout(() => {
-                window.dispatchEvent(new CustomEvent('open-modal', { detail: 'success' }));
+                window.dispatchEvent(new CustomEvent('set-success-message', { detail: 'Document successfully transferred for release!' }));
+                window.dispatchEvent(new CustomEvent('open-modal', { detail: 'success-modal' }));
                 setTimeout(() => {
                     window.location.reload();
                 }, 2000);

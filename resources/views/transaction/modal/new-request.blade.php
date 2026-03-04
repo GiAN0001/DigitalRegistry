@@ -14,20 +14,35 @@
         <form method="POST" action="{{ route('document-request.store') }}" id="documentForm" @submit="handleSubmit($event)">
             @csrf
             
-            <!-- Document Type -->
-            <div class="mb-4">
-                <x-input-label for="document_type_id">Document Type <span class="text-red-500">*</span></x-input-label>
-                <select 
-                    id="document_type_id"
-                    name="document_type_id"
-                    class="w-full h-10 mt-1 text-sm text-slate-500 border border-gray-300 rounded-lg"
-                    @change="checkDocumentType($event)"
-                    required>
-                    <option value="">Select Document Type</option>
-                    @foreach(\App\Models\DocumentType::all() as $type)
-                        <option value="{{ $type->id }}">{{ $type->name }}</option>
-                    @endforeach
-                </select>
+            <!-- Document Type and Fee-->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div>
+                    <x-input-label for="document_type_id">Document Type <span class="text-red-500">*</span></x-input-label>
+                    <select 
+                        id="document_type_id"
+                        name="document_type_id"
+                        class="w-full h-10 mt-1 text-sm text-slate-500 border border-gray-300 rounded-lg"
+                        @change="checkDocumentType($event)"
+                        required>
+                        <option value="">Select Document Type</option>
+                        @foreach(\App\Models\DocumentType::all() as $type)
+                            <option value="{{ $type->id }}">{{ $type->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div>
+                    <x-input-label for="fee">Fee (₱) <span class="text-red-500">*</span></x-input-label>
+                    <x-text-input 
+                        type="number" 
+                        name="fee" 
+                        id="fee" 
+                        min="1" 
+                        max="1000" 
+                        required
+                        class="w-full h-10 mt-1 text-sm text-slate-500 border border-gray-300 rounded-lg"
+                        placeholder="Enter fee (1-1000)"
+                    />
+                </div>
             </div>
 
             <!-- Name with search -->
@@ -260,8 +275,9 @@
             </div>
         </form>
     </div>
+</x-modal>
 
-    <script>
+<script>
     function documentRequestForm() {
         return {
             open: false,
@@ -368,11 +384,10 @@
             }
         }
     }
-    </script>
+</script>
 
-    <style>
+<style>
     [x-cloak] {
         display: none !important;
     }
-    </style>
-</x-modal>
+</style>

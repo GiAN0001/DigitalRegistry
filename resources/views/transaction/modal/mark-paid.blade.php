@@ -1,32 +1,52 @@
-<x-modal name="approve-for-payment" maxWidth="max-w-[500px]" focusable>
-    <div class="p-8" x-data="approveForPaymentForm()" @set-approve-id.window="handleSetId($event.detail)">
-        <h2 class="text-xl font-bold text-gray-900 mb-4">Approve for Payment</h2>
+<x-modal name="mark-paid" maxWidth="max-w-[500px]" focusable>
+    <div class="p-8" x-data="markPaidForm()" @set-paid-id.window="handleSetId($event.detail)">
+        <h2 class="text-xl font-bold text-gray-900 mb-4">Mark as Paid</h2>
         <form @submit.prevent="handleSubmit()">
+            
             <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700 mb-1">Fee Amount (₱)</label>
-                <input type="number" min="0" step="0.01" x-model="fee"
+                <label class="block text-sm font-medium text-gray-700 mb-1">Amount Paid (₱)</label>
+                <input type="number" min="0" step="0.01" x-model="amountPaid"
                     class="w-full border border-gray-300 rounded px-3 py-2 text-sm"
                     required>
             </div>
+
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Mode of Payment</label>
+                <input type="text" x-model="modeOfPayment"
+                    class="w-full border border-gray-300 rounded px-3 py-2 text-sm"
+                    placeholder="e.g. Cash, Check, Bank Transfer"
+                    required>
+            </div>
+
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-1">OR Number</label>
+                <input type="text" x-model="orNumber"
+                    class="w-full border border-gray-300 rounded px-3 py-2 text-sm"
+                    placeholder="Enter Official Receipt Number"
+                    required>
+            </div>
             
-            <!-- Action Buttons -->
             <div class="sticky bottom-0 bg-white pt-4 border-t border-gray-200 flex justify-end gap-3">
                 <x-secondary-button type="button" @click="$dispatch('close')">Cancel</x-secondary-button>
-                <x-primary-button class="ms-3" type="submit">Confirm</x-primary-button>
+                <x-primary-button class="ms-3" type="submit">Confirm Payment</x-primary-button>
             </div>
         </form>
     </div>
 </x-modal>
 
 <script>
-    function approveForPaymentForm() {
+    function markPaidForm() {
         return {
             id: null,
-            fee: '',
+            amountPaid: '',
+            modeOfPayment: '',
+            orNumber: '',
 
             handleSetId(reservationId) {
                 this.id = reservationId;
-                this.fee = '';
+                this.amountPaid = '';
+                this.modeOfPayment = '';
+                this.orNumber = '';
             },
 
             async handleSubmit() {
@@ -36,13 +56,17 @@
                 }
 
                 try {
-                    const response = await fetch('/facility/reservation/' + this.id + '/approve-payment', {
+                    const response = await fetch('/facility/reservation/' + this.id + '/mark-paid', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
                             'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content
                         },
-                        body: JSON.stringify({ fee: this.fee })
+                        body: JSON.stringify({
+                            amount_paid: this.amountPaid,
+                            mode_of_payment: this.modeOfPayment,
+                            or_number: this.orNumber
+                        })
                     });
 
                     const data = await response.json();
@@ -52,7 +76,7 @@
                         
                         // Dispatch success message
                         window.dispatchEvent(new CustomEvent('set-success-message', { 
-                            detail: 'Reservation approved for payment successfully!' 
+                            detail: 'Reservation marked as paid successfully!' 
                         }));
 
                         // Open success modal
@@ -66,7 +90,7 @@
                             }, 2000);
                         }, 300);
                     } else {
-                        alert(data.message || 'Failed to approve reservation');
+                        alert(data.message || 'Failed to mark as paid');
                     }
                 } catch (error) {
                     console.error('Error:', error);

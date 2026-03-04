@@ -34,6 +34,11 @@ class FacilityReservation extends Model
         'paid_at',
         'date_of_cancelled',
         'date_of_rejected',
+        'amount_paid',
+        'mode_of_payment',
+        'completed_by_user_id',
+        'completed_at',
+        'or_number',
     ];
 
     protected $casts = [
