@@ -8,6 +8,7 @@ use App\Http\Controllers\FacilityController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\LogController;
 use App\Http\Controllers\TicketController;
+use App\Http\Controllers\Admin\SettingController; // added by Cath
 use App\Http\Controllers\ChristmasBoxController; // added by GIAN
 use App\Http\Controllers\Admin\TupadController; // added by GIAN
 use Illuminate\Support\Facades\Route;
@@ -99,7 +100,10 @@ Route::middleware(['auth'])->group(function () {
     });
 
     Route::middleware(['auth', 'role:super admin'])->prefix('administrator')->name('admin.')->group(function () {
-         Route::get('/logs', [LogController::class, 'index'])->name('users.logs');
+        Route::get('/logs', [LogController::class, 'index'])->name('users.logs');
+        Route::get('/lookup', [SettingController::class, 'lookup'])->name('lookup.index');
+        Route::post('/barangay-role', [SettingController::class, 'storeBarangayRole'])->name('barangay-role.store');
+        Route::post('/area-street', [SettingController::class, 'storeAreaStreet'])->name('area-street.store');
     });
 
     Route::middleware('auth')->group(function () { // Added by gian, ensures only authenticated users can access ticket routes
