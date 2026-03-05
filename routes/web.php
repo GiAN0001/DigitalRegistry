@@ -80,6 +80,8 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/facility/reservation/{id}/cancel', [FacilityController::class, 'cancelReservation'])->name('facility.reservation.cancel'); // added by cath
         Route::post('/facility/reservation/equipment/{id}/delivered', [FacilityController::class, 'markEquipmentAsDelivered'])->name('facility.reservation.equipment.delivered'); // added by cath
         Route::post('/facility/reservation/equipment/{id}/returned', [FacilityController::class, 'markEquipmentAsReturned'])->name('facility.reservation.equipment.returned'); // added by cath
+        Route::get('/facility/reservation/{id}/equipment-status', [FacilityController::class, 'checkEquipmentStatus']); // added by cath
+        Route::get('/facility/reservation/{id}/check-equipment', [FacilityController::class, 'checkEquipmentStatus']); // added by cath
     });
     //
 

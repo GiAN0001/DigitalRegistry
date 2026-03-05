@@ -405,6 +405,22 @@ class FacilityController extends Controller
             }
         }
 
+    public function checkEquipmentStatus($reservationId)
+    {
+        $equipments = DB::table('reservation_equipment')
+            ->where('facility_reservation_id', $reservationId)
+            ->get();
+        
+        $unreturned = $equipments->whereNotIn('status', ['Returned', 'Cancelled', 'Rejected']);
+        
+        $unretrurnedStatuses = $unreturned->pluck('status')->unique()->toArray();
+
+        return response()->json([
+            'hasUnreturned' => $unreturned->count() > 0,
+            'unretrurnedStatuses' => $unretrurnedStatuses
+        ]);
+    }
+
     public function getEquipmentTypes()
     {
         $types = \App\Models\Equipment::select('id', 'equipment_type')->get();
