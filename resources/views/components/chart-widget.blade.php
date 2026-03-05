@@ -5,8 +5,10 @@
 
     <div class="p-6 bg-slate-50 shadow-sm rounded-lg">
 
-        <div class="relative h-80 w-full">
-            <canvas id="{{ $chartId }}"></canvas>
+        <div class="p-6 bg-slate-50 shadow-sm rounded-lg">
+            <div class="relative h-80 w-full overflow-hidden">
+                <canvas id="{{ $chartId }}"></canvas>
+            </div>
         </div>
 
         <script>
@@ -55,11 +57,12 @@
                             },
                             plugins: {
                                 legend: {
-                                    position: 'right',
+                                    position: 'right', // CHANGE 'right' to 'bottom'
+                                    align: 'center', // Centers the legend
                                     labels: {
                                         usePointStyle: true,
                                         boxWidth: 10,
-                                        padding: 20,
+                                        padding: 15, // Reduced padding slightly to save space
                                         font: {
                                             size: 11,
                                             weight: '600'
@@ -67,6 +70,7 @@
                                         color: '#334155'
                                     }
                                 },
+                                // ...
                                 tooltip: {
                                     callbacks: {
                                         label: function(context) {

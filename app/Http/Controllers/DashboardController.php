@@ -58,7 +58,8 @@ class DashboardController extends Controller
         $totalHouseholds = Household::count();
         $totalActiveUsers = User::where('status', 1)->count();
 
-        // --- WIDGETS (For Staff/Helpdesk - based on their personal inputs) ---
+        // --- WIDGETS (RE-ADDED FOR STAFF/HELPDESK) ---
+        // This fixes the "Undefined variable" error in dashboard.blade.php
         $myResidentsCount = Resident::where('added_by_user_id', auth()->id())->count();
         $myHouseholdsCount = Household::whereHas('residents', function($q) {
             $q->where('added_by_user_id', auth()->id())
@@ -122,12 +123,11 @@ class DashboardController extends Controller
             'totalHousehold' => $totalHouseholds,
             'totalActiveUsers' => $totalActiveUsers,
 
-            // Pass the new variables to the view for Staff/Helpdesk
+            // Pass these variables so they are available in the Blade view
             'myResidentsCount' => $myResidentsCount,
             'myHouseholdsCount' => $myHouseholdsCount,
 
             'users' => $users,
-
             'populationChartData' => $populationChartData,
             'demographicsChartData' => $demographicsChartData,
         ]);
