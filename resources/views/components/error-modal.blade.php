@@ -20,7 +20,7 @@
             </div>
         </div>
 
-        <h2 class="text-3xl sm:text-4xl font-bold text-gray-800 text-center mb-4">Duplicate!</h2>
+        <h2 class="text-3xl sm:text-4xl font-bold text-gray-800 text-center mb-4">Error!</h2>
 
         <p class="text-gray-500 text-base sm:text-lg text-center mb-8 italic">
             {{ $slot }}

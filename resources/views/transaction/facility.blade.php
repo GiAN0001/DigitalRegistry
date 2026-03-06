@@ -648,8 +648,16 @@
                     const day = String(current.getDate()).padStart(2, '0');
                     const dateStr = `${year}-${month}-${day}`;
                     
+                    // Show events that include this date (between start and end date)
                     const dayEvents = this.events
-                        .filter(e => e.date === dateStr)
+                        .filter(e => {
+                            const eventStart = new Date(e.start);
+                            const eventEnd = new Date(e.end);
+                            const currentDay = new Date(dateStr);
+                            
+                            // Check if current day is within event range
+                            return currentDay >= eventStart && currentDay <= eventEnd;
+                        })
                         .sort((a, b) => {
                             if (a.time_sort && b.time_sort) {
                                 return a.time_sort.localeCompare(b.time_sort);

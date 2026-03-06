@@ -36,8 +36,20 @@ Route::middleware(['auth'])->group(function () {
 
     //GIAN ADDED THIS
     Route::post('/residents', [ResidentController::class, 'store'])->name('residents.store');
-    Route::put('/households/{household}', [ResidentController::class, 'updateHousehold'])->name('households.update'); // added by gian
-    Route::put('/residents/{resident}', [ResidentController::class, 'update'])->name('residents.update'); // added by gian
+
+    // --- SECURE: Admin & Super Admin only ---
+    Route::middleware(['auth', 'role:admin|super admin'])->group(function () {
+        Route::put('/households/{household}', [ResidentController::class, 'updateHousehold'])->name('households.update');
+        Route::put('/residents/{resident}', [ResidentController::class, 'update'])->name('residents.update');
+
+        Route::delete('/households/{household}', [ResidentController::class, 'destroyHousehold'])->name('households.destroy');
+        Route::delete('/residents/{resident}', [ResidentController::class, 'destroy'])->name('residents.destroy');
+        Route::post('/households/{household}/restore', [ResidentController::class, 'restoreHousehold'])->name('households.restore');
+        Route::post('/residents/{resident}/restore', [ResidentController::class, 'restore'])->name('residents.restore');
+    });
+
+    // Read-only fetch endpoints (available to all authenticated users with resident access)
+    Route::get('/households/{household}', [ResidentController::class, 'showHousehold'])->name('households.show');
 
     Route::get('/residents/{residentId}/demographics', [ResidentController::class, 'getDemographics']); // added by cath
     Route::get('/residents/search', [ResidentController::class, 'search'])->name('residents.search');
@@ -81,6 +93,8 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/facility/reservation/{id}/cancel', [FacilityController::class, 'cancelReservation'])->name('facility.reservation.cancel'); // added by cath
         Route::post('/facility/reservation/equipment/{id}/delivered', [FacilityController::class, 'markEquipmentAsDelivered'])->name('facility.reservation.equipment.delivered'); // added by cath
         Route::post('/facility/reservation/equipment/{id}/returned', [FacilityController::class, 'markEquipmentAsReturned'])->name('facility.reservation.equipment.returned'); // added by cath
+        Route::get('/facility/reservation/{id}/equipment-status', [FacilityController::class, 'checkEquipmentStatus']); // added by cath
+        Route::get('/facility/reservation/{id}/check-equipment', [FacilityController::class, 'checkEquipmentStatus']); // added by cath
     });
     //
 
@@ -100,10 +114,9 @@ Route::middleware(['auth'])->group(function () {
     });
 
     Route::middleware(['auth', 'role:super admin'])->prefix('administrator')->name('admin.')->group(function () {
-        Route::get('/logs', [LogController::class, 'index'])->name('users.logs');
+
+        Route::get('/logs', [LogController::class, 'index'])->name('settings.logs');
         Route::get('/lookup', [SettingController::class, 'lookup'])->name('lookup.index');
-        Route::post('/barangay-role', [SettingController::class, 'storeBarangayRole'])->name('barangay-role.store');
-        Route::post('/area-street', [SettingController::class, 'storeAreaStreet'])->name('area-street.store');
     });
 
     Route::middleware('auth')->group(function () { // Added by gian, ensures only authenticated users can access ticket routes

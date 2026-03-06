@@ -1,33 +1,37 @@
 <x-app-layout>
     <div class="sub-content">
-        <div class="flex flex-wrap items-center gap-2 mt-4">
-            <x-search-bar 
-                name="search"
-                placeholder="Search by Name or Request ID" 
-                class="w-full md:flex-1"
-                value="{{ $search ?? '' }}"
-            />
-            <x-select-date 
-                class="w-full md:flex-1"
-                :value="$date ?? ''"
-            />
-            <div class="w-full md:flex-1">
-                <x-dynamic-filter
-                    model="App\Models\DocumentType"
-                    column="name"
-                    title="Filter by Document Type"
-                />
-            </div>
-            <x-button
-                x-data
-                x-on:click.prevent="$dispatch('open-modal', 'new-request')"
-            >
-                <x-slot name="icon">
-                    <x-lucide-plus class="w-4 h-4" />
-                </x-slot>
-                Add New Request
-            </x-button>
-        </div>
+<div class="flex flex-wrap items-center gap-2 mt-4">
+<x-search-bar 
+    name="search"
+    placeholder="Search by Name or Request ID" 
+    class="w-full md:flex-1"
+    value="{{ $search ?? '' }}"
+/>
+    <x-select-date 
+        id="main-date"
+        name="date"
+        class="w-full md:flex-1"
+        :value="$date ?? ''"
+    />
+    <div class="w-full md:flex-1">
+        <x-dynamic-filter
+            id="main-document-type"
+            model="App\Models\DocumentType"
+            column="name"
+            title="Filter by Document Type"
+            :selected="$documentType ?? ''"
+        />
+    </div>
+    <x-button
+        x-data
+        x-on:click.prevent="$dispatch('open-modal', 'new-request')"
+    >
+        <x-slot name="icon">
+            <x-lucide-plus class="w-4 h-4" />
+        </x-slot>
+        Add New Request
+    </x-button>
+</div>
         <!-- Tabs -->
         <div class="flex mt-4 mb-6 border-b-2 border-blue-600">
             <button class="tab-button text-blue-600 font-semibold text-sm p-3 border-b-2 border-blue-600" data-tab="document-request">
@@ -314,6 +318,7 @@
                             <tr>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-slate-700 uppercase tracking-wider rounded-l-lg">Request ID</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-slate-700 uppercase tracking-wider">Name</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-slate-700 uppercase tracking-wider">Document Type</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-slate-700 uppercase tracking-wider">Date</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-slate-700 uppercase tracking-wider">Status</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-slate-700 uppercase tracking-wider rounded-r-lg">Actions</th>
@@ -327,6 +332,9 @@
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
                                         {{ $request->resident_name }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        {{ $request->documentType->name }}
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                         {{ $request->created_at->format('F d, Y') }}
@@ -378,13 +386,13 @@
                                 </tr>
                             @empty
                                 <tr class="history-empty-row">
-                                    <td colspan="5" class="px-6 py-4 text-center text-gray-500">
+                                    <td colspan="6" class="px-6 py-4 text-center text-gray-500">
                                         No request history found.
                                     </td>
                                 </tr>
                             @endforelse
                             <tr class="history-no-results hidden">
-                                <td colspan="5" class="px-6 py-4 text-center text-gray-500">
+                                <td colspan="6" class="px-6 py-4 text-center text-gray-500">
                                     No results found for this filter.
                                 </td>
                             </tr>
@@ -393,7 +401,7 @@
                 </div>
 
                 {{-- Pagination Info & Links at Bottom --}}
-                <div>
+                <div class="mt-6">
                     {{ $historyRequests->links() }}
                 </div>
             </div>
@@ -471,7 +479,8 @@
     }
     </style>
 
-    <script>
+<script>
+    // ===== TAB SWITCHING =====
     document.querySelectorAll('.tab-button').forEach(button => {
         button.addEventListener('click', function() {
             const tabName = this.dataset.tab;
@@ -492,7 +501,10 @@
     });
 
     document.addEventListener('DOMContentLoaded', function() {
-        const activeTab = localStorage.getItem('activeDocumentTab') || 'document-request';
+        const urlParams = new URLSearchParams(window.location.search);
+        const urlTab = urlParams.get('tab');
+        const activeTab = urlTab || localStorage.getItem('activeDocumentTab') || 'document-request';
+
         document.querySelectorAll('.tab-button').forEach(btn => {
             btn.classList.remove('text-blue-600', 'border-b-2', 'border-blue-600');
             btn.classList.add('text-slate-600');
@@ -507,94 +519,7 @@
         document.getElementById(activeTab + '-content').classList.remove('hidden');
     });
 
-    // Status filter with view switching
-    document.querySelectorAll('.filter-btn').forEach(button => {
-        button.addEventListener('click', function() {
-            const filter = this.dataset.filter;
-            const kanbanView = document.getElementById('kanban-view');
-            const listView = document.getElementById('list-view');
-            const kanbanGrid = document.querySelector('.kanban-grid');
-            
-            // Update button states
-            document.querySelectorAll('.filter-btn').forEach(btn => {
-                btn.classList.remove('bg-blue-600', 'text-white');
-                btn.classList.add('text-blue-600', 'border', 'border-blue-600');
-            });
-            this.classList.remove('text-blue-600', 'border', 'border-blue-600');
-            this.classList.add('bg-blue-600', 'text-white');
-            
-            if (filter === 'all') {
-                // Show kanban view, hide list view
-                kanbanView.classList.remove('hidden');
-                listView.classList.add('hidden');
-                kanbanGrid.classList.remove('filtered-single');
-                
-                // Show all kanban columns
-                document.querySelectorAll('.kanban-column').forEach(column => {
-                    column.classList.remove('hidden');
-                });
-            } else {
-                // Hide kanban view, show list view
-                kanbanView.classList.add('hidden');
-                listView.classList.remove('hidden');
-                
-                // Hide all list sections first
-                document.querySelectorAll('.list-section').forEach(section => {
-                    section.classList.add('hidden');
-                });
-                
-                // Show only the selected list section
-                document.querySelectorAll('.list-section').forEach(section => {
-                    if (section.dataset.status === filter) {
-                        section.classList.remove('hidden');
-                    }
-                });
-            }
-        });
-    });
-
-    const dateInput = document.querySelector('input[name="date"]');
-    if (dateInput) {
-        dateInput.addEventListener('change', debounce(function() {
-            const params = new URLSearchParams(window.location.search);
-            const dateValue = dateInput.value;
-            if (dateValue) {
-                params.set('date', dateValue);
-            } else {
-                params.delete('date');
-            }
-            window.location.href = window.location.pathname + (params.toString() ? '?' + params.toString() : '');
-        }, 300));
-    }
-    function debounce(func, wait) {
-        let timeout;
-        return function executedFunction(...args) {
-            const later = () => {
-                clearTimeout(timeout);
-                func.apply(this, args);
-            };
-            clearTimeout(timeout);
-            timeout = setTimeout(later, wait);
-        };
-    }
-
-    const searchInput = document.querySelector('input[name="search"]');
-    
-    if (searchInput) {
-        searchInput.addEventListener('input', debounce(function() {
-            const searchValue = searchInput.value;
-            const params = new URLSearchParams(window.location.search);
-            
-            if (searchValue) {
-                params.set('search', searchValue);
-            } else {
-                params.delete('search');
-            }
-            
-            window.location.href = window.location.pathname + (params.toString() ? '?' + params.toString() : '');
-        }, 300));
-    }
-    
+    // ===== DEBOUNCE UTILITY =====
     function debounce(func, wait) {
         let timeout;
         return function executedFunction(...args) {
@@ -607,6 +532,161 @@
         };
     }
 
+    // ===== PRESERVE FILTER STATE =====
+    document.addEventListener('DOMContentLoaded', function() {
+        const savedFilter = localStorage.getItem('activeDocumentFilter') || 'all';
+        
+        // Trigger the saved filter button
+        const filterBtn = document.querySelector(`.filter-btn[data-filter="${savedFilter}"]`);
+        if (filterBtn) {
+            filterBtn.click();
+        }
+    });
+
+    // ===== DOCUMENT REQUEST TAB - STATUS FILTER =====
+    document.querySelectorAll('.filter-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const filter = this.dataset.filter;
+            
+            // Save the current filter to localStorage
+            localStorage.setItem('activeDocumentFilter', filter);
+            
+            const kanbanView = document.getElementById('kanban-view');
+            const listView = document.getElementById('list-view');
+            const kanbanGrid = document.querySelector('.kanban-grid');
+            
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('bg-blue-600', 'text-white');
+                btn.classList.add('text-blue-600', 'border', 'border-blue-600');
+            });
+            this.classList.remove('text-blue-600', 'border', 'border-blue-600');
+            this.classList.add('bg-blue-600', 'text-white');
+            
+            if (filter === 'all') {
+                kanbanView.classList.remove('hidden');
+                listView.classList.add('hidden');
+                kanbanGrid.classList.remove('filtered-single');
+                
+                document.querySelectorAll('.kanban-column').forEach(column => {
+                    column.classList.remove('hidden');
+                });
+            } else {
+                kanbanView.classList.add('hidden');
+                listView.classList.remove('hidden');
+                
+                document.querySelectorAll('.list-section').forEach(section => {
+                    section.classList.add('hidden');
+                });
+                
+                document.querySelectorAll('.list-section').forEach(section => {
+                    if (section.dataset.status === filter) {
+                        section.classList.remove('hidden');
+                    }
+                });
+            }
+        });
+    });
+
+    // ===== REQUEST HISTORY TAB - STATUS FILTER =====
+    document.querySelectorAll('.history-filter-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const filter = this.dataset.filter;
+
+            document.querySelectorAll('.history-filter-btn').forEach(btn => {
+                btn.classList.remove('bg-blue-600', 'text-white');
+                btn.classList.add('text-blue-600', 'border', 'border-blue-600');
+            });
+            this.classList.remove('text-blue-600', 'border', 'border-blue-600');
+            this.classList.add('bg-blue-600', 'text-white');
+
+            const rows = document.querySelectorAll('.history-row');
+            const noResults = document.querySelector('.history-no-results');
+            let visibleCount = 0;
+
+            rows.forEach(row => {
+                if (filter === 'all' || row.dataset.status === filter) {
+                    row.classList.remove('hidden');
+                    visibleCount++;
+                } else {
+                    row.classList.add('hidden');
+                }
+            });
+
+            if (visibleCount === 0) {
+                noResults.classList.remove('hidden');
+            } else {
+                noResults.classList.add('hidden');
+            }
+        });
+    });
+
+    // ===== SEARCH FILTER =====
+    const searchInput = document.querySelector('input[name="search"]');
+    if (searchInput) {
+        searchInput.addEventListener('input', debounce(function() {
+            const searchValue = searchInput.value;
+            const params = new URLSearchParams(window.location.search);
+            
+            if (searchValue) {
+                params.set('search', searchValue);
+                params.delete('page');
+                params.set('tab', 'request-history'); // Go to history tab when searching
+            } else {
+                params.delete('search');
+                params.delete('tab');
+            }
+            
+            window.location.href = window.location.pathname + (params.toString() ? '?' + params.toString() : '');
+        }, 300));
+    }
+
+    // ===== DATE FILTER =====
+    const mainDateInput = document.querySelector('input[name="date"]');
+    if (mainDateInput) {
+        mainDateInput.addEventListener('change', function() {
+            const params = new URLSearchParams(window.location.search);
+            const dateValue = this.value;
+            
+            if (dateValue) {
+                params.set('date', dateValue);
+                params.delete('page');
+            } else {
+                params.delete('date');
+            }
+            
+            window.location.href = window.location.pathname + (params.toString() ? '?' + params.toString() : '');
+        });
+    }
+
+    // ===== DOCUMENT TYPE FILTER =====
+    document.addEventListener('DOMContentLoaded', function() {
+        setTimeout(() => {
+            const mainDocTypeDiv = document.querySelector('#main-document-type');
+            if (mainDocTypeDiv) {
+                const filterLinks = mainDocTypeDiv.querySelectorAll('a');
+                filterLinks.forEach(link => {
+                    link.addEventListener('click', function (e) {
+                        e.preventDefault();
+                        const href = this.getAttribute('href');
+                        const url = new URL(href, window.location.origin);
+                        const filterValue = url.searchParams.get('name');
+                        
+                        const params = new URLSearchParams(window.location.search);
+                        if (filterValue) {
+                            params.set('name', filterValue);
+                            params.delete('page');
+                        } else {
+                            params.delete('name');
+                        }
+                        
+                        window.location.href = window.location.pathname + (params.toString() ? '?' + params.toString() : '');
+                    });
+                });
+            }
+        }, 200);
+    });
+
+    // ===== DROPDOWN MENU CLOSE =====
     document.addEventListener('click', function(event) {
         const allMenus = document.querySelectorAll('.dropdown-menu');
         allMenus.forEach(menu => {
@@ -622,54 +702,7 @@
             });
         });
     });
-
-    // History filter
-    document.querySelectorAll('.history-filter-btn').forEach(button => {
-        button.addEventListener('click', function() {
-            const filter = this.dataset.filter;
-
-            // Update button states
-            document.querySelectorAll('.history-filter-btn').forEach(btn => {
-                btn.classList.remove('bg-blue-600', 'text-white', 'bg-blue-600', 'bg-blue-600');
-                const originalColor = btn.dataset.filter === 'Released' ? 'blue' : btn.dataset.filter === 'Cancelled' ? 'blue' : 'blue';
-                btn.classList.add(`text-${originalColor}-600`, 'border', `border-${originalColor}-600`);
-            });
-            this.classList.remove('border');
-            if (filter === 'all') {
-                this.classList.remove('text-blue-600', 'border-blue-600');
-                this.classList.add('bg-blue-600', 'text-white');
-            } else if (filter === 'Released') {
-                this.classList.remove('text-blue-600', 'border-blue-600');
-                this.classList.add('bg-blue-600', 'text-white');
-            } else if (filter === 'Cancelled') {
-                this.classList.remove('text-blue-600', 'border-blue-600');
-                this.classList.add('bg-blue-600', 'text-white');
-            }
-
-            // Filter rows
-            const rows = document.querySelectorAll('.history-row');
-            const emptyRow = document.querySelector('.history-empty-row');
-            const noResults = document.querySelector('.history-no-results');
-            let visibleCount = 0;
-
-            rows.forEach(row => {
-                if (filter === 'all' || row.dataset.status === filter) {
-                    row.classList.remove('hidden');
-                    visibleCount++;
-                } else {
-                    row.classList.add('hidden');
-                }
-            });
-
-            if (emptyRow) emptyRow.classList.add('hidden');
-            if (visibleCount === 0) {
-                noResults.classList.remove('hidden');
-            } else {
-                noResults.classList.add('hidden');
-            }
-        });
-    });
-    </script>
+</script>
 
     @include('transaction.modal.new-request')
     @include('transaction.modal.view-request')

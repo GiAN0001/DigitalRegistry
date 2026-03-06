@@ -9,11 +9,13 @@ use App\Models\HouseStructure;
 use App\Models\HouseholdPet;
 use App\Traits\Auditable; // GIAN ADDED THIS
 
+use Illuminate\Database\Eloquent\SoftDeletes;
+
 class Household extends Model
 {
     protected $guarded = []; 
    
-    use HasFactory, Auditable;
+    use HasFactory, Auditable, SoftDeletes;
 
     //GIAN ADDED THIS
     
@@ -44,4 +46,17 @@ class Household extends Model
         return $this->hasMany(ChristmasBox::class);
     }
 
+    protected static function booted()
+    {
+        static::deleting(function ($household) {
+            foreach ($household->residents as $resident) {
+                $resident->delete();
+            }
+        });
+        static::restoring(function ($household) {
+            foreach ($household->residents()->withTrashed()->get() as $resident) {
+                $resident->restore();
+            }
+        });
+    }
 }

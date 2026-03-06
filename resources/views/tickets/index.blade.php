@@ -33,7 +33,7 @@
     <div class="p-6 bg-white shadow-md rounded-lg">
         <div class="flex justify-between items-center mb-6">
             <h2 class="text-2xl font-bold text-gray-800">Support Tickets</h2>
-                <button onclick="toggleModal('createTicketModal')" 
+                <button x-data @click="$dispatch('open-modal', 'create-ticket')" 
                         class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center transition">
                     <x-lucide-plus class="w-4 h-4 mr-2" />
                     <span>File New Ticket</span>
@@ -46,7 +46,7 @@
                     <tr>
                         <th class="px-3 py-3 text-left text-xs font-medium text-slate-700 uppercase tracking-wider rounded-l-lg">Ticket Info</th>
                         @hasanyrole('admin|super admin')
-                            <th class="px-6 py-3 text-xs font-semibold text-gray-500 uppercase">Reporter</th>
+                            <th class="px-3 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Reporter</th>
                         @endrole
                         <th class="px-3 py-3 text-left text-xs font-medium text-slate-700 uppercase tracking-wider">Priority</th>
                         <th class="px-3 py-3 text-left text-xs font-medium text-slate-700 uppercase tracking-wider">Status</th>
@@ -94,8 +94,9 @@
                                 @endif
                             </td>
                             <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-900">
-                                <button onclick="openTicketDetails({{ $ticket->toJson() }})" 
-                                    class="text-blue-600 hover:text-blue-800 text-sm transition">
+                                <button x-data 
+                                        @click="$dispatch('open-modal', 'view-ticket-modal'); $dispatch('fetch-ticket-data', {{ $ticket->id }})"
+                                        class="text-blue-600 hover:text-blue-800 text-sm transition">
                                     View Details
                                 </button>
                             </td>
@@ -114,79 +115,17 @@
 @include('tickets.partials._create-modal')
 @include('tickets.partials._details-modal')
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-
-    @if(session('error_ticket_id'))
-        const errorId = {{ session('error_ticket_id') }};
-        const tickets = @json($tickets);
-        const failedTicket = tickets.find(t => t.id == errorId);
-        if (failedTicket) openTicketDetails(failedTicket);
+@if(session('success'))
+            <x-success-modal name="action-success" :show="true">
+                {{ session('success') }}
+            </x-success-modal>
     @endif
-});
-
-function openTicketDetails(ticket) {
-  
-    document.getElementById('detailType').innerText = ticket.ticket_type.replace(/_/g, ' ');
-    document.getElementById('detailDescription').innerText = ticket.description;
-    document.getElementById('detailFiledDate').innerText = ticket.date_created;
-    document.getElementById('detailDoneDate').innerText = ticket.date_done || 'Pending';
-
-    const isAdmin = {{ auth()->user()->hasanyrole('admin|super admin') ? 'true' : 'false' }};
-    const currentUserId = {{ auth()->id() }};
-    
-
-    const readOnly = document.getElementById('readOnlySection');
-    const adminAction = document.getElementById('adminActionSection');
-    const cancelAction = document.getElementById('userCancelSection');
-    
-    [readOnly, adminAction, cancelAction].forEach(el => el?.classList.add('hidden'));
-
-    
-    if (!isAdmin && ticket.user_id === currentUserId && ticket.is_seen_by_user == 0) {
-        fetch(`/tickets/${ticket.id}/mark-seen`, {
-            method: 'POST',
-            headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' }
-        });
-    }
-
-    // 4. Modal Visibility Logic
-    if (ticket.status === 'Completed' || ticket.status === 'Cancelled') {
-        readOnly.classList.remove('hidden');
-        document.getElementById('detailNotesDisplay').innerText = ticket.resolution_notes || 'Resolved.';
-    } else {
-     
-        if (isAdmin) {
-    
-            adminAction.classList.remove('hidden');
-            const form = document.getElementById('resolveForm');
-            const startBtn = document.getElementById('startBtn');
-            const resolveBtn = document.getElementById('resolveBtn');
-            const notesInputContainer = document.getElementById('detailNotesInput').parentElement;
-
-            form.action = `/tickets/${ticket.id}/resolve`;
-            startBtn.formAction = `/tickets/${ticket.id}/start`;
-            
-     
-            startBtn.classList.toggle('hidden', ticket.status !== 'Pending');
-            resolveBtn.classList.toggle('hidden', ticket.status !== 'In Progress');
-    
-            notesInputContainer.classList.toggle('hidden', ticket.status === 'Pending');
-            
-        } else {
-    
-            if (ticket.user_id === currentUserId && ticket.status === 'Pending') {
-                cancelAction.classList.remove('hidden');
-                document.getElementById('cancelForm').action = `/tickets/${ticket.id}/cancel`;
-            }
-       
-            readOnly.classList.remove('hidden');
-            document.getElementById('detailNotesDisplay').innerText = 'The system administrator has not yet responded to this ticket.';
-        }
-    }
-
-    toggleModal('viewTicketModal');
-}
-</script>
+    @if(session('error'))
+        <x-error-modal name="action-error" :show="true">
+            <div class="text-center">
+                <p class="text-gray-600 mb-4">{{ session('error') }}</p>
+            </div>
+        </x-error-modal>
+    @endif
 
 </x-app-layout>

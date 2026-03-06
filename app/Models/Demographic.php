@@ -4,9 +4,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 use App\Traits\Auditable;
 
+use Illuminate\Database\Eloquent\SoftDeletes;
+
 class Demographic extends Model
 {
-    use Auditable;    //GIAN ADDED THIS
+    use Auditable, SoftDeletes;    //GIAN ADDED THIS
     
     protected $guarded = []; // Critical
     public $timestamps = false; // Usually demographic tables don't have created_at/updated_at

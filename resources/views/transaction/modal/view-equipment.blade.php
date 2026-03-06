@@ -197,36 +197,46 @@
             <x-secondary-button @click="$dispatch('close')">Close</x-secondary-button>
             
             {{-- Mark as Delivered Button --}}
-            <template x-if="equipment.equipment_status === 'For Delivery'">
-                <button 
-                    @click="
+            <button 
+                @click="
+                    if (equipment.equipment_status === 'For Delivery') {
                         $dispatch('close');
                         setTimeout(() => {
                             window.dispatchEvent(new CustomEvent('show-delivery-form', { detail: { id: equipment.equipment_id } }));
                             $dispatch('open-modal', 'mark-equipment-delivered');
                         }, 100);
-                    "
-                    class="inline-flex items-center px-4 py-2 bg-orange-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-orange-700 focus:bg-orange-700 active:bg-orange-800 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 transition ease-in-out duration-150"
-                >
-                    Mark as Delivered
-                </button>
-            </template>
+                    }
+                "
+                :disabled="equipment.equipment_status !== 'For Delivery'"
+                :class="{
+                    'opacity-50 cursor-not-allowed': equipment.equipment_status !== 'For Delivery',
+                    'hover:bg-orange-700': equipment.equipment_status === 'For Delivery'
+                }"
+                class="inline-flex items-center px-4 py-2 bg-orange-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest focus:bg-orange-700 active:bg-orange-800 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 transition ease-in-out duration-150"
+            >
+                Mark as Delivered
+            </button>
 
             {{-- Mark as Returned Button --}}
-            <template x-if="equipment.equipment_status === 'Delivered'">
-                <button 
-                    @click="
+            <button 
+                @click="
+                    if (equipment.equipment_status === 'Delivered') {
                         $dispatch('close');
                         setTimeout(() => {
                             window.dispatchEvent(new CustomEvent('show-return-form', { detail: { id: equipment.equipment_id } }));
                             $dispatch('open-modal', 'mark-equipment-returned');
                         }, 100);
-                    "
-                    class="inline-flex items-center px-4 py-2 bg-green-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-green-700 focus:bg-green-700 active:bg-green-800 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition ease-in-out duration-150"
-                >
-                    Mark as Returned
-                </button>
-            </template>
+                    }
+                "
+                :disabled="equipment.equipment_status !== 'Delivered'"
+                :class="{
+                    'opacity-50 cursor-not-allowed': equipment.equipment_status !== 'Delivered',
+                    'hover:bg-green-700': equipment.equipment_status === 'Delivered'
+                }"
+                class="inline-flex items-center px-4 py-2 bg-green-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest focus:bg-green-700 active:bg-green-800 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition ease-in-out duration-150"
+            >
+                Mark as Returned
+            </button>
         </div>
     </div>
 </x-modal>
