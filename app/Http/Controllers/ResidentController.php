@@ -401,27 +401,33 @@ class ResidentController extends Controller
     public function update(Request $request, Resident $resident): RedirectResponse // edited by GIAN
     {
         // 1. Validation for the specific resident being updated
-        $validated = $request->validate([
+        $rules = [
             'resident.first_name' => ['required', 'string', 'max:100'],
             'resident.last_name' => ['required', 'string', 'max:100'],
             'resident.middle_name' => ['nullable', 'string', 'max:100'],
             'resident.extension' => ['nullable', 'string', 'max:10'],
             'resident.household_role_id' => ['required', 'exists:household_roles,id'],
             'resident.birthplace' => ['required', 'string', 'max:255'],
-            'resident.birthdate' => ['required', 'date', 'before:today'],
             'resident.sex' => ['required', 'in:Male,Female'],
             'resident.civil_status' => ['required', 'in:Single,Married,Widowed,Separated'],
             'resident.nationality' => ['required', 'string', 'max:100'],
             'resident.occupation' => ['nullable', 'string', 'max:100'],
-            'resident.sector' => ['required', 'in:None,PWD,Senior Citizen,Solo Parent'],
-            'resident.vaccination' => ['nullable', 'in:None,Private,Health Center'],
-            'resident.comorbidity' => ['nullable', 'string', 'max:255'],
-            'resident.maintenance' => ['nullable', 'string', 'max:255'],
-        ]);
+        ];
 
+        if (Auth::user()->hasRole('super admin')) {
+            $rules['resident.birthdate'] = ['required', 'date', 'before:today'];
+            $rules['resident.sector'] = ['required', 'in:None,PWD,Senior Citizen,Solo Parent'];
+            $rules['resident.vaccination'] = ['nullable', 'in:None,Private,Health Center'];
+            $rules['resident.comorbidity'] = ['nullable', 'string', 'max:255'];
+            $rules['resident.maintenance'] = ['nullable', 'string', 'max:255'];
+        }
+
+        $validated = $request->validate($rules);
         $data = $validated['resident'];
+        
         // Use the cycle assigned to this specific record for temporal isolation
         $currentCycle = $resident->census_cycle; 
+        $birthDate = Auth::user()->hasRole('super admin') ? $data['birthdate'] : ($resident->demographic->birthdate ?? null);
 
         DB::beginTransaction();
         try {
@@ -431,14 +437,14 @@ class ResidentController extends Controller
                 ->where('first_name', $data['first_name'])
                 ->where('last_name', $data['last_name'])
                 ->where('census_cycle', $currentCycle)
-                ->whereHas('demographic', function($q) use ($data) {
-                    $q->where('birthdate', $data['birthdate'])
-                    ->where('birthplace', $data['birthplace']);
+                ->whereHas('demographic', function($q) use ($data, $birthDate) {
+                    $q->where('birthdate', $birthDate)
+                      ->where('birthplace', $data['birthplace']);
                 })->exists();
 
             if ($duplicate) {
-                // Triggers your red Error Modal
-                return back()->with('error', "Update Blocked: Another resident named {$data['first_name']} {$data['last_name']} (Born {$data['birthdate']}) already exists in the {$currentCycle} cycle.")->withInput();
+                $bDateStr = $birthDate ?? 'Unknown';
+                return back()->with('error', "Update Blocked: Another resident named {$data['first_name']} {$data['last_name']} (Born {$bDateStr}) already exists in the {$currentCycle} cycle.")->withInput();
             }
 
             // --- 3. PROCEED WITH UPDATES ---
@@ -451,28 +457,35 @@ class ResidentController extends Controller
                 'updated_by_user_id' => Auth::id(), 
             ]);
 
+            $demoData = [
+                'birthplace' => $data['birthplace'],
+                'sex' => $data['sex'],
+                'civil_status' => $data['civil_status'],
+                'nationality' => $data['nationality'],
+                'occupation' => $data['occupation'],
+            ];
+
+            if (Auth::user()->hasRole('super admin')) {
+                $demoData['birthdate'] = $data['birthdate'];
+            }
+
             $resident->demographic()->updateOrCreate(
                 ['resident_id' => $resident->id],
-                [
-                    'birthplace' => $data['birthplace'],
-                    'birthdate' => $data['birthdate'],
-                    'sex' => $data['sex'],
-                    'civil_status' => $data['civil_status'],
-                    'nationality' => $data['nationality'],
-                    'occupation' => $data['occupation'],
-                ]
+                $demoData
             );
 
-            $vaccination = ($data['vaccination'] === 'None') ? null : $data['vaccination'];
-            $resident->healthInformation()->updateOrCreate(
-                ['resident_id' => $resident->id],
-                [
-                    'sector' => $data['sector'] ?? 'None',
-                    'vaccination' => $vaccination,
-                    'comorbidity' => $data['comorbidity'],
-                    'maintenance' => $data['maintenance'],
-                ]
-            );
+            if (Auth::user()->hasRole('super admin')) {
+                $vaccination = ($data['vaccination'] === 'None') ? null : $data['vaccination'];
+                $resident->healthInformation()->updateOrCreate(
+                    ['resident_id' => $resident->id],
+                    [
+                        'sector' => $data['sector'] ?? 'None',
+                        'vaccination' => $vaccination,
+                        'comorbidity' => $data['comorbidity'],
+                        'maintenance' => $data['maintenance'],
+                    ]
+                );
+            }
 
             DB::commit();
             return back()->with('success', 'Resident details updated successfully.');
