@@ -15,6 +15,8 @@ class ResidentRegistrationRequest extends FormRequest
 
     public function rules(): array
     {
+        $ownerId = \App\Models\ResidencyType::where('name', 'Owner')->value('id');
+
         return [
             // --- STEP 1: Head of Family ONLY ---
             'head.first_name' => ['required', 'string', 'max:100'],
@@ -52,12 +54,12 @@ class ResidentRegistrationRequest extends FormRequest
             'household.landlord_name' => [
                 'nullable', 
                 'string', 
-                Rule::requiredIf(fn() => $this->input('household.residency_type_id') != 1)
+                Rule::requiredIf(fn() => $this->input('household.residency_type_id') && $this->input('household.residency_type_id') != $ownerId)
             ],
             'household.landlord_contact' => [
                 'nullable', 
                 'string',
-                Rule::requiredIf(fn() => $this->input('household.residency_type_id') != 1)
+                Rule::requiredIf(fn() => $this->input('household.residency_type_id') && $this->input('household.residency_type_id') != $ownerId)
             ],
 
             //STEP 2 added by GIAN
@@ -85,6 +87,55 @@ class ResidentRegistrationRequest extends FormRequest
 
             'pets.*.pet_type_id' => ['required', 'exists:pet_types,id'],
             'pets.*.quantity' => ['required', 'integer', 'min:1'],
+        ];
+    }
+
+    public function attributes(): array
+    {
+        return [
+            'head.first_name' => 'First Name',
+            'head.last_name' => 'Last Name',
+            'head.middle_name' => 'Middle Name',
+            'head.extension' => 'Extension',
+            'head.birthplace' => 'Place of Birth',
+            'head.birthdate' => 'Date of Birth',
+            'head.household_role_id' => 'Household Role',
+            'head.sex' => 'Sex',
+            'head.civil_status' => 'Civil Status',
+            'head.nationality' => 'Nationality',
+            'head.occupation' => 'Occupation',
+            'head.sector' => 'Sector',
+            'head.vaccination' => 'Vaccination',
+            'head.comorbidity' => 'Comorbidity',
+            'head.maintenance' => 'Maintenance',
+            
+            'household.house_number' => 'House Number',
+            'household.area_id' => 'Street',
+            'household.house_structure_id' => 'House Structure',
+            'household.residency_type_id' => 'Ownership Status',
+            'household.contact_number' => 'Household Contact Number',
+            'household.email' => 'Household Email',
+            'household.landlord_name' => 'Landlord Name',
+            'household.landlord_contact' => 'Landlord Contact',
+
+            'members.*.first_name' => 'Member First Name',
+            'members.*.last_name' => 'Member Last Name',
+            'members.*.middle_name' => 'Member Middle Name',
+            'members.*.extension' => 'Member Extension',
+            'members.*.birthplace' => 'Member Place of Birth',
+            'members.*.birthdate' => 'Member Date of Birth',
+            'members.*.household_role_id' => 'Member Household Role',
+            'members.*.sex' => 'Member Sex',
+            'members.*.civil_status' => 'Member Civil Status',
+            'members.*.nationality' => 'Member Nationality',
+            'members.*.occupation' => 'Member Occupation',
+            'members.*.sector' => 'Member Sector',
+            'members.*.vaccination' => 'Member Vaccination',
+            'members.*.comorbidity' => 'Member Comorbidity',
+            'members.*.maintenance' => 'Member Maintenance',
+            
+            'pets.*.pet_type_id' => 'Pet Type',
+            'pets.*.quantity' => 'Pet Quantity',
         ];
     }
 }

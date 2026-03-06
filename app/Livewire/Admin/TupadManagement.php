@@ -8,13 +8,11 @@ use Livewire\Attributes\Url;
 use App\Models\Resident;
 use App\Models\TupadParticipation;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class TupadManagement extends Component
 {
     use WithPagination;
-    
-    //public testDate= null; // For testing purposes only.
-
 
     #[Url(history: true, except: '')]
     public $search = '';
@@ -34,11 +32,7 @@ class TupadManagement extends Component
 
     public function render()
     {
-         /*  if ($this->testDate) {
-            Carbon::setTestNow(Carbon::parse($this->testDate));
-           } */ //fo testing purposes only.
-           
-        $now = now(); 
+        $now = now();
         $threeMonthsAgo = now()->subMonths(3);
 
         TupadParticipation::where('status', 'Scheduled')
@@ -49,6 +43,13 @@ class TupadManagement extends Component
             ->where('end_date', '<', $now->toDateString())
             ->update(['status' => 'Completed']);
 
+        // --- EFFECTIVE CENSUS CYCLE (with fallback, no UI filter) ---
+        $currentCycle = Resident::getCurrentCensusCycle();
+        $hasCurrentCycle = Resident::where('census_cycle', $currentCycle)->exists();
+        $cycle = $hasCurrentCycle
+            ? $currentCycle
+            : (Resident::max('census_cycle') ?? $currentCycle);
+
         // --- SHARED SEARCH SCOPE ---
         $searchQuery = function ($query) {
             $query->when($this->search, function ($q) {
@@ -56,32 +57,39 @@ class TupadManagement extends Component
                     $inner->where('first_name', 'like', '%' . $this->search . '%')
                         ->orWhere('last_name', 'like', '%' . $this->search . '%')
                         ->orWhere('middle_name', 'like', '%' . $this->search . '%')
-                        ->orWhere('extension', 'like', '%' . $this->search . '%');
+                        ->orWhere('extension', 'like', '%' . $this->search . '%')
+                        ->orWhere(DB::raw("CONCAT(first_name, ' ', last_name)"), 'like', "%{$this->search}%")
+                        ->orWhere(DB::raw("CONCAT(first_name, ' ', IFNULL(middle_name, ''), ' ', last_name)"), 'like', "%{$this->search}%")
+                        ->orWhere(DB::raw("CONCAT(last_name, ', ', first_name)"), 'like', "%{$this->search}%");
                 });
             });
         };
 
         $adultCutoffDate = Carbon::now()->subYears(18)->toDateString();
+
         // 1. AUTO-ELIGIBLE: 18+ AND no active work OR cooldown record
         $eligible = Resident::with(['demographic', 'household.areaStreet'])
+            ->where('census_cycle', $cycle)
             ->tap($searchQuery)
             ->whereHas('demographic', function ($q) use ($adultCutoffDate) {
                 $q->where('birthdate', '<=', $adultCutoffDate);
             })
             ->whereDoesntHave('tupadParticipations', function ($q) use ($now, $threeMonthsAgo) {
-                $q->where('end_date', '>=', $now) // Active
-                ->orWhere('end_date', '>', $threeMonthsAgo); // Cooldown
+                $q->where('end_date', '>=', $now)
+                ->orWhere('end_date', '>', $threeMonthsAgo);
             })->paginate(15);
 
-        // 2. AUTO-ONGOING: Status is 'Ongoing' AND contract hasn't expired
+        // 2. AUTO-ONGOING
         $ongoing = Resident::with(['demographic', 'tupadParticipations'])
+            ->where('census_cycle', $cycle)
             ->tap($searchQuery)
             ->whereHas('tupadParticipations', function ($q) use ($now) {
-                $q->whereIn('status', ['Ongoing', 'Scheduled']); // Records older than $now were already updated to 'Completed' above
+                $q->whereIn('status', ['Ongoing', 'Scheduled']);
             })->paginate(15);
 
-        // 5. INELIGIBLE: Residents who recently exited (Finished or Dropped)
+        // 3. INELIGIBLE
         $ineligible = Resident::with(['demographic', 'tupadParticipations'])
+            ->where('census_cycle', $cycle)
             ->tap($searchQuery)
             ->whereHas('tupadParticipations', function ($q) use ($threeMonthsAgo, $now) {
                 $q->whereIn('status', ['Completed', 'Dropped'])
@@ -89,41 +97,43 @@ class TupadManagement extends Component
                 ->where('end_date', '<', $now);
             })->paginate(15);
 
-        // 4. DROPPED: Everyone who has ever been dropped (Full History)
+        // 4. DROPPED
         $dropped = Resident::with(['demographic', 'tupadParticipations'])
+            ->where('census_cycle', $cycle)
             ->tap($searchQuery)
             ->whereHas('tupadParticipations', fn($q) => $q->where('status', 'Dropped'))
             ->paginate(15);
 
-        // 5. UNIFIED COUNTS
+        // 5. UNIFIED COUNTS (scoped to effective cycle)
         $counts = [
-            'eligible' => Resident::whereHas('demographic', fn($q) => $q->where('birthdate', '<=', $adultCutoffDate))
-            ->whereDoesntHave('tupadParticipations', function($q) use ($now, $threeMonthsAgo) {
-                $q->where('end_date', '>=', $now)->orWhere('end_date', '>', $threeMonthsAgo);
-            })->count(),
-            'ongoing' => TupadParticipation::where('status', 'Ongoing')->count(),
-            'ineligible' => TupadParticipation::whereIn('status', ['Completed', 'Dropped'])
+            'eligible' => Resident::where('census_cycle', $cycle)
+                ->whereHas('demographic', fn($q) => $q->where('birthdate', '<=', $adultCutoffDate))
+                ->whereDoesntHave('tupadParticipations', function($q) use ($now, $threeMonthsAgo) {
+                    $q->where('end_date', '>=', $now)->orWhere('end_date', '>', $threeMonthsAgo);
+                })->count(),
+            'ongoing'   => TupadParticipation::whereHas('resident', fn($q) => $q->where('census_cycle', $cycle))
+                ->where('status', 'Ongoing')->count(),
+            'ineligible'=> TupadParticipation::whereHas('resident', fn($q) => $q->where('census_cycle', $cycle))
+                ->whereIn('status', ['Completed', 'Dropped'])
                 ->where('end_date', '>', $threeMonthsAgo)->count(),
-            'dropped' => TupadParticipation::where('status', 'Dropped')->count(),
-            'scheduled' => TupadParticipation::where('status', 'Scheduled')->count(),
+            'dropped'   => TupadParticipation::whereHas('resident', fn($q) => $q->where('census_cycle', $cycle))
+                ->where('status', 'Dropped')->count(),
+            'scheduled' => TupadParticipation::whereHas('resident', fn($q) => $q->where('census_cycle', $cycle))
+                ->where('status', 'Scheduled')->count(),
         ];
 
         $this->dispatch('update-counts', ...$counts);
 
         return view('livewire.admin.tupad-management', [
-            'eligible' => Resident::with(['demographic', 'household.areaStreet'])->tap($searchQuery)->whereDoesntHave('tupadParticipations', function($q) use ($now, $threeMonthsAgo) {
-                $q->where('end_date', '>=', $now)->orWhere('end_date', '>', $threeMonthsAgo);
-            })->paginate(15),
-            'eligible' => $eligible,
-            'ongoing' => $ongoing,
-            'ineligible' => $ineligible,
-            'dropped' => Resident::with(['demographic', 'tupadParticipations'])->tap($searchQuery)->whereHas('tupadParticipations', fn($q) => $q->where('status', 'Dropped'))->paginate(15),
-            'eligibleCount' => $counts['eligible'],
-            'ongoingCount' => $counts['ongoing'],
-            'ineligibleCount' => $counts['ineligible'],
-            'droppedCount' => $counts['dropped'],
+            'eligible'       => $eligible,
+            'ongoing'        => $ongoing,
+            'ineligible'     => $ineligible,
+            'dropped'        => $dropped,
+            'eligibleCount'  => $counts['eligible'],
+            'ongoingCount'   => $counts['ongoing'],
+            'ineligibleCount'=> $counts['ineligible'],
+            'droppedCount'   => $counts['dropped'],
             'scheduledCount' => $counts['scheduled'],
-           
         ]);
     }
 }

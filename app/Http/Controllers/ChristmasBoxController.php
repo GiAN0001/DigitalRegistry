@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\DB;
 
 class ChristmasBoxController extends Controller
 {
@@ -18,7 +19,18 @@ class ChristmasBoxController extends Controller
         $year = $request->input('year', now()->year);
         $status = $request->input('status');
 
-        $totalHouseholds = Resident::where('household_role_id', 1)->count();
+        // --- CENSUS CYCLE LOGIC with fallback ---
+        $currentCycle = Resident::getCurrentCensusCycle();
+        $hasCurrentCycleResidents = Resident::where('census_cycle', $currentCycle)->exists();
+        $effectiveCycle = $hasCurrentCycleResidents
+            ? $currentCycle
+            : (Resident::max('census_cycle') ?? $currentCycle);
+        $selectedCycle = $request->input('census_cycle', $effectiveCycle);
+        $availableCycles = Resident::select('census_cycle')
+            ->distinct()->orderByDesc('census_cycle')->pluck('census_cycle');
+
+        $totalHouseholds = Resident::where('household_role_id', 1)
+            ->where('census_cycle', $selectedCycle)->count();
         $releasedCount = ChristmasBox::where('year', $year)
             ->where('status', 'Released')
             ->count();
@@ -26,6 +38,7 @@ class ChristmasBoxController extends Controller
         $onHoldCount = $totalHouseholds - $releasedCount;
 
         $query = Resident::where('household_role_id', 1)
+            ->where('census_cycle', $selectedCycle)
             ->leftJoin('christmas_boxes', function ($join) use ($year) {
                 $join->on('residents.household_id', '=', 'christmas_boxes.household_id')
                     ->where('christmas_boxes.year', '=', $year);
@@ -50,13 +63,26 @@ class ChristmasBoxController extends Controller
             $searchTerm = $request->q;
             $query->where(function($q) use ($searchTerm) {
                 $q->where('first_name', 'like', "%{$searchTerm}%")
-                ->orWhere('last_name', 'like', "%{$searchTerm}%");
+                ->orWhere('last_name', 'like', "%{$searchTerm}%")
+                ->orWhere('middle_name', 'like', "%{$searchTerm}%")
+                ->orWhere(DB::raw("CONCAT(first_name, ' ', last_name)"), 'like', "%{$searchTerm}%")
+                ->orWhere(DB::raw("CONCAT(first_name, ' ', IFNULL(middle_name, ''), ' ', last_name)"), 'like', "%{$searchTerm}%")
+                ->orWhere(DB::raw("CONCAT(last_name, ', ', first_name)"), 'like', "%{$searchTerm}%");
+            });
+        }
+        // filter by purok
+        if($request->filled('purok_name')) {
+            $query->whereHas('household.areaStreet', function($q) use ($request) {
+                $q->where('purok_name', $request->purok_name);
             });
         }
 
         $heads = $query->paginate(15)->withQueryString();
 
-        return view('admin.christmas.index', compact('heads', 'year', 'releasedCount', 'onHoldCount', 'totalHouseholds'));
+        return view('admin.christmas.index', compact(
+            'heads', 'year', 'releasedCount', 'onHoldCount', 'totalHouseholds',
+            'selectedCycle'
+        ));
     }
 
     public function release(Household $household): RedirectResponse

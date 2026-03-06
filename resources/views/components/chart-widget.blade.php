@@ -76,8 +76,8 @@
                                         label: function(context) {
                                             let label = context.dataset.label || '';
                                             if (label) label += ': ';
-                                            if (context.parsed.y !== null) {
-                                                label += new Intl.NumberFormat().format(context.parsed.y);
+                                            if (context.raw !== null && context.raw !== undefined) {
+                                                label += new Intl.NumberFormat().format(context.raw);
                                             }
                                             return label;
                                         }

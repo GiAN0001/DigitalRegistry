@@ -6,10 +6,10 @@
     placeholder:text-gray-400
 ']) }}>
     
-    <option value="" disabled selected>{{ $placeholder }}</option>
+    <option value="" disabled @if(is_null($selected) || $selected === '') selected @endif>{{ $placeholder }}</option>
 
     @foreach($options as $value => $label)
-        <option value="{{ $value }}">{{ $label }}</option>
+        <option value="{{ $value }}" @if($selected !== null && $selected !== '' && $value == $selected) selected @endif>{{ $label }}</option>
     @endforeach
 
 </select>

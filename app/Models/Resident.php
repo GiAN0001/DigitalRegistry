@@ -15,9 +15,11 @@ use App\Models\Demographic;
 use App\Models\ResidencyType; 
 use App\Traits\Auditable; // GIAN ADDED THIS
 
+use Illuminate\Database\Eloquent\SoftDeletes;
+
 class Resident extends Model
 {
-    use HasFactory, Auditable;
+    use HasFactory, Auditable, SoftDeletes;
     
 
     //GIAN ADDED THIS
@@ -84,5 +86,25 @@ class Resident extends Model
             return $query->where('added_by_user_id', $user->id);
         }
         return $query->where('id', null); 
+    }
+
+    protected static function booted()
+    {
+        static::deleting(function ($resident) {
+            if ($resident->demographic) {
+                $resident->demographic->delete();
+            }
+            if ($resident->healthInformation) {
+                $resident->healthInformation->delete();
+            }
+        });
+        static::restoring(function ($resident) {
+            if ($record = Demographic::withTrashed()->where('resident_id', $resident->id)->first()) {
+                $record->restore();
+            }
+            if ($record = HealthInformation::withTrashed()->where('resident_id', $resident->id)->first()) {
+                $record->restore();
+            }
+        });
     }
 }

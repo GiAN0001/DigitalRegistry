@@ -4,13 +4,19 @@
             // 1. Initialize household: Use OLD input if validation failed, otherwise empty
             household: @if($errors->hasAny(['house_number', 'area_id', 'residency_type_id', 'contact_number'])) @js(old()) @else {} @endif,
             
-            // 2. Initialize Status: Use OLD input if available
+            // 2. Owner ID looked up by name — safe regardless of seeding order
+            ownerId: '{{ \App\Models\ResidencyType::where('name', 'Owner')->value('id') ?? '' }}',
+
+            // 3. Initialize Status: Use OLD input if available
             ownershipStatus: '{{ old('residency_type_id') }}',
             
-            // 3. Purok Filter
+            // 4. Purok Filter
             selectedPurok: '',
 
-            // 4. Data Sources
+            // 5. Loading state
+            loading: false,
+
+            // 5. Data Sources
             allAreas: @js(App\Models\AreaStreet::all()),
             
             get availableStreets() {
@@ -25,9 +31,29 @@
                 return [...new Set(puroks)].sort();
             },
 
-            updateUrlBase: '{{ url('households') }}'
+            updateUrlBase: '{{ url('households') }}',
+
+            // 6. Secure fetch — only the ID is passed in HTML
+            async fetchHousehold(id) {
+                this.loading = true;
+                try {
+                    const response = await fetch(`${this.updateUrlBase}/${id}`);
+                    const data = await response.json();
+
+                    this.household = data;
+                    this.ownershipStatus = data.residency_type_id ?? '';
+
+                    if (data.area_street) {
+                        this.selectedPurok = data.area_street.purok_name;
+                    }
+                } catch (error) {
+                    console.error('Failed to fetch household:', error);
+                } finally {
+                    this.loading = false;
+                }
+            }
         }"
-        {{-- 5. AUTO-OPEN ON ERROR: Triggers only if Edit-specific errors exist --}}
+        {{-- 7. AUTO-OPEN ON ERROR: Triggers only if Edit-specific errors exist --}}
         x-init="
             @if($errors->hasAny(['house_number', 'area_id', 'residency_type_id', 'contact_number', 'landlord_name']))
                 $dispatch('open-modal', 'edit-household-modal');
@@ -41,16 +67,8 @@
                 });
             @endif
         "
-        {{-- 6. NORMAL OPEN: Triggered by clicking 'Edit' in the table --}}
-        x-on:edit-household-data.window="
-            household = $event.detail;
-            ownershipStatus = household.residency_type_id; 
-
-            // Initialize Purok filter from existing data
-            if (household.area_street) {
-                selectedPurok = household.area_street.purok_name;
-            }
-        "
+        {{-- 8. NORMAL OPEN: Triggered by clicking 'Edit' — receives only the ID --}}
+        x-on:fetch-household-data.window="fetchHousehold($event.detail)"
         class="p-8"
     >
         <div class="flex justify-between items-center bg-white z-10 pb-4 border-b mb-4">
@@ -60,7 +78,12 @@
             </button>
         </div>
 
-        <form method="POST" x-bind:action="updateUrlBase + '/' + household.id">
+        {{-- Loading Spinner --}}
+        <div x-show="loading" class="flex items-center justify-center py-16">
+            <x-lucide-loader-2 class="w-10 h-10 animate-spin text-blue-600" />
+        </div>
+
+        <form method="POST" x-bind:action="updateUrlBase + '/' + household.id" x-show="!loading">
             @csrf
             @method('PUT')
             
@@ -136,7 +159,7 @@
                 {{-- Email --}}
                 <div>
                     <x-input-label>Household Email</x-input-label>
-                    <x-text-input name="email" type="email" class="w-full mt-1 text-sm" x-model="household.email" />
+                    <x-text-input name="email" type="email" placeholder="family@example.com" class="w-full mt-1 text-sm" x-model="household.email" />
                     <x-input-error :messages="$errors->get('email')" class="mt-2" />
                 </div>
 
@@ -149,20 +172,20 @@
             </div>
 
             {{-- Landlord Details --}}
-            <div x-show="ownershipStatus != '1'" class="bg-gray-50 p-4 rounded-lg border border-gray-200 mt-2">
+            <div x-show="ownershipStatus != ownerId && ownershipStatus != ''" class="bg-gray-50 p-4 rounded-lg border border-gray-200 mt-2">
                 <h4 class="text-sm font-bold text-gray-600 mb-2">Landlord Details (Required if not Owner)</h4>
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <x-input-label>Landlord Name <span class="text-red-500">*</span></x-input-label>
                         <x-text-input name="landlord_name" class="w-full mt-1" 
-                            x-bind:required="ownershipStatus != '1'" 
+                            x-bind:required="ownershipStatus != ownerId && ownershipStatus != ''" 
                             x-model="household.landlord_name" />
                         <x-input-error :messages="$errors->get('landlord_name')" class="mt-2" />
                     </div>
                     <div>
                         <x-input-label>Landlord Contact <span class="text-red-500">*</span></x-input-label>
                         <x-text-input name="landlord_contact" class="w-full mt-1" 
-                            x-bind:required="ownershipStatus != '1'" 
+                            x-bind:required="ownershipStatus != ownerId && ownershipStatus != ''" 
                             x-model="household.landlord_contact" />
                         <x-input-error :messages="$errors->get('landlord_contact')" class="mt-2" />
                     </div>
