@@ -27,13 +27,7 @@ class UserController extends Controller
         $totalStaff = User::role('Staff')->count();
         $totalHelpDesk = User::role('help desk')->count();
 
-        // --- MOVED ANALYTICS FROM DASHBOARDCONTROLLER ---
-        // Counts for the currently logged-in user (Staff/Helpdesk)
-        $myResidentsCount = Resident::where('added_by_user_id', Auth::id())->count();
-        $myHouseholdsCount = Household::whereHas('residents', function($q) {
-            $q->where('added_by_user_id', Auth::id())
-              ->where('household_role_id', 1); // 1 = Head of the family
-        })->count();
+
 
         // Fetch ALL users for the table
         $query = User::with('barangayRole')->latest();
@@ -58,9 +52,7 @@ class UserController extends Controller
             'totalAdmins' => $totalAdmins,
             'totalStaff' => $totalStaff,
             'totalHelpDesk' => $totalHelpDesk,
-            // Pass the moved variables
-            'myResidentsCount' => $myResidentsCount,
-            'myHouseholdsCount' => $myHouseholdsCount,
+            
         ]);
     }
 

@@ -97,6 +97,7 @@
                 </div>
             </div>
         </div>
+    @endhasanyrole
 
         <script>
             function clock() {
@@ -129,112 +130,100 @@
                 };
             }
         </script>
-    @else
 
+        @role('help desk|staff')
+            <div class="max-w-full mx-auto mt-4 mb-4">
 
+                {{-- GRID CONTAINER: Welcome (Left) & Date (Right) --}}
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-        <div class="max-w-full mx-auto mt-8 mb-6">
-
-            {{-- GRID CONTAINER: Welcome (Left) & Date (Right) --}}
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-
-                {{-- 1. Welcome Card (Takes up 2/3 of space) --}}
-                <div class="lg:col-span-2">
-                    <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg border border-slate-200 h-full">
-                        <div class="p-8 bg-slate-50 text-slate-700 flex flex-col justify-center h-full">
-                            <h2 class="text-3xl font-bold text-blue-600 mb-2">
-                                Welcome back, {{ auth()->user()->first_name }}!
-                            </h2>
-                            <p class="text-lg text-slate-500 mb-6">
-                                You are logged in as a <span
-                                    class="font-semibold capitalize text-slate-700">{{ auth()->user()->roles->first()->name ?? 'User' }}</span>.
-                            </p>
-
-                            <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-lg">
-                                <div class="flex items-center">
-                                    <div class="flex-shrink-0">
-                                        <svg class="h-5 w-5 text-blue-500" xmlns="http://www.w3.org/2000/svg"
-                                            viewBox="0 0 20 20" fill="currentColor">
-                                            <path fill-rule="evenodd"
-                                                d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
-                                                clip-rule="evenodd" />
-                                        </svg>
-                                    </div>
-                                    <div class="ml-3">
-                                        <p class="text-sm text-blue-700">
-                                            Use the navigation menu on the left to access your assigned modules and tasks.
-                                        </p>
+                    {{-- 1. Welcome Card (Takes up 2/3 of space) --}}
+                    <div class="lg:col-span-2">
+                        <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg border border-slate-200 h-full">
+                            <div class="p-8 bg-slate-50 text-slate-700 flex flex-col justify-center h-full">
+                                <h2 class="text-3xl font-bold text-blue-600 mb-2">
+                                    Welcome back, {{ auth()->user()->first_name }}!
+                                </h2>
+                                <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-lg">
+                                    <div class="flex items-center">
+                                        <div class="flex-shrink-0">
+                                            <svg class="h-5 w-5 text-blue-500" xmlns="http://www.w3.org/2000/svg"
+                                                viewBox="0 0 20 20" fill="currentColor">
+                                                <path fill-rule="evenodd"
+                                                    d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                                                    clip-rule="evenodd" />
+                                            </svg>
+                                        </div>
+                                        <div class="ml-3">
+                                            <p class="text-sm text-blue-700">
+                                                Use the Sidebar to navigate through the system.
+                                            </p>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
 
-                {{-- 2. Date Widget (Takes up 1/3 of space) --}}
-                <div class="lg:col-span-1">
-                    <div class="h-full flex flex-col">
-                        <div class="h-full w-full bg-slate-50 text-slate-700 overflow-hidden shadow-sm sm:rounded-lg p-6 relative flex flex-col justify-center items-center text-center"
-                            x-data="clock()" x-init="startClock()">
-                            <div class="w-full flex items-center justify-between">
-                                <div class="text-sm text-slate-700 font-bold" x-text="monthName"></div>
-                                <div class="text-sm text-slate-700 font-bold" x-text="time"></div>
-                            </div>
-                            <div class="z-10 py-6">
-                                <h1 class="text-8xl text-blue-600 font-bold tracking-tighter leading-none"
-                                    x-text="dayNumber"></h1>
-                            </div>
-                            <div class="w-full flex items-center justify-between">
-                                <div class="text-sm text-slate-500 font-bold" x-text="dayName"></div>
-                                <div class="text-sm text-slate-500 font-bold">Manila</div>
+                    <div class="lg:col-span-1">
+                        <div class="h-full flex flex-col">
+                            <div class="h-full w-full bg-slate-50 text-slate-700 overflow-hidden shadow-sm sm:rounded-lg p-6 relative flex flex-col justify-center items-center text-center"
+                                x-data="clock()" x-init="startClock()">
+                                <div class="w-full flex items-center justify-between">
+                                    <div class="text-sm text-slate-700 font-bold" x-text="monthName"></div>
+                                    <div class="text-sm text-slate-700 font-bold" x-text="time"></div>
+                                </div>
+                                <div class="z-10 py-6">
+                                    <h1 class="text-8xl text-blue-600 font-bold tracking-tighter leading-none"
+                                        x-text="dayNumber"></h1>
+                                </div>
+                                <div class="w-full flex items-center justify-between">
+                                    <div class="text-sm text-slate-500 font-bold" x-text="dayName"></div>
+                                    <div class="text-sm text-slate-500 font-bold">Manila</div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-
             </div>
+            @role('help desk')
+                <div class="analytics mt-4">
+                    <x-analytics-widget 
+                        title="My Registered Residents" 
+                        :value="$myResidentsCount" 
+                        icon-name="users"
+                        bg-color="bg-blue-500" />
+                    <x-analytics-widget 
+                        title="My Registered Households" 
+                        :value="$myHouseholdsCount" 
+                        icon-name="house"
+                        bg-color="bg-blue-500" />
+                    <x-analytics-widget 
+                        title="For Fulfillment Document Requests" 
+                        :value="$myDocumentRequestsCount" 
+                        icon-name="file"
+                        bg-color="bg-blue-500" />
+                    <x-analytics-widget 
+                        title="For Approval Reservations" 
+                        :value="$myReservationsCount" 
+                        icon-name="calendar"
+                        bg-color="bg-blue-500" />
+                </div>
+            @endrole
 
+            @role('staff')
+            <div class="analytics mt-4">
+                <x-analytics-widget 
+                    title="My Registered Residents" 
+                    :value="$myResidentsCount" 
+                    icon-name="users"
+                    bg-color="bg-blue-500" />
+                <x-analytics-widget 
+                    title="My Registered Households" 
+                    :value="$myHouseholdsCount" 
+                    icon-name="house"
+                    bg-color="bg-blue-500" />
+            @endrole
+        @endrole
 
-                         {{-- PERSONAL ANALYTICS WIDGETS --}}
-        <div class="analytics mt-3">
-            <x-analytics-widget title="My Registered Residents" :value="$myResidentsCount" icon-name="users"
-                bg-color="bg-blue-500" />
-            <x-analytics-widget title="My Registered Households" :value="$myHouseholdsCount" icon-name="house"
-                bg-color="bg-blue-500" />
-        </div>
-        </div>
-
-        {{-- Script for Staff Clock (Duplicated here in case the admin script doesn't load in the else block context) --}}
-        <script>
-            function clock() {
-                return {
-                    monthName: '',
-                    dayNumber: '',
-                    dayName: '',
-                    time: '',
-                    startClock() {
-                        this.updateTime();
-                        setInterval(() => {
-                            this.updateTime();
-                        }, 1000);
-                    },
-                    updateTime() {
-                        const date = new Date();
-                        this.monthName = date.toLocaleDateString('en-US', {
-                            month: 'long'
-                        });
-                        this.dayNumber = date.getDate();
-                        this.dayName = date.toLocaleDateString('en-US', {
-                            weekday: 'long'
-                        });
-                        this.time = date.toLocaleTimeString('en-US', {
-                            hour: 'numeric',
-                            minute: '2-digit',
-                            hour12: true
-                        });
-                    },
-                };
-            }
-        </script>
-    @endhasanyrole
 </x-app-layout>

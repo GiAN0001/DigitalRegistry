@@ -93,7 +93,7 @@
                             <th class="px-2 py-2 text-left text-xs font-bold text-slate-700 uppercase tracking-wider">Email</th>
                             
                             @hasanyrole('admin|super admin')
-                                <th class="px-2 py-2 text-left text-xs font-medium text-slate-700 uppercase tracking-wider rounded-r-lg">Action</th>
+                                <th class="px-2 py-2 text-center text-xs font-medium text-slate-700 uppercase tracking-wider rounded-r-lg">Actions</th>
                             @endhasanyrole
                         </tr>
                     </thead>
@@ -169,27 +169,29 @@
                                                 $editData['residency_type_id'] = $residencyTypeId;
                                                 $editData['area_street'] = $household->areaStreet;
                                             @endphp
-
+                                            
                                             <button 
                                                 x-data 
                                                 @click="$dispatch('open-modal', 'edit-household-modal'); $dispatch('fetch-household-data', {{ $household->id }})"
-                                                class="text-blue-600 hover:text-blue-900"
+                                                class="text-blue-600 hover:text-blue-800 text-sm flex items-center gap-1"
                                             >
-                                                Edit
+                                                <x-lucide-pencil class="w-3 h-3" /> Edit
                                             </button>
                                         </div>
                                         @if($household->trashed())
                                             <form action="{{ route('households.restore', $household->id) }}" method="POST" class="inline">
                                                 @csrf
-                                                <button type="submit" class="text-green-600 hover:underline hover:text-green-900" onclick="return confirm('Restore this household back to active?')">Restore</button>
+                                                <button type="submit" class="text-green-600 hover:text-green-800 text-sm flex items-center gap-1" onclick="return confirm('Restore this household back to active?')">
+                                                    <x-lucide-rotate-ccw class="w-3 h-3" /> Restore
+                                                </button>
                                             </form>
                                         @else
                                             <button 
                                                 x-data
                                                 @click="$dispatch('open-modal', 'delete-household-modal'); $dispatch('set-delete-household-id', {{ $household->id }})"
-                                                class="text-red-800 hover:underline"
+                                                class="text-red-600 hover:text-red-800 text-sm flex items-center gap-1"
                                             >
-                                                Delete
+                                                <x-lucide-trash-2 class="w-3 h-3" /> Delete
                                             </button>
                                         @endif
                                     </td>
@@ -220,7 +222,7 @@
                                                     @endrole
 
                                                     @hasanyrole('admin|super admin')
-                                                        <th class="px-3 py-2">Actions</th>
+                                                        <th class="px-3 py-2 text-center">Actions</th>
                                                     @endhasanyrole
                                                 </tr>
                                             </thead>
@@ -265,21 +267,23 @@
                                                             </td>
                                                         @endrole
                                                         @hasanyrole('admin|super admin')
-                                                            <td class="px-3 py-2">
-                                                                <button 
-                                                                    x-data 
-                                                                    @click="$dispatch('open-modal', 'edit-resident-modal'); $dispatch('fetch-resident-data', {{ $member->id }})"
-                                                                    class="text-blue-600 hover:text-blue-900"
-                                                                >
-                                                                    Edit
-                                                                </button>
-                                                                <button 
-                                                                    x-data
-                                                                    @click="$dispatch('open-modal', 'delete-resident-modal'); $dispatch('set-delete-resident-id', {{ $member->id }})"
-                                                                    class="text-red-800 hover:underline"
-                                                                >
-                                                                    Delete
-                                                                </button>
+                                                            <td class="px-3 py-2 gap-2 text-center">
+                                                                <div class="flex justify-center gap-3">
+                                                                    <button 
+                                                                        x-data 
+                                                                        @click="$dispatch('open-modal', 'edit-resident-modal'); $dispatch('fetch-resident-data', {{ $member->id }})"
+                                                                        class="text-blue-600 hover:text-blue-800 text-sm flex items-center gap-1"
+                                                                    >
+                                                                        <x-lucide-pencil class="w-3 h-3" /> Edit
+                                                                    </button>
+                                                                    <button 
+                                                                        x-data
+                                                                        @click="$dispatch('open-modal', 'delete-resident-modal'); $dispatch('set-delete-resident-id', {{ $member->id }})"
+                                                                        class="text-red-600 hover:text-red-800 text-sm flex items-center gap-1"
+                                                                    >
+                                                                        <x-lucide-trash-2 class="w-3 h-3" /> Delete
+                                                                    </button>
+                                                                </div>
                                                             </td>
                                                         @endhasanyrole
                                                     </tr>
@@ -328,8 +332,8 @@
                                                                 <td class="px-3 py-2">
                                                                     <form action="{{ route('residents.restore', $member->id) }}" method="POST" class="inline">
                                                                         @csrf
-                                                                        <button type="submit" class="text-green-600 hover:underline hover:text-green-900 text-sm" onclick="return confirm('Restore this archived resident?')">
-                                                                            Restore
+                                                                        <button type="submit" class="text-green-600 hover:text-green-800 text-sm flex items-center gap-1 font-medium" onclick="return confirm('Restore this archived resident?')">
+                                                                            <x-lucide-rotate-ccw class="w-3 h-3" /> Restore
                                                                         </button>
                                                                     </form>
                                                                 </td>

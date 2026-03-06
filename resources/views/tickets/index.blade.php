@@ -29,7 +29,9 @@
                 />
         </div>
     @endhasanyrole
-
+        <div class="filters">
+            <x-search-bar placeholder="Search residents..." />
+        </div>
     <div class="p-6 bg-white shadow-md rounded-lg">
         <div class="flex justify-between items-center mb-6">
             <h2 class="text-2xl font-bold text-gray-800">Support Tickets</h2>

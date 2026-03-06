@@ -69,7 +69,7 @@ class DashboardController extends Controller
         })->count();
         $totalActiveUsers = User::where('status', 1)->count();
 
-        // --- WIDGETS (For Staff/Helpdesk - based on their personal inputs) ---
+        // --- WIDGETS (For Staff/Helpdesk - based on their personal inputs & assignments) ---
         $myResidentsCount = Resident::where('census_cycle', $cycle)
             ->where('added_by_user_id', auth()->id())->count();
         $myHouseholdsCount = Household::whereHas('residents', function($q) use ($cycle) {
@@ -77,6 +77,10 @@ class DashboardController extends Controller
               ->where('added_by_user_id', auth()->id())
               ->where('household_role_id', 1); // 1 = Head of the family
         })->count();
+        
+        $myDocumentRequestsCount = \App\Models\DocumentRequest::where('status', 'For Fulfillment')->count();
+
+        $myReservationsCount = \App\Models\FacilityReservation::where('status', 'For Approval')->count();
 
         // TABLE
         $users = User::with(['roles', 'barangayRole'])
@@ -140,6 +144,8 @@ class DashboardController extends Controller
             // Pass these variables so they are available in the Blade view
             'myResidentsCount' => $myResidentsCount,
             'myHouseholdsCount' => $myHouseholdsCount,
+            'myDocumentRequestsCount' => $myDocumentRequestsCount,
+            'myReservationsCount' => $myReservationsCount,
 
             'users' => $users,
             'populationChartData' => $populationChartData,

@@ -35,6 +35,18 @@ class TicketController extends Controller
             $query->where('user_id', $user->id);
         }
 
+        if (request()->filled('q')) {
+            $searchTerm = trim(request()->q);
+            $query->whereHas('user', function ($q) use ($searchTerm) {
+                $q->where('first_name', 'like', "%{$searchTerm}%")
+                  ->orWhere('last_name', 'like', "%{$searchTerm}%")
+                  ->orWhere('middle_name', 'like', "%{$searchTerm}%")
+                  ->orWhere(DB::raw("CONCAT(first_name, ' ', last_name)"), 'like', "%{$searchTerm}%")
+                  ->orWhere(DB::raw("CONCAT(first_name, ' ', IFNULL(middle_name, ''), ' ', last_name)"), 'like', "%{$searchTerm}%")
+                  ->orWhere(DB::raw("CONCAT(last_name, ', ', first_name)"), 'like', "%{$searchTerm}%");
+            });
+        }
+
         $tickets = $query->orderByRaw("FIELD(status, 'Pending', 'In Progress', 'Completed', 'Cancelled')")
             ->orderByRaw("FIELD(priority, 'High', 'Medium', 'Low')")
             ->latest('date_created')
