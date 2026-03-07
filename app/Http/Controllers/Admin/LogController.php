@@ -42,7 +42,7 @@ class LogController extends Controller
         $logStat3 = $topActions->get(2);
         $logStat4 = $topActions->get(3);
 
-        return view('admin.users.logs.index', [
+        return view('admin.settings.logs.index', [
             'logs' => $logs,
             'stat1Title' => $logStat1 ? str_replace('_', ' ', $logStat1->log_type) : 'No Data',
             'stat1Value' => $logStat1->total ?? 0,

@@ -9,14 +9,14 @@
         $module = 'Residents';
         $page = 'Resident List';
     } elseif (request()->routeIs('transaction.document') || request()->routeIs('document-request.*') || request()->routeIs('document.*')) {
-        $module = 'Transaction';
-        $page = 'Document Request';
+        $module = 'Transactions';
+        $page = 'Document Requests';
     } elseif (request()->routeIs('transaction.facility') || request()->routeIs('facility.*')) {
-        $module = 'Transaction';
+        $module = 'Transactions';
         $page = 'Facility Reservation';
     } elseif (request()->routeIs('admin.users.*')) {
         $module = 'Manage Staff';
-        $page = 'User Management';
+        $page = 'Account Management';
 
         if (request()->routeIs('admin.users.logs')) {
             $page = 'Audit Logs';
@@ -30,7 +30,7 @@
     }
     else if (request()->routeIs('admin.christmas.*')) {
         $module = 'Social Services';
-        $page = 'Christmas Box';
+        $page = 'Christmas Boxes';
     }
     else if (request()->routeIs('admin.tupad.*')) {
         $module = 'Social Services';

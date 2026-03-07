@@ -10,6 +10,7 @@ class FormSelect extends Component
 {
     public $options;
     public $placeholder;
+    public $selected;
 
     /**
      * Create a new component instance.
@@ -18,10 +19,12 @@ class FormSelect extends Component
      * @param string $column      The column to display (e.g., 'name')
      * @param string $valueColumn (Optional) The column to use as the value (default is 'id')
      * @param string $placeholder The default text (e.g., 'Select Type')
+     * @param string $selected    The selected value
      */
-    public function __construct($model, $column, $valueColumn = null, $placeholder = 'Select...')
+    public function __construct($model, $column, $valueColumn = null, $placeholder = 'Select...', $selected = null)
     {
         $this->placeholder = $placeholder;
+        $this->selected = $selected;
 
         try {
             

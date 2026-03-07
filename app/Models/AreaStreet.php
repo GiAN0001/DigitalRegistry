@@ -12,4 +12,9 @@ class AreaStreet extends Model
     
     use HasFactory, Auditable;
     protected $table = 'area_streets';
+
+    protected $fillable = [ // added by Cath
+        'purok_name',
+        'purok_code',
+        'street_name'];
 }

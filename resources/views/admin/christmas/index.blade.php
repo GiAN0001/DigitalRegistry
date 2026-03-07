@@ -33,6 +33,11 @@
             title="Filter by Status"
             :manualOptions="['On Hold', 'Released']"
         />
+        <x-dynamic-filter
+            model="App\Models\Resident"
+            column="census_cycle"
+            title="Filter by Census Cycle"
+        />
         <x-search-bar placeholder="Search Head of Family..." />
     </div>
     @if(count(request()->query()) > 0)

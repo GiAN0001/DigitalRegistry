@@ -9,7 +9,7 @@ use Illuminate\View\View;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
-
+use Illuminate\Support\Facades\Hash;
 
 use App\Models\Resident;
 use App\Models\AreaStreet;
@@ -31,23 +31,60 @@ class ResidentController extends Controller
         $defaultCycle = Resident::getCurrentCensusCycle();
         $selectedCycle = $request->input('census_cycle', $defaultCycle);
 
+        $isArchived = $request->filled('archived') && $request->archived == 'true';
 
-        $query = Resident::forUser($user)
-            ->where('household_role_id', 1)
-            ->where('census_cycle', $selectedCycle)
+  
+        $query = Household::whereHas('residents', function ($q) use ($selectedCycle) {
+            $q->withTrashed()->where('census_cycle', $selectedCycle);
+        });
+
+      
+        if ($user->hasRole('staff')) {
+            $query->whereHas('residents', function ($q) use ($user) {
+                $q->withTrashed()->where('added_by_user_id', $user->id);
+            });
+        } elseif (!$user->hasRole('super admin') && !$user->hasRole('admin') && !$user->hasRole('help desk')) {
+            $query->whereRaw('1 = 0'); // no results for unknown roles
+        }
+
+        if ($isArchived) {
+            $query->withTrashed()
+                ->where(function ($q) {
+                    $q->whereNotNull('households.deleted_at')
+                      ->orWhereHas('residents', fn($r) => $r->onlyTrashed());
+                })
+                ->with([
+                    'areaStreet',
+                    'houseStructure',
+                    'residents' => fn($q) => $q->withTrashed()->with([
+                        'demographic' => fn($q) => $q->withTrashed(),
+                        'healthInformation' => fn($q) => $q->withTrashed(),
+                        'residencyType',
+                        'householdRole',
+                    ]),
+                    'householdPets.petType',
+                ]);
+        } else {
+            
+            $query->whereHas('residents', function ($q) use ($selectedCycle) {
+                $q->whereNull('deleted_at')->where('census_cycle', $selectedCycle);
+            })
             ->with([
-                'demographic',
-                'residencyType',
-                'healthInformation',
-                'household.areaStreet',
-                'household.houseStructure',
-                'household.residents.demographic',
-                'household.residents.healthInformation'
+                'areaStreet',
+                'houseStructure',
+                'residents' => fn($q) => $q->withTrashed()->with([
+                    'demographic' => fn($q) => $q->withTrashed(),
+                    'healthInformation' => fn($q) => $q->withTrashed(),
+                    'residencyType',
+                    'householdRole',
+                ]),
+                'householdPets.petType',
             ]);
+        }
 
-        // --- ALL OTHER CODES BELOW REMAIN UNMODIFIED ---
+        // --- FILTERS ---
 
-        //search bar -- added by GIAN
+        // Search by resident name (any member)
         if ($request->filled('q')) {
             $searchTerm = $request->q;
             $query->whereHas('household.residents', function ($q) use ($searchTerm) {
@@ -59,35 +96,35 @@ class ResidentController extends Controller
             });
         }
 
-        // 1. Filter by Purok
+        // Filter by Purok
         if ($request->filled('purok_name')) {
-            $query->whereHas('household.areaStreet', function ($q) use ($request) {
-                $q->where('purok_name', $request->purok_name);
-            });
+            $query->whereHas('areaStreet', fn($q) => $q->where('purok_name', $request->purok_name));
         }
 
-        // 2. Filter by House Structure
+        // Filter by House Structure
         if ($request->filled('house_structure_type')) {
-            $query->whereHas('household.houseStructure', function ($q) use ($request) {
-                $q->where('house_structure_type', $request->house_structure_type);
-            });
+            $query->whereHas('houseStructure', fn($q) => $q->where('house_structure_type', $request->house_structure_type));
         }
 
-        // 3. Filter by Residency Status
+        // Filter by Ownership/Residency Status (stored on residents)
         if ($request->filled('name')) {
-            $query->whereHas('residencyType', function ($q) use ($request) {
-                $q->where('name', $request->name);
+            $query->whereHas('residents', function ($q) use ($request) {
+                $q->withTrashed()->whereHas('residencyType', fn($r) => $r->where('name', $request->name));
             });
         }
 
-        // 4. Filter by Street
+        // Filter by Street
         if ($request->filled('street_name')) {
-            $query->whereHas('household.areaStreet', function ($q) use ($request) {
-                $q->where('street_name', $request->street_name);
-            });
+            $query->whereHas('areaStreet', fn($q) => $q->where('street_name', $request->street_name));
         }
-        
+
+        // Filter by Census Cycle
+        if ($request->filled('census_cycle')) {
+            $query->whereHas('residents', fn($q) => $q->withTrashed()->where('census_cycle', $request->census_cycle));
+        }
+
         $perPage = $request->input('per_page', 10);
+        // NOTE: variable renamed to $households for clarity in view
         $residents = $query->latest()->paginate($perPage)->withQueryString();
 
         return view('residents.index', compact('residents', 'selectedCycle', 'streets', 'purok'));
@@ -187,6 +224,35 @@ class ResidentController extends Controller
         }));
     }
 
+    /**
+     * Returns ONLY the fields required by the Edit Household modal.
+     * Keeps sensitive resident/demographic data out of the HTML source.
+     */
+    public function showHousehold(Household $household): \Illuminate\Http\JsonResponse
+    {
+        $household->load('areaStreet');
+
+        return response()->json([
+            'id'               => $household->id,
+            'house_number'     => $household->house_number,
+            'area_id'          => $household->area_id,
+            'area_street'      => $household->areaStreet ? [
+                'id'         => $household->areaStreet->id,
+                'purok_name' => $household->areaStreet->purok_name,
+                'street_name'=> $household->areaStreet->street_name,
+            ] : null,
+            'house_structure_id' => $household->house_structure_id,
+            'residency_type_id'  => $household->residents()
+                                        ->whereNull('deleted_at')
+                                        ->value('residency_type_id'),
+            'contact_number'   => $household->contact_number,
+            'email'            => $household->email,
+            'landlord_name'    => $household->landlord_name,
+            'landlord_contact'  => $household->landlord_contact,
+        ]);
+    }
+
+
     public function store(ResidentRegistrationRequest $request): RedirectResponse // edited by GIAN
     {
         $validated = $request->validated();
@@ -233,7 +299,8 @@ class ResidentController extends Controller
             ]);
 
             // --- 3. RESIDENT ENTRIES ---
-            $headId = $this->createResidentEntry($headData, $household->id, $householdData['residency_type_id'], 1);
+            $headRoleId = \App\Models\householdRole::where('name', 'Head')->value('id');
+            $headId = $this->createResidentEntry($headData, $household->id, $householdData['residency_type_id'], $headRoleId);
             foreach ($membersData as $member) {
                 $this->createResidentEntry($member, $household->id, $householdData['residency_type_id'], $member['household_role_id']);
             }
@@ -246,7 +313,8 @@ class ResidentController extends Controller
             }
 
             // --- 5. OWNER STAMPING ---
-            if ($householdData['residency_type_id'] == 1) {
+            $ownerId = \App\Models\ResidencyType::where('name', 'Owner')->value('id');
+            if ($householdData['residency_type_id'] == $ownerId) {
                 $household->update(['owner_resident_id' => $headId]);
             }
 
@@ -268,7 +336,8 @@ class ResidentController extends Controller
 
     public function updateHousehold(Request $request, Household $household) //ADDDED BY GIAN
     {
- 
+        $ownerId = \App\Models\ResidencyType::where('name', 'Owner')->value('id');
+
         $validated = $request->validate([
             'house_number' => ['required', 'string', 'max:50'],
             'area_id' => ['required', 'exists:area_streets,id'], // This represents the specific Street row
@@ -276,8 +345,8 @@ class ResidentController extends Controller
             'residency_type_id' => ['required', 'exists:residency_types,id'], // Input comes from form, saved to Residents
             'contact_number' => ['required', 'string', 'max:30'],
             'email' => ['nullable', 'email', 'max:255'],
-            'landlord_name' => ['nullable', 'string', \Illuminate\Validation\Rule::requiredIf($request->residency_type_id != 1)],
-            'landlord_contact' => ['nullable', 'string', \Illuminate\Validation\Rule::requiredIf($request->residency_type_id != 1)],
+            'landlord_name' => ['nullable', 'string', \Illuminate\Validation\Rule::requiredIf($request->residency_type_id != $ownerId)],
+            'landlord_contact' => ['nullable', 'string', \Illuminate\Validation\Rule::requiredIf($request->residency_type_id != $ownerId)],
         ]);
 
         DB::beginTransaction();
@@ -292,10 +361,12 @@ class ResidentController extends Controller
             // Exclude residency_type_id since it doesn't exist in the households table
             $householdData = collect($validated)->except(['residency_type_id'])->toArray();
 
-            if ($validated['residency_type_id'] == 1) {
+            $headRoleId = \App\Models\householdRole::where('name', 'Head')->value('id');
+
+            if ($validated['residency_type_id'] == $ownerId) {
                 $householdData['landlord_name'] = null;
                 $householdData['landlord_contact'] = null;
-                $householdData['owner_resident_id'] = $household->residents()->where('household_role_id', 1)->first()->id ?? null;
+                $householdData['owner_resident_id'] = $household->residents()->where('household_role_id', $headRoleId)->first()->id ?? null;
             }
             else {
                 $householdData['owner_resident_id'] = null;
@@ -334,27 +405,33 @@ class ResidentController extends Controller
     public function update(Request $request, Resident $resident): RedirectResponse // edited by GIAN
     {
         // 1. Validation for the specific resident being updated
-        $validated = $request->validate([
+        $rules = [
             'resident.first_name' => ['required', 'string', 'max:100'],
             'resident.last_name' => ['required', 'string', 'max:100'],
             'resident.middle_name' => ['nullable', 'string', 'max:100'],
             'resident.extension' => ['nullable', 'string', 'max:10'],
             'resident.household_role_id' => ['required', 'exists:household_roles,id'],
             'resident.birthplace' => ['required', 'string', 'max:255'],
-            'resident.birthdate' => ['required', 'date', 'before:today'],
             'resident.sex' => ['required', 'in:Male,Female'],
             'resident.civil_status' => ['required', 'in:Single,Married,Widowed,Separated'],
             'resident.nationality' => ['required', 'string', 'max:100'],
             'resident.occupation' => ['nullable', 'string', 'max:100'],
-            'resident.sector' => ['required', 'in:None,PWD,Senior Citizen,Solo Parent'],
-            'resident.vaccination' => ['nullable', 'in:None,Private,Health Center'],
-            'resident.comorbidity' => ['nullable', 'string', 'max:255'],
-            'resident.maintenance' => ['nullable', 'string', 'max:255'],
-        ]);
+        ];
 
+        if (Auth::user()->hasRole('super admin')) {
+            $rules['resident.birthdate'] = ['required', 'date', 'before:today'];
+            $rules['resident.sector'] = ['required', 'in:None,PWD,Senior Citizen,Solo Parent'];
+            $rules['resident.vaccination'] = ['nullable', 'in:None,Private,Health Center'];
+            $rules['resident.comorbidity'] = ['nullable', 'string', 'max:255'];
+            $rules['resident.maintenance'] = ['nullable', 'string', 'max:255'];
+        }
+
+        $validated = $request->validate($rules);
         $data = $validated['resident'];
+        
         // Use the cycle assigned to this specific record for temporal isolation
         $currentCycle = $resident->census_cycle; 
+        $birthDate = Auth::user()->hasRole('super admin') ? $data['birthdate'] : ($resident->demographic->birthdate ?? null);
 
         DB::beginTransaction();
         try {
@@ -364,14 +441,14 @@ class ResidentController extends Controller
                 ->where('first_name', $data['first_name'])
                 ->where('last_name', $data['last_name'])
                 ->where('census_cycle', $currentCycle)
-                ->whereHas('demographic', function($q) use ($data) {
-                    $q->where('birthdate', $data['birthdate'])
-                    ->where('birthplace', $data['birthplace']);
+                ->whereHas('demographic', function($q) use ($data, $birthDate) {
+                    $q->where('birthdate', $birthDate)
+                      ->where('birthplace', $data['birthplace']);
                 })->exists();
 
             if ($duplicate) {
-                // Triggers your red Error Modal
-                return back()->with('error', "Update Blocked: Another resident named {$data['first_name']} {$data['last_name']} (Born {$data['birthdate']}) already exists in the {$currentCycle} cycle.")->withInput();
+                $bDateStr = $birthDate ?? 'Unknown';
+                return back()->with('error', "Update Blocked: Another resident named {$data['first_name']} {$data['last_name']} (Born {$bDateStr}) already exists in the {$currentCycle} cycle.")->withInput();
             }
 
             // --- 3. PROCEED WITH UPDATES ---
@@ -384,28 +461,35 @@ class ResidentController extends Controller
                 'updated_by_user_id' => Auth::id(), 
             ]);
 
+            $demoData = [
+                'birthplace' => $data['birthplace'],
+                'sex' => $data['sex'],
+                'civil_status' => $data['civil_status'],
+                'nationality' => $data['nationality'],
+                'occupation' => $data['occupation'],
+            ];
+
+            if (Auth::user()->hasRole('super admin')) {
+                $demoData['birthdate'] = $data['birthdate'];
+            }
+
             $resident->demographic()->updateOrCreate(
                 ['resident_id' => $resident->id],
-                [
-                    'birthplace' => $data['birthplace'],
-                    'birthdate' => $data['birthdate'],
-                    'sex' => $data['sex'],
-                    'civil_status' => $data['civil_status'],
-                    'nationality' => $data['nationality'],
-                    'occupation' => $data['occupation'],
-                ]
+                $demoData
             );
 
-            $vaccination = ($data['vaccination'] === 'None') ? null : $data['vaccination'];
-            $resident->healthInformation()->updateOrCreate(
-                ['resident_id' => $resident->id],
-                [
-                    'sector' => $data['sector'] ?? 'None',
-                    'vaccination' => $vaccination,
-                    'comorbidity' => $data['comorbidity'],
-                    'maintenance' => $data['maintenance'],
-                ]
-            );
+            if (Auth::user()->hasRole('super admin')) {
+                $vaccination = ($data['vaccination'] === 'None') ? null : $data['vaccination'];
+                $resident->healthInformation()->updateOrCreate(
+                    ['resident_id' => $resident->id],
+                    [
+                        'sector' => $data['sector'] ?? 'None',
+                        'vaccination' => $vaccination,
+                        'comorbidity' => $data['comorbidity'],
+                        'maintenance' => $data['maintenance'],
+                    ]
+                );
+            }
 
             DB::commit();
             return back()->with('success', 'Resident details updated successfully.');
@@ -486,5 +570,97 @@ class ResidentController extends Controller
     
         return "NAM-{$purokCode}-{$formattedHouseNo}-{$counter}";
     }
-    
+
+    public function destroyHousehold(Request $request, $householdId): RedirectResponse
+    {
+        $request->validate([
+            'password' => ['required', 'string'],
+        ]);
+
+        if (!Hash::check($request->password, Auth::user()->password)) {
+            return back()->with('error', 'Authentication failed. Please check your password.');
+        }
+
+        DB::beginTransaction();
+        try {
+            $household = Household::findOrFail($householdId);
+            $household->delete(); 
+            DB::commit();
+            return back()->with('success', 'Household and its members successfully deleted.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->with('error', 'Error deleting household: ' . $e->getMessage());
+        }
+    }
+
+    public function destroy(Request $request, $residentId): RedirectResponse
+    {
+        $request->validate([
+            'password' => ['required', 'string'],
+        ]);
+
+        if (!Hash::check($request->password, Auth::user()->password)) {
+            return back()->with('error', 'Authentication failed. Please check your password.');
+        }
+
+        DB::beginTransaction();
+        try {
+            $resident = Resident::findOrFail($residentId);
+            $household = $resident->household;
+
+            $resident->delete();
+
+            // Auto-archive the household if no active residents remain
+            $activeResidentsLeft = $household->residents()->whereNull('deleted_at')->count();
+            if ($activeResidentsLeft === 0) {
+                $household->delete();
+                DB::commit();
+                return back()->with('success', 'Resident deleted. Since this was the last active member, the household has been archived as well.');
+            }
+
+            DB::commit();
+            return back()->with('success', 'Resident successfully deleted.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->with('error', 'Error deleting resident: ' . $e->getMessage());
+        }
+    }
+
+    public function restoreHousehold(Request $request, $householdId): RedirectResponse
+    {
+        DB::beginTransaction();
+        try {
+            $household = Household::withTrashed()->findOrFail($householdId);
+            $household->restore();
+            DB::commit();
+            return back()->with('success', 'Household successfully restored.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->with('error', 'Error restoring household: ' . $e->getMessage());
+        }
+    }
+
+    public function restore(Request $request, $residentId): RedirectResponse
+    {
+        DB::beginTransaction();
+        try {
+            $resident = Resident::withTrashed()->findOrFail($residentId);
+            $household = Household::withTrashed()->findOrFail($resident->household_id);
+
+            $resident->restore();
+
+            // Auto-restore the household if it was also soft-deleted (e.g. last member was deleted)
+            if ($household->trashed()) {
+                $household->restore();
+                DB::commit();
+                return back()->with('success', 'Resident restored. The household has also been automatically restored.');
+            }
+
+            DB::commit();
+            return back()->with('success', 'Resident successfully restored.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->with('error', 'Error restoring resident: ' . $e->getMessage());
+        }
+    }
 }

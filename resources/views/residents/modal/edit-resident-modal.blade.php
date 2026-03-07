@@ -178,12 +178,13 @@
                     <x-input-error :messages="$errors->get('resident.household_role_id')" class="mt-2" />
                 </div>
                 <div>
-                    <x-input-label>Citizenship <span class="text-red-500">*</span></x-input-label>
+                    <x-input-label>Nationality <span class="text-red-500">*</span></x-input-label>
                     <x-text-input 
                         name="resident[nationality]" 
                         x-model="resident.nationality" 
                         value="{{ old('resident.nationality') }}"
                         x-init="if($el.value) resident.nationality = $el.value"
+                        placeholder="e.g. Filipino"
                         class="w-full mt-1"  
                     />
                     <x-input-error :messages="$errors->get('resident.nationality')" class="mt-2" />
@@ -246,6 +247,7 @@
                             name="resident[maintenance]" 
                             x-model="resident.maintenance" 
                             value="{{ old('resident.maintenance') }}"
+                            placeholder="Metformin, Losartan"
                             x-init="if($el.value) resident.maintenance = $el.value"
                             class="w-full mt-1" 
                         />

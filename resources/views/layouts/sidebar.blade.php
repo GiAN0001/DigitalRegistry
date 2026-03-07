@@ -114,13 +114,28 @@
                 </x-sidebar.dropdown>
                 
                 @role ('super admin')
-                {{-- Jaz enhance: Added active state logic for System Logs --}}
-                    <a href="{{ route('admin.users.logs') }}"
-                        class="flex items-center w-full p-2 text-sm font-medium transition duration-75 rounded-lg
-                        {{ request()->routeIs('admin.users.logs') ? 'bg-blue-700 text-white' : 'text-slate-700 hover:text-white hover:bg-blue-700' }}">
-                        <x-lucide-history class="w-5 h-5 mr-2" />
-                        <span>System Logs</span>
-                    </a>
+                {{-- Lookup & Add Item Button --}}
+                    <x-sidebar.dropdown title="Settings"
+                        :active="request()->routeIs('admin.settings.*') || request()->routeIs('admin.settings.logs')">
+                        <x-slot name="icon">
+                            <x-lucide-settings class="w-5 h-5"/>
+                        </x-slot>
+
+                        <li>
+                            <a href="{{ route('admin.lookup.index') }}"
+                                class="flex items-center w-full p-2 text-sm font-medium transition duration-75 rounded-lg
+                                {{ request()->routeIs('admin.lookup.index') ? 'bg-blue-700 text-white' : 'text-slate-700 hover:text-white hover:bg-blue-700' }}">
+                                <span>Lookup Management</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('admin.settings.logs') }}"
+                                class="flex items-center w-full p-2 text-sm font-medium transition duration-75 rounded-lg
+                                {{ request()->routeIs('admin.settings.logs') ? 'bg-blue-700 text-white' : 'text-slate-700 hover:text-white hover:bg-blue-700' }}">
+                                <span>System Logs</span>
+                            </a>
+                        </li>
+                    </x-sidebar.dropdown>
                 @endrole
             </div>
         @endhasanyrole

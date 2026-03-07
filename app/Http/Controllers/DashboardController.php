@@ -15,6 +15,14 @@ class DashboardController extends Controller
 {
     public function index() : View
     {
+        // --- EFFECTIVE CENSUS CYCLE ---
+        $currentCycle = Resident::getCurrentCensusCycle();
+        $hasCurrentCycle = Resident::where('census_cycle', $currentCycle)->exists();
+        $cycle = $hasCurrentCycle
+            ? $currentCycle
+            : (Resident::max('census_cycle') ?? $currentCycle);
+
+
         // BAR CHART FOR AGE
         $referenceDate = '2025-12-08';
 
@@ -33,6 +41,7 @@ class DashboardController extends Controller
         $demographicsData = \App\Models\Resident::query()
             ->join('demographics as d', 'd.resident_id', '=', 'residents.id')
             ->selectRaw("{$ageGroupSql} AS age_group, COUNT(residents.id) AS population_count")
+            ->where('residents.census_cycle', $cycle)
             ->whereNotNull('d.birthdate')
             ->where('d.birthdate', '<', $referenceDate)
             ->groupBy(DB::raw($ageGroupSql))
@@ -54,16 +63,24 @@ class DashboardController extends Controller
         $currentYearEnd = Carbon::now()->endOfYear()->toDateTimeString();
 
         // --- WIDGETS (For Admin/Super Admin) ---
-        $totalResidents = Resident::count();
-        $totalHouseholds = Household::count();
+        $totalResidents = Resident::where('census_cycle', $cycle)->count();
+        $totalHouseholds = Household::whereHas('residents', function ($q) use ($cycle) {
+            $q->where('census_cycle', $cycle);
+        })->count();
         $totalActiveUsers = User::where('status', 1)->count();
 
-        // --- WIDGETS (For Staff/Helpdesk - based on their personal inputs) ---
-        $myResidentsCount = Resident::where('added_by_user_id', auth()->id())->count();
-        $myHouseholdsCount = Household::whereHas('residents', function($q) {
-            $q->where('added_by_user_id', auth()->id())
+        // --- WIDGETS (For Staff/Helpdesk - based on their personal inputs & assignments) ---
+        $myResidentsCount = Resident::where('census_cycle', $cycle)
+            ->where('added_by_user_id', auth()->id())->count();
+        $myHouseholdsCount = Household::whereHas('residents', function($q) use ($cycle) {
+            $q->where('census_cycle', $cycle)
+              ->where('added_by_user_id', auth()->id())
               ->where('household_role_id', 1); // 1 = Head of the family
         })->count();
+        
+        $myDocumentRequestsCount = \App\Models\DocumentRequest::where('status', 'For Fulfillment')->count();
+
+        $myReservationsCount = \App\Models\FacilityReservation::where('status', 'For Approval')->count();
 
         // TABLE
         $users = User::with(['roles', 'barangayRole'])
@@ -72,12 +89,14 @@ class DashboardController extends Controller
                 ->join('residents', 'residents.household_id', '=', 'households.id')
                 ->whereColumn('residents.added_by_user_id', 'users.id')
                 ->where('residents.household_role_id', 1)
+                ->where('residents.census_cycle', $cycle)
                 ->whereBetween('residents.created_at', [$currentYearStart, $currentYearEnd])
             ])
             ->get();
 
         // CHART QUERY
         $purokPopulationData = Resident::query()
+            ->where('residents.census_cycle', $cycle)
             ->join('households', 'households.id', '=', 'residents.household_id')
             ->join('area_streets', 'area_streets.id', '=', 'households.area_id')
             ->groupBy('area_streets.purok_name')
@@ -122,12 +141,13 @@ class DashboardController extends Controller
             'totalHousehold' => $totalHouseholds,
             'totalActiveUsers' => $totalActiveUsers,
 
-            // Pass the new variables to the view for Staff/Helpdesk
+            // Pass these variables so they are available in the Blade view
             'myResidentsCount' => $myResidentsCount,
             'myHouseholdsCount' => $myHouseholdsCount,
+            'myDocumentRequestsCount' => $myDocumentRequestsCount,
+            'myReservationsCount' => $myReservationsCount,
 
             'users' => $users,
-
             'populationChartData' => $populationChartData,
             'demographicsChartData' => $demographicsChartData,
         ]);

@@ -35,6 +35,18 @@ class TicketController extends Controller
             $query->where('user_id', $user->id);
         }
 
+        if (request()->filled('q')) {
+            $searchTerm = trim(request()->q);
+            $query->whereHas('user', function ($q) use ($searchTerm) {
+                $q->where('first_name', 'like', "%{$searchTerm}%")
+                  ->orWhere('last_name', 'like', "%{$searchTerm}%")
+                  ->orWhere('middle_name', 'like', "%{$searchTerm}%")
+                  ->orWhere(DB::raw("CONCAT(first_name, ' ', last_name)"), 'like', "%{$searchTerm}%")
+                  ->orWhere(DB::raw("CONCAT(first_name, ' ', IFNULL(middle_name, ''), ' ', last_name)"), 'like', "%{$searchTerm}%")
+                  ->orWhere(DB::raw("CONCAT(last_name, ', ', first_name)"), 'like', "%{$searchTerm}%");
+            });
+        }
+
         $tickets = $query->orderByRaw("FIELD(status, 'Pending', 'In Progress', 'Completed', 'Cancelled')")
             ->orderByRaw("FIELD(priority, 'High', 'Medium', 'Low')")
             ->latest('date_created')
@@ -90,20 +102,12 @@ class TicketController extends Controller
         return back()->with('success', 'Working on ticket: ' . $ticket->subject);
     }
 
-    
-    public function show(Ticket $ticket): View
+    public function show(Ticket $ticket): \Illuminate\Http\JsonResponse
     {
-        
-        if (Auth::user()->hasanyrole('admin|super admin') && $ticket->status === 'Pending') {
-            $ticket->update(['status' => 'In Progress']);
-        }
+        // Load the relationship to display user info securely
+        $ticket->load('user:id,first_name,last_name');
 
-      
-        if (Auth::id() === $ticket->user_id) {
-            $ticket->update(['is_seen_by_user' => 1]);
-        }
-
-        return view('tickets.show', compact('ticket'));
+        return response()->json($ticket);
     }
 
    
@@ -130,7 +134,7 @@ class TicketController extends Controller
             'is_seen_by_user' => 0 
         ]);
 
-        return back()->with('success', 'Ticket resolved successfully.');
+        return back()->with('success', 'Ticket marked as resolved.');
     }
 
 
@@ -156,6 +160,6 @@ class TicketController extends Controller
             'date_done' => now(),
         ]);
 
-        return back()->with('success', 'Ticket cancelled.');
+        return back()->with('success', 'Ticket cancelled. Admin will no longer see your filed ticket.');
     }
 }

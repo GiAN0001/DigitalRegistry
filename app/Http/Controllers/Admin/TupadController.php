@@ -44,7 +44,7 @@ class TupadController extends Controller
             'status' => $status,
         ]);
 
-        return back()->with('success', "Resident successfully scheduled as $status.");
+        return back()->with('success', "Resident successfully emplyed at TUPAD program.");
     }
 
     public function drop(Request $request)
@@ -109,7 +109,7 @@ class TupadController extends Controller
 
         $participation->update($data);
 
-        return back()->with('success', 'Project dates updated successfully.');
+        return back()->with('success', 'Participation dates updated successfully.');
     }
     
 
