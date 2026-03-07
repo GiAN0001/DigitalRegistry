@@ -122,10 +122,10 @@
                         </x-slot>
 
                         <li>
-                            <a href="{{ route('admin.lookup.index') }}"
+                            <a href="{{ route('admin.settings.lookup') }}"
                                 class="flex items-center w-full p-2 text-sm font-medium transition duration-75 rounded-lg
-                                {{ request()->routeIs('admin.lookup.index') ? 'bg-blue-700 text-white' : 'text-slate-700 hover:text-white hover:bg-blue-700' }}">
-                                <span>Lookup Management</span>
+                                {{ request()->routeIs('admin.settings.lookup') ? 'bg-blue-700 text-white' : 'text-slate-700 hover:text-white hover:bg-blue-700' }}">
+                                <span>Reference Data Library</span>
                             </a>
                         </li>
                         <li>

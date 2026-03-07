@@ -54,7 +54,7 @@
                         <th class="px-3 py-3 text-left text-xs font-medium text-slate-700 uppercase tracking-wider">Status</th>
                         <th class="px-3 py-3 text-left text-xs font-medium text-slate-700 uppercase tracking-wider">Date Opened</th>
                         <th class="px-3 py-3 text-left text-xs font-medium text-slate-700 uppercase tracking-wider">Date Closed</th>
-                        <th class="px-3 py-3 text-left text-xs font-medium text-slate-700 uppercase tracking-wider rounded-r-lg">Action</th>
+                        <th class="px-3 py-3 text-center text-xs font-medium text-slate-700 uppercase tracking-wider rounded-r-lg">Action</th>
                     </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
@@ -95,12 +95,14 @@
                                     <span class="text-gray-300 italic">--</span>
                                 @endif
                             </td>
-                            <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-900">
-                                <button x-data 
-                                        @click="$dispatch('open-modal', 'view-ticket-modal'); $dispatch('fetch-ticket-data', {{ $ticket->id }})"
-                                        class="text-blue-600 hover:text-blue-800 text-sm transition">
-                                    View Details
-                                </button>
+                            <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-900 text-center">
+                                <div class="flex justify-center3">
+                                    <button x-data 
+                                            @click="$dispatch('open-modal', 'view-ticket-modal'); $dispatch('fetch-ticket-data', {{ $ticket->id }})"
+                                            class="text-green-600 text-xs flex items-center hover:underline">
+                                        <x-lucide-eye class="w-3 h-3 mr-1" /> View details
+                                    </button>
+                                </div>
                             </td>
                         </tr>
                     @empty

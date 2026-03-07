@@ -64,6 +64,18 @@ class Resident extends Model
     {
         return $this->hasMany(TupadParticipation::class);
     }
+
+    public function allTupadParticipations()
+    {
+        return $this->hasManyThrough(
+            TupadParticipation::class,
+            Resident::class,
+            'global_id',    
+            'resident_id',  
+            'global_id',    
+            'id'            
+        );
+    }
     public static function getCurrentCensusCycle(): string // GIAN ADDED THIS  
     {
         $year = date('Y');

@@ -1,6 +1,6 @@
 @forelse($dropped as $resident)
     @php 
-        $lastDrop = $resident->tupadParticipations->where('status', 'Dropped')->sortByDesc('dropped_at')->first();
+        $lastDrop = $resident->allTupadParticipations->where('status', 'Dropped')->sortByDesc('dropped_at')->first();
     @endphp
     <tr class="hover:bg-gray-50 transition">
         <td class="px-3 py-4 text-sm font-bold text-gray-700">
@@ -21,7 +21,7 @@
         <td class="px-3 py-4 text-center">
             <div class="flex justify-center gap-3">
                 <button @click="$dispatch('open-modal', 'view-details-{{ $resident->id }}')" class="text-green-600 text-xs flex items-center hover:underline">
-                    <x-lucide-eye class="w-4 h-4 mr-1" /> View Details
+                    <x-lucide-eye class="w-3 h-3 mr-1" /> View Details
                 </button>
             </div>
                 @include('admin.tupad.partials.details-modal', ['resident' => $resident])

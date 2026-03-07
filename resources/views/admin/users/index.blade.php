@@ -90,34 +90,36 @@
                                     <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">Inactive</span>
                                 @endif
                             </td>
-                            <td class="px-3 py-4 whitespace-nowrap text-sm">
-
-                                <a href="#"
-                                    x-data
-                                    x-on:click.prevent="
-                                        // 1. Open the modal
-                                        $dispatch('open-modal', 'edit-user-modal');
-                                        // 2. Dispatch the user data as JSON
-                                        $dispatch('edit-user-data', {{ $user->toJson() }})
-                                    "
-                                    class="text-blue-800 hover:text-blue-700 ml-4">
-                                        Edit
-                                </a>
-
-                                @if($user->id != Auth::id())
-                                    <a href="#"
+                            <td class="px-3 py-4 whitespace-nowrap text-sm text-center">
+                                <div class="flex justify-start gap-4">
+                                    <button
                                         x-data
-                                        x-on:click.prevent="
-                                            $dispatch('open-modal', 'delete-confirmation-modal');
-                                            $dispatch('set-delete-target', {{ $user->id }})
+                                        @click.prevent="
+                                            $dispatch('open-modal', 'edit-user-modal');
+                                            $dispatch('edit-user-data', {{ $user->id }})
                                         "
-                                        class="text-red-800 hover:text-red-900 ml-4">
-                                            Delete
-                                    </a>
+                                        title="Edit User"
+                                         class="text-blue-600 hover:text-blue-800 text-sm flex items-center gap-1"
+                                    >
+                                        <x-lucide-pencil class="w-3 h-3" /> Edit
+                                    </button>
 
-                                @else
-                                    <span class="text-gray-400 ml-4">Admin Self</span>
-                                @endif
+                                    @if($user->id != Auth::id())
+                                        <button
+                                            x-data
+                                            @click.prevent="
+                                                $dispatch('open-modal', 'delete-confirmation-modal');
+                                                $dispatch('set-delete-target', {{ $user->id }})
+                                            "
+                                            title="Delete User"
+                                            class="text-red-500 hover:text-red-800 text-sm flex items-center gap-1"
+                                        >
+                                            <x-lucide-trash-2 class="w-3 h-3" /> Delete
+                                        </button>
+                                    @else
+                                        <span class="text-gray-400 italic text-xs ml-2 mt-0.5" title="You cannot modify yourself">Self</span>
+                                    @endif
+                                </div>
                             </td>
                         </tr>
                     @empty
@@ -139,7 +141,7 @@
         @include('admin.users.partials.edit-modal')
         @include('admin.users.partials._delete-confirmation-modal')
 
-        @if ($errors->any())
+        @if ($errors->any() && !old('user_id'))
             <div x-data x-init="$dispatch('open-modal', 'create-user-modal')"></div>
         @endif
 

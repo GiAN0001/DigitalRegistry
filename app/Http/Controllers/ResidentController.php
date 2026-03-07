@@ -86,13 +86,15 @@ class ResidentController extends Controller
 
         // Search by resident name (any member)
         if ($request->filled('q')) {
-            $searchTerm = $request->q;
-            $query->whereHas('household.residents', function ($q) use ($searchTerm) {
-                $q->whereRaw("CONCAT_WS(' ', first_name, middle_name, last_name, extension) LIKE ?", ["%{$searchTerm}%"]) //Bugs Fixed: Search now looks into residents full name, modified by Cath
-                ->orWhere('first_name', 'like', "%{$searchTerm}%")
-                ->orWhere('last_name', 'like', "%{$searchTerm}%")
-                ->orWhere('middle_name', 'like', "%{$searchTerm}%")
-                ->orWhere('extension', 'like', "%{$searchTerm}%");  //Bugs Fixed: Search now looks into residents full name, modified by Cath
+            $searchTerm = trim($request->q);
+            $query->whereHas('residents', function ($q) use ($searchTerm) {
+                $q->withTrashed()
+                  ->where('first_name', 'like', "%{$searchTerm}%")
+                  ->orWhere('last_name', 'like', "%{$searchTerm}%")
+                  ->orWhere('middle_name', 'like', "%{$searchTerm}%")
+                  ->orWhere(DB::raw("CONCAT(first_name, ' ', last_name)"), 'like', "%{$searchTerm}%")
+                  ->orWhere(DB::raw("CONCAT(first_name, ' ', IFNULL(middle_name, ''), ' ', last_name)"), 'like', "%{$searchTerm}%")
+                  ->orWhere(DB::raw("CONCAT(last_name, ', ', first_name)"), 'like', "%{$searchTerm}%");
             });
         }
 
@@ -267,12 +269,12 @@ class ResidentController extends Controller
             // Validate every person in the form against the current cycle
             $people = array_merge([$headData], $membersData);
             foreach ($people as $person) {
-                $duplicate = Resident::where('first_name', $person['first_name'])
-                    ->where('last_name', $person['last_name'])
+                $duplicate = Resident::whereRaw('LOWER(first_name) = ?', [strtolower(trim($person['first_name']))])
+                    ->whereRaw('LOWER(last_name) = ?', [strtolower(trim($person['last_name']))])
                     ->where('census_cycle', $currentCycle)
                     ->whereHas('demographic', function($q) use ($person) {
                         $q->where('birthdate', $person['birthdate'])
-                        ->where('birthplace', $person['birthplace']);
+                        ->whereRaw('LOWER(birthplace) = ?', [strtolower(trim($person['birthplace']))]);
                     })->exists();
 
                 if ($duplicate) {
@@ -438,12 +440,12 @@ class ResidentController extends Controller
             // --- 2. IDENTITY FINGERPRINT CHECK (With ID Exclusion) ---
             // We look for OTHER people in the SAME cycle who match the core details
             $duplicate = Resident::where('id', '!=', $resident->id) // CRITICAL: Exclude self
-                ->where('first_name', $data['first_name'])
-                ->where('last_name', $data['last_name'])
+                ->whereRaw('LOWER(first_name) = ?', [strtolower(trim($data['first_name']))])
+                ->whereRaw('LOWER(last_name) = ?', [strtolower(trim($data['last_name']))])
                 ->where('census_cycle', $currentCycle)
                 ->whereHas('demographic', function($q) use ($data, $birthDate) {
                     $q->where('birthdate', $birthDate)
-                      ->where('birthplace', $data['birthplace']);
+                      ->whereRaw('LOWER(birthplace) = ?', [strtolower(trim($data['birthplace']))]);
                 })->exists();
 
             if ($duplicate) {
@@ -451,7 +453,18 @@ class ResidentController extends Controller
                 return back()->with('error', "Update Blocked: Another resident named {$data['first_name']} {$data['last_name']} (Born {$bDateStr}) already exists in the {$currentCycle} cycle.")->withInput();
             }
 
-            // --- 3. PROCEED WITH UPDATES ---
+         
+            $existingGlobalMatch = \App\Models\Resident::where('id', '!=', $resident->id)
+                ->whereRaw('LOWER(first_name) = ?', [strtolower(trim($data['first_name']))])
+                ->whereRaw('LOWER(last_name) = ?', [strtolower(trim($data['last_name']))])
+                ->whereHas('demographic', function($q) use ($data, $birthDate) {
+                    $q->where('birthdate', $birthDate)
+                      ->whereRaw('LOWER(birthplace) = ?', [strtolower(trim($data['birthplace']))]);
+                })->first();
+
+            $updatedGlobalId = $existingGlobalMatch ? $existingGlobalMatch->global_id : $resident->global_id;
+
+            // --- 4. PROCEED WITH UPDATES ---
             $resident->update([
                 'first_name' => $data['first_name'],
                 'last_name' => $data['last_name'],
@@ -459,6 +472,7 @@ class ResidentController extends Controller
                 'extension' => $data['extension'],
                 'household_role_id' => $data['household_role_id'],
                 'updated_by_user_id' => Auth::id(), 
+                'global_id' => $updatedGlobalId,
             ]);
 
             $demoData = [
@@ -506,6 +520,16 @@ class ResidentController extends Controller
         $currentYear = date('Y');
         $currentSem = (date('n') <= 6) ? 1 : 2; //edited by GIAN
 
+        // Check if this resident exists in any previous cycle
+        $existingResident = \App\Models\Resident::whereRaw('LOWER(first_name) = ?', [strtolower(trim($data['first_name']))])
+            ->whereRaw('LOWER(last_name) = ?', [strtolower(trim($data['last_name']))])
+            ->whereHas('demographic', function($q) use ($data) {
+                $q->where('birthdate', $data['birthdate']);
+                $q->whereRaw('LOWER(birthplace) = ?', [strtolower(trim($data['birthplace']))]);
+            })->first();
+
+        $globalId = $existingResident ? $existingResident->global_id : (string) \Illuminate\Support\Str::uuid();
+
         $resident = Resident::create([
             'first_name' => $data['first_name'],
             'last_name' => $data['last_name'],
@@ -516,6 +540,7 @@ class ResidentController extends Controller
             'residency_type_id' => $residencyTypeId,
             'added_by_user_id' => Auth::id(),
             'census_cycle' => Resident::getCurrentCensusCycle(),
+            'global_id' => $globalId,
         ]);
 
 

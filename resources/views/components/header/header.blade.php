@@ -17,10 +17,6 @@
     } elseif (request()->routeIs('admin.users.*')) {
         $module = 'Manage Staff';
         $page = 'Account Management';
-
-        if (request()->routeIs('admin.users.logs')) {
-            $page = 'Audit Logs';
-        }
     } elseif (request()->routeIs('profile.*')) {
         $module = 'Account';
         $page = 'Profile Settings';
@@ -35,6 +31,14 @@
     else if (request()->routeIs('admin.tupad.*')) {
         $module = 'Social Services';
         $page = 'TUPAD Program';
+    }
+    else if (request()->routeIs('admin.settings.logs')) {
+        $module = 'Settings';
+        $page = 'Logs';
+    }
+    else if (request()->routeIs('admin.settings.lookup')) {
+        $module = 'Settings';
+        $page = 'Reference Data Library';
     }
 
 
@@ -80,7 +84,7 @@
                     <div class="text-left hidden md:block">
                         <div class="font-semibold text-sm text-gray-900">{{ Auth::user()->first_name }}
                             {{ Auth::user()->last_name }} {{ Auth::user()->extension }}</div>
-                        <div class="text-xs text-gray-500">{{ Auth::user()->barangayRole->name }}</div>
+                        <div class="text-xs text-gray-500">{{ Auth::user()->barangayRole->name ?? 'N/A' }}</div>
                     </div>
 
                     {{-- Drop down Icon --}}

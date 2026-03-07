@@ -38,26 +38,26 @@
             @endrole
         </div>
 
-        {{-- Work History --}}
         <div class="mt-6">
             <h3 class="font-bold text-gray-700 mb-3 uppercase tracking-wider text-xs">TUPAD History</h3>
-            <div class="overflow-hidden border border-gray-100 rounded-xl">
-                <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gray-50">
-                        <tr>
-                            <th class="px-4 py-2 text-left text-xs font-bold text-gray-500 uppercase">Program Dates</th>
-                            <th class="px-4 py-2 text-center text-xs font-bold text-gray-500 uppercase">Processed By</th>
-                            <th class="px-4 py-2 text-center text-xs font-bold text-gray-500 uppercase">Dropped By</th>
-                            <th class="px-4 py-2 text-center text-xs font-bold text-gray-500 uppercase">Status</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-100 bg-white text-xs">
-                        @forelse($resident->tupadParticipations as $history)
+            <div class="border border-gray-100 rounded-xl">
+                <div class="max-h-[16.5rem] overflow-y-auto overflow-x-hidden rounded-xl">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50 sticky top-0 z-10 shadow-sm border-b border-gray-200">
                             <tr>
-                                <td class="px-4 py-2 font-medium">
-                                    {{ \Carbon\Carbon::parse($history->start_date)->format('M d, Y') }} - 
-                                    {{ \Carbon\Carbon::parse($history->end_date)->format('M d, Y') }}
-                                </td>
+                                <th class="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase bg-gray-50">Program Dates</th>
+                                <th class="px-4 py-3 text-center text-xs font-bold text-gray-500 uppercase bg-gray-50">Processed By</th>
+                                <th class="px-4 py-3 text-center text-xs font-bold text-gray-500 uppercase bg-gray-50">Dropped By</th>
+                                <th class="px-4 py-3 text-center text-xs font-bold text-gray-500 uppercase bg-gray-50">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100 bg-white text-xs">
+                            @forelse($resident->allTupadParticipations->sortByDesc('start_date') as $history)
+                                <tr>
+                                    <td class="px-4 py-3 font-medium">
+                                        {{ \Carbon\Carbon::parse($history->start_date)->format('M d, Y') }} - 
+                                        {{ \Carbon\Carbon::parse($history->end_date)->format('M d, Y') }}
+                                    </td>
                                 <td class="px-4 py-2 text-center">
                                     {{ $history->processor->name ?? 'System' }}
                                 </td>
@@ -65,17 +65,17 @@
                                     {{ $history->dropper->name ?? '-' }}   
                                 </td>
                                 <td class="px-4 py-2 text-center">
-                                    <span class="px-2 py-0.5 rounded-full text-xs font-bold 
-                                        {{ $history->status === 'Completed' ? 'bg-green-100 text-green-800' : 
-                                        ($history->status === 'Dropped' ? 'bg-red-100 text-red-800' : 
-                                        ($history->status === 'Scheduled' ? 'bg-slate-200 text-slate-800' : 'bg-amber-100 text-amber-800')) }}">
-                                        {{ strtoupper($history->status) }}
-                                    </span>
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="2" class="px-4 py-6 text-center text-gray-400 italic">No participation history on record.</td>
+                            <span class="px-2 py-0.5 rounded-full text-xs font-bold 
+                                {{ $history->status === 'Completed' ? 'bg-green-100 text-green-800' : 
+                                ($history->status === 'Dropped' ? 'bg-red-100 text-red-800' : 
+                                ($history->status === 'Scheduled' ? 'bg-slate-200 text-slate-800' : 'bg-amber-100 text-amber-800')) }}">
+                                {{ strtoupper($history->status) }}
+                            </span>
+                        </td>
+                    </tr>
+                @empty
+                    <tr>
+                                <td colspan="4" class="px-4 py-6 text-center text-gray-400 italic">No participation history on record.</td>
                             </tr>
                         @endforelse
                     </tbody>

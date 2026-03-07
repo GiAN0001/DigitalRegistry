@@ -69,8 +69,8 @@ class UserController extends Controller
             'username' => ['required', 'string', 'max:255', Rule::unique('users')->ignore($user->id)],
             'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
             'contact' => 'required|string|max:15|regex:/^(09)\d{9}$/',
-            // Validates Role ID exists
-            'role' => ['required', 'integer', Rule::exists('roles', 'id')],
+            // Validates Role by string name
+            'role' => ['required', 'string', Rule::exists('roles', 'name')],
             'barangay_role_id' => ['required', 'integer', Rule::exists('barangay_roles', 'id')],
             'status' => ['required', 'in:0,1'],
             'password' => 'nullable|string|min:8|confirmed',
@@ -90,12 +90,7 @@ class UserController extends Controller
 
         $user->update($data);
 
-
-        $roleId = $request->role;
-        $role = Role::findById($roleId);
-
-
-        $user->syncRoles([$role]);
+        $user->syncRoles([$request->role]);
 
         return redirect()->route('admin.users.index')->with('success', 'User updated successfully and editor tracked.');
     }
@@ -139,7 +134,7 @@ class UserController extends Controller
             'username' => 'required|string|max:255|unique:users',
             'email' => 'required|string|email|max:255|unique:users',
             'contact' => 'required|string|max:15|regex:/^(09)\d{9}$/',
-            'role' => 'required|string|',
+            'role' => ['required', 'string', Rule::exists('roles', 'name')],
             'barangay_role_id' => ['required', 'integer', Rule::exists('barangay_roles', 'id')],
             'status' => ['required', 'in:0,1'],
             'password' => 'required|string|min:8|confirmed',
@@ -158,12 +153,7 @@ class UserController extends Controller
             'added_by' => Auth::id(),
         ]);
 
-            $roleId = $request->role;
-
-
-            $role = Role::findById($roleId);
-            $user->assignRole($role);
-
+        $user->assignRole($request->role);
 
         return redirect()->route('admin.users.index')->with('success', 'User created successfully.');
     }
@@ -181,7 +171,7 @@ class UserController extends Controller
                 'contact' => $user->contact,
                 'status' => $user->status,
                 'barangay_role_id' => $user->barangay_role_id,
-                'role_id' => $user->roles->first()?->id,
+                'role_name' => $user->roles->first()?->name,
             ]);
         }
 
