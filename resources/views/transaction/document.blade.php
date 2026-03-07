@@ -712,6 +712,29 @@
     @include('transaction.modal.released')
     @include('transaction.modal.cancelled')
 
+    @if ($errors->has('duplicate'))
+        <div 
+            x-data="{ show: true }" 
+            x-show="show"
+            class="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
+            style="background: rgba(0,0,0,0.5);"
+        >
+            <div class="bg-white rounded-xl shadow-lg p-8 max-w-md w-full text-left">
+                <h2 class="text-lg font-bold text-red-600">Cannot Process Request</h2>
+                <p class="mt-2 text-sm text-gray-600">
+                    {!! preg_replace(
+                        '/^(.+?) still has a pending (.+?) request\.$/',
+                        '<strong>$1</strong> still has a pending <strong>$2</strong> request.',
+                        e($errors->first('duplicate'))
+                    ) !!}
+                </p>
+                <div class="mt-6 flex justify-end">
+                    <x-primary-button type="button" @click="show = false">Close</x-primary-button>
+                </div>
+            </div>
+        </div>
+    @endif
+
     <div x-data="{ 
             successMessage: '{{ session('success') ?? 'Action completed successfully!' }}'
          }" 

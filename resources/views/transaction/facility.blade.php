@@ -30,19 +30,30 @@
                 @endforelse
             </div>
         </div>
+        
+        <div x-data="{ activeTab: localStorage.getItem('activeFacilityTab') || 'reservation-calendar' }">
+            <!-- Search Bar: Only show in Reservation History tab -->
+            <div class="flex flex-wrap items-center gap-2 mt-4 mb-4"
+                x-show="activeTab === 'reservation-history'">
+                <form method="GET" action="{{ route('transaction.facility') }}" class="w-full md:flex-1">
+                    <input type="hidden" name="tab" value="reservation-history">
+                    <x-search-bar name="search" placeholder="Search by Name or Reservation ID" class="w-full md:flex-1" :value="request('search')" />
+                </form>
+            </div>
 
-        <div class="flex flex-wrap items-center gap-2 mt-4 mb-4">
-            <x-search-bar placeholder="Search by Name or Reservation ID" class="w-full md:flex-1" />  
-        </div>
-
-        <!-- Tabs -->
-        <div class="flex mt-4 mb-6 border-b-2 border-blue-600">
-            <button class="facility-tab-button text-blue-600 font-semibold text-sm p-3 border-b-2 border-blue-600" data-tab="reservation-calendar">
-                Reservation Calendar
-            </button>
-            <button class="facility-tab-button text-slate-600 font-semibold text-sm p-3" data-tab="reservation-history">
-                Reservation History
-            </button>
+            <!-- Tabs -->
+            <div class="flex mt-4 mb-6 border-b-2 border-blue-600">
+                <button class="facility-tab-button text-blue-600 font-semibold text-sm p-3 border-b-2 border-blue-600"
+                        data-tab="reservation-calendar"
+                        @click="activeTab = 'reservation-calendar'; localStorage.setItem('activeFacilityTab', 'reservation-calendar')">
+                    Reservation Calendar
+                </button>
+                <button class="facility-tab-button text-slate-600 font-semibold text-sm p-3"
+                        data-tab="reservation-history"
+                        @click="activeTab = 'reservation-history'; localStorage.setItem('activeFacilityTab', 'reservation-history')">
+                    Reservation History
+                </button>
+            </div>
         </div>
 
         <!-- Tab Content: Reservation Calendar -->
@@ -223,23 +234,34 @@
                         $eventDates = $reservations->pluck('start_date')->map(fn($d) => \Carbon\Carbon::parse($d)->format('Y-m-d'))->unique()->values()->toArray();
                     @endphp
                     
-                    <div class="overflow-y-auto space-y-3 flex-1 min-h-0" 
-                         x-data="{ eventDates: @js($eventDates) }">
-                        {{-- Events for selected date --}}
-                        @foreach($reservations as $reservation)
-                            <div x-show="selectedDate === '{{ \Carbon\Carbon::parse($reservation->start_date)->format('Y-m-d') }}'">
-                                <x-event-card :event="$reservation" />
-                            </div>
-                        @endforeach
-                        
-                        {{-- No Events Message --}}
-                        <div 
-                            x-show="!eventDates.includes(selectedDate)"
-                            class="text-center text-gray-500 py-4"
-                        >
-                            No Event
+                    <div class="overflow-y-auto space-y-3 flex-1 min-h-0">
+                    {{-- Events for selected date --}}
+                    @foreach($reservations as $reservation)
+                        @php
+                            $rStart = \Carbon\Carbon::parse($reservation->start_date)->format('Y-m-d');
+                            $rEnd   = \Carbon\Carbon::parse($reservation->end_date)->format('Y-m-d');
+                        @endphp
+                        <div x-show="selectedDate >= '{{ $rStart }}' && selectedDate <= '{{ $rEnd }}'">
+                            <x-event-card :event="$reservation" />
                         </div>
+                    @endforeach
+
+                    {{-- No Events Message --}}
+                    <div 
+                        x-show="
+                            @if($reservations->isEmpty())
+                                true
+                            @else
+                                {{ $reservations->map(fn($r) => 
+                                    "(selectedDate < '" . \Carbon\Carbon::parse($r->start_date)->format('Y-m-d') . "' || selectedDate > '" . \Carbon\Carbon::parse($r->end_date)->format('Y-m-d') . "')"
+                                )->implode(' && ') }}
+                            @endif
+                        "
+                        class="text-center text-gray-500 py-4"
+                    >
+                        No Event
                     </div>
+                </div>
                 </div>
             </div>
 

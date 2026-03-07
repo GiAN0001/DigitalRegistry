@@ -50,11 +50,13 @@ class ResidentController extends Controller
         //search bar -- added by GIAN
         if ($request->filled('q')) {
             $searchTerm = $request->q;
-                $query->whereHas('household.residents', function ($q) use ($searchTerm) {
-                    $q->where('first_name', 'like', "%{$searchTerm}%")
-                    ->orWhere('last_name', 'like', "%{$searchTerm}%")
-                    ->orWhere('middle_name', 'like', "%{$searchTerm}%");
-                });
+            $query->whereHas('household.residents', function ($q) use ($searchTerm) {
+                $q->whereRaw("CONCAT_WS(' ', first_name, middle_name, last_name, extension) LIKE ?", ["%{$searchTerm}%"]) //Bugs Fixed: Search now looks into residents full name, modified by Cath
+                ->orWhere('first_name', 'like', "%{$searchTerm}%")
+                ->orWhere('last_name', 'like', "%{$searchTerm}%")
+                ->orWhere('middle_name', 'like', "%{$searchTerm}%")
+                ->orWhere('extension', 'like', "%{$searchTerm}%");  //Bugs Fixed: Search now looks into residents full name, modified by Cath
+            });
         }
 
         // 1. Filter by Purok
@@ -135,11 +137,17 @@ class ResidentController extends Controller
         }
 
         $user = Auth::user();
+        $currentCycle = Resident::getCurrentCensusCycle(); //Fixed: Ensures search is cycle-specific, modified by Cath
 
+        //Bugs Fixed: Search now looks into residents full name, modified by Cath
         $residents = Resident::forUser($user)
+            ->where('census_cycle', $currentCycle) //Fixed: Ensures search is cycle-specific, modified by Cath
             ->where(function($q) use ($query) {
-                $q->where('first_name','like',"%{$query}%")
+                $q->whereRaw("CONCAT_WS(' ', first_name, middle_name, last_name, extension) LIKE ?", ["%{$query}%"])
+                ->orWhere('first_name','like',"%{$query}%")
                 ->orWhere('last_name','like',"%{$query}%")
+                ->orWhere('middle_name','like',"%{$query}%")
+                ->orWhere('extension','like',"%{$query}%")
                 ->orWhereHas('household', function($h) use ($query) {
                     $h->where('email','like',"%{$query}%")
                         ->orWhere('contact_number','like',"%{$query}%")

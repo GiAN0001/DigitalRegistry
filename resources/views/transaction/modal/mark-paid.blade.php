@@ -4,14 +4,14 @@
         <form @submit.prevent="handleSubmit()">
             
             <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700 mb-1">Amount Paid (₱)</label>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Amount Paid (₱) <span class="text-red-500">*</span></label>
                 <input type="number" min="0" step="0.01" x-model="amountPaid"
                     class="w-full border border-gray-300 rounded px-3 py-2 text-sm"
                     required>
             </div>
 
             <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700 mb-1">Mode of Payment</label>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Mode of Payment <span class="text-red-500">*</span> </label>
                 <input type="text" x-model="modeOfPayment"
                     class="w-full border border-gray-300 rounded px-3 py-2 text-sm"
                     placeholder="e.g. Cash, Check, Bank Transfer"
@@ -19,7 +19,7 @@
             </div>
 
             <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700 mb-1">OR Number</label>
+                <label class="block text-sm font-medium text-gray-700 mb-1">OR Number <span class="text-red-500">*</span></label>
                 <input type="text" x-model="orNumber"
                     class="w-full border border-gray-300 rounded px-3 py-2 text-sm"
                     placeholder="Enter Official Receipt Number"

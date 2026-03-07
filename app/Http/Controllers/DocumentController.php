@@ -25,7 +25,7 @@ class DocumentController extends Controller
         // ===== FOR FULFILLMENT =====
         $forFulfillmentQuery = DocumentRequest::withNames()
             ->with(['documentType', 'resident', 'createdBy'])
-            ->whereIn('document_requests.status', $inProgressStatuses);
+            ->where('document_requests.status', 'For Fulfillment');
 
         if ($search) {
             $forFulfillmentQuery->where(function ($q) use ($search) {
@@ -246,6 +246,22 @@ class DocumentController extends Controller
             'remarks' => 'nullable|string',
         ]);
 
+        // Duplicate request validation
+        $hasDuplicate = \App\Models\DocumentRequest::where('resident_id', $request->resident_id)
+            ->where('document_type_id', $request->document_type_id)
+            ->whereNotIn('status', ['Released', 'Cancelled'])
+            ->exists();
+
+        if ($hasDuplicate) {
+            $resident = \App\Models\Resident::find($request->resident_id);
+            $docType = \App\Models\DocumentType::find($request->document_type_id);
+            return back()
+                ->withErrors([
+                    'duplicate' => "{$resident->first_name} {$resident->last_name} still has a pending {$docType->name} request."
+                ])
+                ->withInput();
+        }
+
         // Get document type to check if it's Cedula
         $documentType = \App\Models\DocumentType::find($request->document_type_id);
         $isCedula = strtolower($documentType->name) === 'cedula';
@@ -289,7 +305,7 @@ class DocumentController extends Controller
                 'created_by_user_id' => auth()->id(),
                 'status' => 'For Fulfillment',
                 'remarks' => $request->remarks ?? null,
-                'fee' => 0.00,
+                'fee' => $request->fee,
             ]);
 
             return redirect()->back()->with('success', 'Document request created successfully!');
