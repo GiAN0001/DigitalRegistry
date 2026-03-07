@@ -3,7 +3,7 @@
         <h2 class="text-xl font-bold text-gray-900 mb-4">Add New Equipment</h2>
         <form @submit.prevent="submit">
             <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700 mb-1">Equipment Type</label>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Equipment Type <span class="text-red-500">*</span></label>
                 <select x-model="type_id" class="w-full border border-gray-300 rounded px-3 py-2 text-sm" required>
                     <option value="">Select type</option>
                     <template x-for="type in types" :key="type.id">
@@ -12,7 +12,7 @@
                 </select>
             </div>
             <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700 mb-1">Quantity</label>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Quantity <span class="text-red-500">*</span></label>
                 <input type="number" x-model="quantity" min="1" class="w-full border border-gray-300 rounded px-3 py-2 text-sm" required>
             </div>
             <div class="flex justify-end gap-3">

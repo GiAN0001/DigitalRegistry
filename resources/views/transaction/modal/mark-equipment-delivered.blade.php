@@ -5,7 +5,7 @@
         <form @submit.prevent="submit()" class="space-y-4">
             <div>
                 <label for="delivered_by_name" class="block text-sm font-medium text-gray-700 mb-1">
-                    Delivered By Name
+                    Delivered By <span class="text-red-500">*</span>
                 </label>
                 <input 
                     type="text" 

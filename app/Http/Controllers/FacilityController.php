@@ -161,45 +161,65 @@ class FacilityController extends Controller
         $currentMonth = \Carbon\Carbon::now()->format('Y-m');
         $threeDaysAgo = \Carbon\Carbon::now()->subDays(3);
 
+        $search = request()->get('search', '');
+
         $historyReservations = FacilityReservation::with(['facility'])
             ->where(function($query) use ($currentMonth, $threeDaysAgo) {
-                // Completed reservations from previous months (not current month)
                 $query->where(function($q) use ($currentMonth) {
                     $q->where('status', 'Completed')
-                      ->whereRaw("DATE_FORMAT(updated_at, '%Y-%m') < ?", [$currentMonth]);
+                    ->whereRaw("DATE_FORMAT(updated_at, '%Y-%m') < ?", [$currentMonth]);
                 })
-                // Cancelled/Rejected reservations older than 3 days
                 ->orWhere(function($q) use ($threeDaysAgo) {
                     $q->whereIn('status', ['Cancelled', 'Rejected'])
-                      ->where('updated_at', '<', $threeDaysAgo);
+                    ->where('updated_at', '<', $threeDaysAgo);
+                });
+            })
+            // ADD THIS SEARCH FILTER:
+            ->when($search, function($query, $search) {
+                $query->where(function($q) use ($search) {
+                    $q->where('id', $search)
+                    ->orWhere('renter_name', 'like', "%$search%")
+                    ->orWhereHas('facility', function($qr) use ($search) {
+                        $qr->where('facility_type', 'like', "%$search%");
+                    });
                 });
             })
             ->orderBy('updated_at', 'desc')
             ->paginate(10, ['*'], 'history_page');
 
+            $search = request()->get('search', '');
+
             $equipmentBorrowedHistory = DB::table('facility_reservations')
-            ->join('reservation_equipment', 'facility_reservations.id', '=', 'reservation_equipment.facility_reservation_id')
-            ->leftJoin('residents', 'facility_reservations.resident_id', '=', 'residents.id')
-            ->leftJoin('equipments', 'reservation_equipment.equipment_id', '=', 'equipments.id')
-            ->select(
-                'reservation_equipment.id as equipment_id',
-                'facility_reservations.id as reservation_id',
-                'facility_reservations.event_name',
-                'facility_reservations.renter_name',
-                'facility_reservations.start_date',
-                'reservation_equipment.status as equipment_status',
-                'equipments.equipment_type',
-                'reservation_equipment.quantity_borrowed',
-                'reservation_equipment.updated_at',
-                DB::raw("COALESCE(CONCAT(residents.first_name, ' ', residents.last_name), facility_reservations.renter_name) as resident_name")
-            )
-            ->where(function($query) use ($threeDaysAgo) {
-                // Returned, Cancelled, Rejected older than 3 days
-                $query->whereIn('reservation_equipment.status', ['Returned', 'Cancelled', 'Rejected'])
-                      ->where('reservation_equipment.updated_at', '<', $threeDaysAgo);
-            })
-            ->orderBy('reservation_equipment.updated_at', 'desc')
-            ->paginate(10, ['*'], 'equipment_history_page');
+                ->join('reservation_equipment', 'facility_reservations.id', '=', 'reservation_equipment.facility_reservation_id')
+                ->leftJoin('residents', 'facility_reservations.resident_id', '=', 'residents.id')
+                ->leftJoin('equipments', 'reservation_equipment.equipment_id', '=', 'equipments.id')
+                ->select(
+                    'reservation_equipment.id as equipment_id',
+                    'facility_reservations.id as reservation_id',
+                    'facility_reservations.event_name',
+                    'facility_reservations.renter_name',
+                    'facility_reservations.start_date',
+                    'reservation_equipment.status as equipment_status',
+                    'equipments.equipment_type',
+                    'reservation_equipment.quantity_borrowed',
+                    'reservation_equipment.updated_at',
+                    DB::raw("COALESCE(CONCAT(residents.first_name, ' ', residents.last_name), facility_reservations.renter_name) as resident_name")
+                )
+                ->where(function($query) use ($threeDaysAgo) {
+                    $query->whereIn('reservation_equipment.status', ['Returned', 'Cancelled', 'Rejected'])
+                        ->where('reservation_equipment.updated_at', '<', $threeDaysAgo);
+                })
+                // ADD THIS SEARCH FILTER:
+                ->when($search, function($query, $search) {
+                    $query->where(function($q) use ($search) {
+                        $q->where('facility_reservations.id', $search)
+                        ->orWhere('facility_reservations.renter_name', 'like', "%$search%")
+                        ->orWhere(DB::raw("CONCAT(residents.first_name, ' ', residents.last_name)"), 'like', "%$search%")
+                        ->orWhere('equipments.equipment_type', 'like', "%$search%");
+                    });
+                })
+                ->orderBy('reservation_equipment.updated_at', 'desc')
+                ->paginate(10, ['*'], 'equipment_history_page');
 
         $jsReservations = $reservations->map(function($r) {
             return [
