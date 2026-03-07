@@ -116,7 +116,7 @@ Route::middleware(['auth'])->group(function () {
     Route::middleware(['auth', 'role:super admin'])->prefix('administrator')->name('admin.')->group(function () {
 
         Route::get('/logs', [LogController::class, 'index'])->name('settings.logs');
-        Route::get('/lookup', [SettingController::class, 'lookup'])->name('lookup.index');
+        Route::get('/lookup', [SettingController::class, 'lookup'])->name('settings.lookup');
     });
 
     Route::middleware('auth')->group(function () { // Added by gian, ensures only authenticated users can access ticket routes

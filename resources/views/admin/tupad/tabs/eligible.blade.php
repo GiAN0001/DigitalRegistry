@@ -15,14 +15,14 @@
         <td class="px-3 py-4 text-center">
             <div class="flex justify-center gap-2">
                 <button @click="$dispatch('open-modal', 'view-details-{{ $resident->id }}')" class="text-green-600 text-xs flex items-center hover:underline">
-                    <x-lucide-eye class="w-4 h-4 mr-1" /> View Details
+                    <x-lucide-eye class="w-3 h-3 mr-1" /> View Details
                 </button>
                 <button 
                     type="button"
                     @click="$dispatch('open-modal', 'employ-resident-{{ $resident->id }}')" 
                     class="text-blue-800 text-xs flex items-center hover:underline"
                 >
-                    <x-lucide-file-pen class="w-4 h-4 mr-1" /> Employ
+                    <x-lucide-file-pen class="w-3 h-3 mr-1" /> Employ
                 </button>
             </div>
                 @include('admin.tupad.partials.details-modal', ['resident' => $resident])

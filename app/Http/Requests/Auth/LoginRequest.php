@@ -44,12 +44,18 @@ class LoginRequest extends FormRequest
         $this->ensureIsNotRateLimited();
 
         // --- THIS IS THE 2ND FIX ---
-        // We tell Auth::attempt to use `username` instead of `email`.
-        if (! Auth::attempt($this->only('username', 'password'), $this->boolean('remember'))) {
+        // We tell Auth::attempt to use `username` instead of `email`, AND we add a strict requirement that `status` must be 1.
+        $credentials = [
+            'username' => $this->input('username'),
+            'password' => $this->input('password'),
+            'status' => '1',
+        ];
+
+        if (! Auth::attempt($credentials, $this->boolean('remember'))) {
             RateLimiter::hit($this->throttleKey());
 
             throw ValidationException::withMessages([
-                'username' => trans('auth.failed'), // Also change this from 'email'
+                'username' => trans('auth.failed') . ' Or your account may be inactive.', 
             ]);
         }
 

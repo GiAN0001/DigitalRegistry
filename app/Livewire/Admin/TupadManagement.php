@@ -74,52 +74,59 @@ class TupadManagement extends Component
             ->whereHas('demographic', function ($q) use ($adultCutoffDate) {
                 $q->where('birthdate', '<=', $adultCutoffDate);
             })
-            ->whereDoesntHave('tupadParticipations', function ($q) use ($now, $threeMonthsAgo) {
+            ->whereDoesntHave('allTupadParticipations', function ($q) use ($now, $threeMonthsAgo) {
                 $q->where('end_date', '>=', $now)
                 ->orWhere('end_date', '>', $threeMonthsAgo);
             })->paginate(15);
 
         // 2. AUTO-ONGOING
-        $ongoing = Resident::with(['demographic', 'tupadParticipations'])
+        $ongoing = Resident::with(['demographic', 'allTupadParticipations'])
             ->where('census_cycle', $cycle)
             ->tap($searchQuery)
-            ->whereHas('tupadParticipations', function ($q) use ($now) {
+            ->whereHas('allTupadParticipations', function ($q) use ($now) {
                 $q->whereIn('status', ['Ongoing', 'Scheduled']);
             })->paginate(15);
 
         // 3. INELIGIBLE
-        $ineligible = Resident::with(['demographic', 'tupadParticipations'])
+        $ineligible = Resident::with(['demographic', 'allTupadParticipations'])
             ->where('census_cycle', $cycle)
             ->tap($searchQuery)
-            ->whereHas('tupadParticipations', function ($q) use ($threeMonthsAgo, $now) {
+            ->whereHas('allTupadParticipations', function ($q) use ($threeMonthsAgo, $now) {
                 $q->whereIn('status', ['Completed', 'Dropped'])
                 ->where('end_date', '>', $threeMonthsAgo)
                 ->where('end_date', '<', $now);
             })->paginate(15);
 
         // 4. DROPPED
-        $dropped = Resident::with(['demographic', 'tupadParticipations'])
+        $dropped = Resident::with(['demographic', 'allTupadParticipations'])
             ->where('census_cycle', $cycle)
             ->tap($searchQuery)
-            ->whereHas('tupadParticipations', fn($q) => $q->where('status', 'Dropped'))
+            ->whereHas('allTupadParticipations', fn($q) => $q->where('status', 'Dropped'))
             ->paginate(15);
 
         // 5. UNIFIED COUNTS (scoped to effective cycle)
+        // 5. UNIFIED COUNTS (scoped to effective cycle and global ID!)
         $counts = [
             'eligible' => Resident::where('census_cycle', $cycle)
                 ->whereHas('demographic', fn($q) => $q->where('birthdate', '<=', $adultCutoffDate))
-                ->whereDoesntHave('tupadParticipations', function($q) use ($now, $threeMonthsAgo) {
+                ->whereDoesntHave('allTupadParticipations', function($q) use ($now, $threeMonthsAgo) {
                     $q->where('end_date', '>=', $now)->orWhere('end_date', '>', $threeMonthsAgo);
                 })->count(),
-            'ongoing'   => TupadParticipation::whereHas('resident', fn($q) => $q->where('census_cycle', $cycle))
-                ->where('status', 'Ongoing')->count(),
-            'ineligible'=> TupadParticipation::whereHas('resident', fn($q) => $q->where('census_cycle', $cycle))
-                ->whereIn('status', ['Completed', 'Dropped'])
-                ->where('end_date', '>', $threeMonthsAgo)->count(),
-            'dropped'   => TupadParticipation::whereHas('resident', fn($q) => $q->where('census_cycle', $cycle))
-                ->where('status', 'Dropped')->count(),
-            'scheduled' => TupadParticipation::whereHas('resident', fn($q) => $q->where('census_cycle', $cycle))
-                ->where('status', 'Scheduled')->count(),
+                
+            'ongoing' => Resident::where('census_cycle', $cycle)
+                ->whereHas('allTupadParticipations', fn($q) => $q->where('status', 'Ongoing'))->count(),
+                
+            'ineligible' => Resident::where('census_cycle', $cycle)
+                ->whereHas('allTupadParticipations', function($q) use ($threeMonthsAgo) {
+                    $q->whereIn('status', ['Completed', 'Dropped'])
+                      ->where('end_date', '>', $threeMonthsAgo);
+                })->count(),
+                
+            'dropped' => Resident::where('census_cycle', $cycle)
+                ->whereHas('allTupadParticipations', fn($q) => $q->where('status', 'Dropped'))->count(),
+                
+            'scheduled' => Resident::where('census_cycle', $cycle)
+                ->whereHas('allTupadParticipations', fn($q) => $q->where('status', 'Scheduled'))->count(),
         ];
 
         $this->dispatch('update-counts', ...$counts);

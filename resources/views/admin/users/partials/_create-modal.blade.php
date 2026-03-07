@@ -18,22 +18,22 @@
                         <x-input-label for="first_name" class="text-slate-700">
                             <span class="text-red-600">*</span> First Name
                         </x-input-label>
-                        <x-text-input id="first_name" name="first_name" type="text" class="mt-1 w-full h-10" :value="old('first_name')" />
-                        <x-input-error :messages="$errors->get('first_name')" class="mt-2" />
+                        <x-text-input id="first_name" name="first_name" type="text" class="mt-1 w-full h-10" :value="old('user_id') ? '' : old('first_name')" />
+                        <x-input-error :messages="old('user_id') ? [] : $errors->get('first_name')" class="mt-2" />
                     </div>
 
                     <div>
                         <x-input-label for="last_name" class="text-slate-700">
                             <span class="text-red-600">*</span> Last Name
                         </x-input-label>
-                        <x-text-input id="last_name" name="last_name" type="text" class="mt-1 w-full h-10" :value="old('last_name')" />
-                        <x-input-error :messages="$errors->get('last_name')" class="mt-2" />
+                        <x-text-input id="last_name" name="last_name" type="text" class="mt-1 w-full h-10" :value="old('user_id') ? '' : old('last_name')" />
+                        <x-input-error :messages="old('user_id') ? [] : $errors->get('last_name')" class="mt-2" />
                     </div>
 
                     <div>
                         <x-input-label for="middle_name" value=" Middle Name" class="text-slate-700" />
-                        <x-text-input id="middle_name" name="middle_name" type="text" class="mt-1 w-full h-10" :value="old('middle_name')" />
-                        <x-input-error :messages="$errors->get('middle_name')" class="mt-2" />
+                        <x-text-input id="middle_name" name="middle_name" type="text" class="mt-1 w-full h-10" :value="old('user_id') ? '' : old('middle_name')" />
+                        <x-input-error :messages="old('user_id') ? [] : $errors->get('middle_name')" class="mt-2" />
                     </div>
                 </div>
 
@@ -46,16 +46,16 @@
                         @php $roles = Spatie\Permission\Models\Role::all(); @endphp
 
                         <select id="role" name="role" class=" text-slate-500 mt-1 w-full h-10 border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                            <option value="" disabled {{ old('role') ? '' : 'selected' }}>Select System Role</option>
+                            <option value="" disabled {{ (!old('user_id') && old('role')) ? '' : 'selected' }}>Select System Role</option>
 
                             @foreach($roles as $role)
-                                <option value="{{ $role->id }}" {{ old('role') == $role->id ? 'selected' : '' }}>
+                                <option value="{{ $role->name }}" {{ (!old('user_id') && old('role') == $role->name) ? 'selected' : '' }}>
                                     {{ $role->name }}
                                 </option>
                             @endforeach
                         </select>
 
-                        <x-input-error :messages="$errors->get('role')" class="mt-2" />
+                        <x-input-error :messages="old('user_id') ? [] : $errors->get('role')" class="mt-2" />
                     </div>
 
                     <div>
@@ -66,16 +66,16 @@
                         @php $barangayRoles = App\Models\BarangayRole::all(); @endphp
 
                         <select id="barangay_role_id" name="barangay_role_id" class="text-slate-500 mt-1 w-full h-10 border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                            <option value="" disabled {{ old('barangay_role_id') ? '' : 'selected' }}>Select Job Title</option>
+                            <option value="" disabled {{ (!old('user_id') && old('barangay_role_id')) ? '' : 'selected' }}>Select Job Title</option>
 
                             @foreach($barangayRoles as $job)
-                                <option value="{{ $job->id }}" {{ old('barangay_role_id') == $job->id ? 'selected' : '' }}>
+                                <option value="{{ $job->id }}" {{ (!old('user_id') && old('barangay_role_id') == $job->id) ? 'selected' : '' }}>
                                     {{ $job->name }}
                                 </option>
                             @endforeach
                         </select>
 
-                        <x-input-error :messages="$errors->get('barangay_role_id')" class="mt-2" />
+                        <x-input-error :messages="old('user_id') ? [] : $errors->get('barangay_role_id')" class="mt-2" />
                     </div>
                 </div>
 
@@ -84,16 +84,16 @@
                         <x-input-label for="contact" class="text-slate-700">
                             <span class="text-red-600">*</span> Contact No.
                         </x-input-label>
-                        <x-text-input id="contact" name="contact" type="text" class="mt-1 w-full h-10" :value="old('contact')" />
-                        <x-input-error :messages="$errors->get('contact')" class="mt-2" />
+                        <x-text-input id="contact" name="contact" type="text" class="mt-1 w-full h-10" :value="old('user_id') ? '' : old('contact')" />
+                        <x-input-error :messages="old('user_id') ? [] : $errors->get('contact')" class="mt-2" />
                     </div>
 
                     <div>
                         <x-input-label for="email" class="text-slate-700">
                             <span class="text-red-600">*</span> Email
                         </x-input-label>
-                        <x-text-input id="email" name="email" type="email" class="mt-1 w-full h-10" :value="old('email')" />
-                        <x-input-error :messages="$errors->get('email')" class="mt-2" />
+                        <x-text-input id="email" name="email" type="email" class="mt-1 w-full h-10" :value="old('user_id') ? '' : old('email')" />
+                        <x-input-error :messages="old('user_id') ? [] : $errors->get('email')" class="mt-2" />
                     </div>
                 </div>
 
@@ -102,17 +102,17 @@
                         <x-input-label for="username" class="text-slate-700">
                             <span class="text-red-600">*</span> Username
                         </x-input-label>
-                        <x-text-input id="username" name="username" type="text" class="mt-1 w-full h-10" :value="old('username')" />
-                        <x-input-error :messages="$errors->get('username')" class="mt-2" />
+                        <x-text-input id="username" name="username" type="text" class="mt-1 w-full h-10" :value="old('user_id') ? '' : old('username')" />
+                        <x-input-error :messages="old('user_id') ? [] : $errors->get('username')" class="mt-2" />
                     </div>
 
                     <div>
                         <x-input-label for="status" value="Account Status" class="text-slate-700" />
                         <select id="status" name="status" class="mt-1 w-full h-10 border-gray-300 rounded-md shadow-sm">
-                            <option value="1" {{ old('status') == '1' ? 'selected' : '' }}>Active</option>
-                            <option value="0" {{ old('status') == '0' ? 'selected' : '' }}>Inactive</option>
+                            <option value="1" {{ (!old('user_id') && old('status') == '1') ? 'selected' : '' }}>Active</option>
+                            <option value="0" {{ (!old('user_id') && old('status') == '0') ? 'selected' : '' }}>Inactive</option>
                         </select>
-                        <x-input-error :messages="$errors->get('status')" class="mt-2" />
+                        <x-input-error :messages="old('user_id') ? [] : $errors->get('status')" class="mt-2" />
                     </div>
                 </div>
 
@@ -122,7 +122,7 @@
                             <span class="text-red-600">*</span> Password
                         </x-input-label>
                         <x-text-input id="password" name="password" type="password" class="mt-1 w-full h-10" />
-                        <x-input-error :messages="$errors->get('password')" class="mt-2" />
+                        <x-input-error :messages="old('user_id') ? [] : $errors->get('password')" class="mt-2" />
                     </div>
 
                     <div>
@@ -130,7 +130,7 @@
                             <span class="text-red-600">*</span> Confirm Password
                         </x-input-label>
                         <x-text-input id="password_confirmation" name="password_confirmation" type="password" class="mt-1 w-full h-10" />
-                        <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
+                        <x-input-error :messages="old('user_id') ? [] : $errors->get('password_confirmation')" class="mt-2" />
                     </div>
                 </div>
 

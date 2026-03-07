@@ -1,7 +1,7 @@
 @forelse($ongoing as $resident)
     @php 
         // Forensic Check: Find the record that is either 'Ongoing' or 'Scheduled' for this resident [cite: 2025-12-04]
-        $currentParticipation = $resident->tupadParticipations
+        $currentParticipation = $resident->allTupadParticipations
             ->whereIn('status', ['Ongoing', 'Scheduled']) 
             ->first(); 
     @endphp
@@ -33,15 +33,15 @@
         <td class="px-3 py-4 text-center">
             <div class="flex justify-center gap-3">
                 <button @click="$dispatch('open-modal', 'view-details-{{ $resident->id }}')" class="text-green-600 text-xs flex items-center hover:underline">
-                    <x-lucide-eye class="w-4 h-4 mr-1" /> View Details
+                    <x-lucide-eye class="w-3 h-3 mr-1" /> View Details
                 </button>
 
                 <button @click="$dispatch('open-modal', 'edit-resident-{{ $resident->id }}')" class="text-blue-600 text-xs flex items-center hover:underline">
-                    <x-lucide-edit class="w-4 h-4 mr-1" /> Edit
+                    <x-lucide-edit class="w-3 h-3 mr-1" /> Edit
                 </button>
     
                 <button @click="$dispatch('open-modal', 'drop-resident-{{ $currentParticipation->id }}')" class="text-red-600 text-xs flex items-center hover:underline">
-                    <x-lucide-user-minus class="w-4 h-4 mr-1" /> Drop
+                    <x-lucide-user-minus class="w-3 h-3 mr-1" /> Drop
                 </button>
             </div>
 
